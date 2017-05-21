@@ -44,4 +44,4 @@ Available one-time transformations include:
 
 * choose: {'x' 20, 'y' 30, 'z' 50}
 * call: {call someFunc('some flag')}
-* use: {use literal}
+* using: {using literal}

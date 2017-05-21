@@ -6,6 +6,9 @@
   "scripts": {
     "test": "mocha"
   },
+  "devDependencies": {
+    "mocha": "3.4.1"
+  },
   "author": "",
   "license": "ISC"
 }

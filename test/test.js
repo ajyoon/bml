@@ -90,15 +90,37 @@ describe('lineAndColumnOf', function() {
 
 describe('parseMode', function() {
   before(function() {
-    //bml.setModes({});
+    bml.setModes({});
   });
 
   it('should allow empty modes', function() {
     var testString = 'mode test {}end';
     var closeBraceIndex = bml.parseMode(testString, 5);
-    assert.equal(closeBraceIndex, testString.indexOf('end'));
+    assert.equal(closeBraceIndex, testString.indexOf('end') - 1);
     assert(bml.getModes().hasOwnProperty('test'));
     assert(bml.getModes().test instanceof bml.Mode);
     assert(bml.getModes().test.name = 'test');
+  });
+
+  it('recognizes rules and passes them off to parseRule', function() {
+    var ruleEnd = 'MOCK RULE END MARK';
+    var testString =
+        `mode test {
+             // some comments
+             'bml' as 'BML'${ruleEnd}
+             // more comments
+             'javascript' as 'Javascript' 30, 'JS' 10,
+                 'js' 10${ruleEnd}
+             // more comments
+        }`;
+    // Mock parseRule
+    calls = [];
+    bml.parseRule = function(string, ruleStartIndex, mode) {
+      calls.push(ruleStartIndex);
+      return string.indexOf(ruleEnd, ruleStartIndex) + ruleEnd.length;
+    };
+    var closeBraceIndex = bml.parseMode(testString, 5);
+    assert.deepEqual(calls, [testString.indexOf("'bml'"),
+                             testString.indexOf("'javascript'")]);
   });
 });

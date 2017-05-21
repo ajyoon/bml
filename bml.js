@@ -137,17 +137,42 @@ function setModes(newModes) {
   modes = newModes;
 }
 
+function parseRule(string, ruleStartIndex, mode) {
+  //stub
+  throw new Error('not implemented');
+}
+
 function parseMode(string, modeNameIndex) {
   // Get mode name
   var openBraceIndex = string.indexOf('{', modeNameIndex);
   var name = string.slice(modeNameIndex,openBraceIndex).trim();
   var mode = new Mode(name);
+  var state = 'mode';
   modes[name] = mode;
   var index = openBraceIndex + 1;
   while (index < string.length) {
-    if (string[index] === '}') {
-      return index + 1;
+    switch (state) {
+    case 'comment':
+      if (string[index] === '\n') {
+        state = 'mode';
+      }
+      break;
+    case 'mode':
+      if ('\n\t '.indexOf(string[index]) !== -1) {
+        break;
+      } else if (string.slice(index, index + 2) === '//') {
+        state = 'comment';
+      } else if (string[index] === '}') {
+        return index;
+      } else {
+        // Rule encountered. (Go through exports for mocking)
+        index = exports.parseRule(string, index, mode);
+      }
+      break;
+    default:
+      throw Error('Invalid state: ' + state);
     }
+    index++;
   }
   throw new BMLSyntaxError('Could not find end of mode: ' + name);
 }
@@ -180,7 +205,8 @@ exports._private = {
   __unpackPrivates: __unpackPrivates,
   extractJavascript: extractJavascript,
   lineAndColumnOf: lineAndColumnOf,
+  parseRule: parseRule,
   parseMode: parseMode,
   Mode: Mode,
   normalizeWeights: normalizeWeights
-}
+};
