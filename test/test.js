@@ -24,23 +24,23 @@ describe('bmlSettings', function() {
   });
 });
 
-describe('extractJavascript', function() {
+describe('findCodeBlockEnd', function() {
   it('should ignore braces in inline comments', function() {
     var testString = '012{//}\n}end';
-    assert.equal(bml.extractJavascript(testString, 3), testString.indexOf('end'));
+    assert.equal(bml.findCodeBlockEnd(testString, 3), testString.indexOf('end'));
   });
   it('should ignore braces in block comments', function() {
     var testString = '012{4/*\n}*/}end';
-    assert.equal(bml.extractJavascript(testString, 3), testString.indexOf('end'));
+    assert.equal(bml.findCodeBlockEnd(testString, 3), testString.indexOf('end'));
   });
   it('should ignore braces in single-quote string literals', function() {
     var testString = "012{'}'}end";
-    assert.equal(bml.extractJavascript(testString, 3), testString.indexOf('end'));
+    assert.equal(bml.findCodeBlockEnd(testString, 3), testString.indexOf('end'));
   });
   it('should error on newline before matching single-quote', function() {
     var testString = "012{'\n";
     try {
-      bml.extractJavascript(testString, 3);
+      bml.findCodeBlockEnd(testString, 3);
       assert(false, 'error expected');
     } catch (e) {
       assert.equal(true, e.message.startsWith('Syntax error'));
@@ -48,12 +48,12 @@ describe('extractJavascript', function() {
   });
   it('should ignore braces in double-quote string literals', function() {
     var testString = '012{"}"}end';
-    assert.equal(bml.extractJavascript(testString, 3), testString.indexOf('end'));
+    assert.equal(bml.findCodeBlockEnd(testString, 3), testString.indexOf('end'));
   });
   it('should error on newline before matching double-quote', function() {
     var testString = '012{"\n';
     try {
-      bml.extractJavascript(testString, 3);
+      bml.findCodeBlockEnd(testString, 3);
       assert(false, 'error expected');
     } catch (e) {
       assert.equal(true, e.message.startsWith('Syntax error'));
@@ -61,15 +61,15 @@ describe('extractJavascript', function() {
   });
   it('should ignore braces in backtick string literals', function() {
     var testString = "012{`\n}`}end";
-    assert.equal(bml.extractJavascript(testString, 3), testString.indexOf('end'));
+    assert.equal(bml.findCodeBlockEnd(testString, 3), testString.indexOf('end'));
   });
   it('should handle braces in javascript', function() {
     var testString = '012{{{{}}}}end';
-    assert.equal(bml.extractJavascript(testString, 3), testString.indexOf('end'));
+    assert.equal(bml.findCodeBlockEnd(testString, 3), testString.indexOf('end'));
   });
   it('should be able to read itself (very meta)', function() {
     var testString = '012{' + fs.readFileSync(require.resolve('bml')) + '}!!!!!!';
-    assert.equal(bml.extractJavascript(testString, 3), testString.indexOf('!!!!!!'));
+    assert.equal(bml.findCodeBlockEnd(testString, 3), testString.indexOf('!!!!!!'));
   });
 });
 
@@ -122,5 +122,27 @@ describe('parseMode', function() {
     var closeBraceIndex = bml.parseMode(testString, 5);
     assert.deepEqual(calls, [testString.indexOf("'bml'"),
                              testString.indexOf("'javascript'")]);
+  });
+});
+
+describe('parsePrelude', function() {
+  it('knows when there is no prelude', function() {
+    var testString = `as long as there is no 'begin' statement
+                      parsePrelude will assume there is no prelude at all.
+                      begin statements have the form 'begin [using someMode]'
+                      when no begin statement is found,
+                      index  0 is always returned.`;
+    assert.equal(bml.parsePrelude(testString), 0);
+  });
+
+  it('finds and executes evaluate blocks', function() {
+    var testString = `evaluate {
+                          global.evalTest = 1;
+                      }
+                      begin
+
+                      some text`;
+    assert.equal(bml.parsePrelude(testString), testString.indexOf('begin') + 5);
+    assert.equal(global.evalTest, 1);
   });
 });

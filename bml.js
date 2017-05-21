@@ -54,7 +54,7 @@ function lineColumnString(string, charIndex) {
  * Extract an arbitrary javascript block enclosed in braces
  * @returns (Number) the index after the ending curly brace.
  */
-function extractJavascript(string, curlyBraceStartIndex) {
+function findCodeBlockEnd(string, curlyBraceStartIndex) {
   var openBraceCount = 0;
   var state = 'code';
   var isEscaped = false;
@@ -98,6 +98,11 @@ function extractJavascript(string, curlyBraceStartIndex) {
                         + '  ' + string.slice(index-10, index+10));
       }
       break;
+    case 'regex literal':
+      if (string[index] === '/' && !isEscaped) {
+        state = 'code';
+      }
+      break;
     case 'code':
       if (string[index] === '{') {
         openBraceCount++;
@@ -113,6 +118,8 @@ function extractJavascript(string, curlyBraceStartIndex) {
         state = 'single-quote string';
       } else if (string[index] === '\"') {
         state = 'double-quote string';
+      } else if (string[index] === '/' && string[index - 1] !== '*') {
+        state = 'regex literal';
       }
       break;
     default:
@@ -181,10 +188,25 @@ function parseMode(string, modeNameIndex) {
  * Parse the prelude of a bml file.
  *
  * @param {String} string The contents of a bml file
- * @returns {Number} the index of the start of the first line after the prelude.
+ * @returns {Number} the index of end of the prelude
  */
 function parsePrelude(string) {
-
+  var beginPattern = /^\s*begin( using ([a-zA-Z]+))?\n/m;
+  var evalPattern = /^\s*evaluate {/gm;
+  var beginMatch = string.match(beginPattern);
+  if (beginMatch !== null) {
+    var beginIndex = beginMatch.index;
+    var prelude = string.slice(0, beginIndex);
+    var evalBlock;
+    while ((evalBlock = evalPattern.exec(prelude)) !== null) {
+      var codeEndIndex = findCodeBlockEnd(prelude, evalPattern.lastIndex - 1);
+      eval(prelude.slice(evalPattern.lastIndex, codeEndIndex - 1));
+    }
+  } else {
+    // No begin pattern found - assume there is no prelude.
+    return 0;
+  }
+  return beginMatch.index + beginMatch[0].length - 1;
 }
 
 
@@ -203,9 +225,10 @@ exports.getModes = getModes;
 exports.setModes = setModes;
 exports._private = {
   __unpackPrivates: __unpackPrivates,
-  extractJavascript: extractJavascript,
+  findCodeBlockEnd: findCodeBlockEnd,
   lineAndColumnOf: lineAndColumnOf,
   parseRule: parseRule,
+  parsePrelude: parsePrelude,
   parseMode: parseMode,
   Mode: Mode,
   normalizeWeights: normalizeWeights
