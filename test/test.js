@@ -43,7 +43,7 @@ describe('findCodeBlockEnd', function() {
       bml.findCodeBlockEnd(testString, 3);
       assert(false, 'error expected');
     } catch (e) {
-      assert.equal(true, e.message.startsWith('Syntax error'));
+      assert(e instanceof bml.JavascriptSyntaxError);
     }
   });
   it('should ignore braces in double-quote string literals', function() {
@@ -56,7 +56,7 @@ describe('findCodeBlockEnd', function() {
       bml.findCodeBlockEnd(testString, 3);
       assert(false, 'error expected');
     } catch (e) {
-      assert.equal(true, e.message.startsWith('Syntax error'));
+      assert(e instanceof bml.JavascriptSyntaxError);
     }
   });
   it('should ignore braces in backtick string literals', function() {
@@ -126,6 +126,11 @@ describe('parseMode', function() {
 });
 
 describe('parsePrelude', function() {
+
+  before(function() {
+    bml.setModes({});
+  });
+
   it('knows when there is no prelude', function() {
     var testString = `as long as there is no 'begin' statement
                       parsePrelude will assume there is no prelude at all.
@@ -135,14 +140,47 @@ describe('parsePrelude', function() {
     assert.equal(bml.parsePrelude(testString), 0);
   });
 
-  it('finds and executes evaluate blocks', function() {
+  it('finds and executes multiple evaluate blocks', function() {
     var testString = `evaluate {
                           global.evalTest = 1;
+                      }
+                      // comment
+                      evaluate {
+                          global.evalTest2 = 2;
                       }
                       begin
 
                       some text`;
-    assert.equal(bml.parsePrelude(testString), testString.indexOf('begin') + 5);
+    assert.equal(bml.parsePrelude(testString), testString.indexOf('begin\n') + 'begin\n'.length);
     assert.equal(global.evalTest, 1);
+    assert.equal(global.evalTest2, 2);
+  });
+
+  it('recognizes mode blocks and passes them to parseMode', function() {
+    var modeEnd = 'MODE END TEST MARKER';
+    var testString = `mode firstMode {
+                          // do something
+                      }
+                      mode secondMode {
+                          // do something
+                      }
+                      begin
+
+                      some text`;
+    assert.equal(bml.parsePrelude(testString), testString.indexOf('begin\n') + 'begin\n'.length);
+    assert(bml.getModes().hasOwnProperty('firstMode'));
+    assert(bml.getModes().hasOwnProperty('secondMode'));
+  });
+
+  it('extracts the beginning mode name and sets the initial mode', function() {
+    var testString = `mode test {
+                          // do something
+                      }
+                      begin using test
+                     `;
+    assert.equal(bml.parsePrelude(testString),
+                 testString.indexOf('begin using test\n') + 'begin using test\n'.length);
+    assert(bml.getModes().hasOwnProperty('test'));
+    assert.equal(bml.getActiveMode().name, 'test');
   });
 });

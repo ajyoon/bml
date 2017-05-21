@@ -1,12 +1,17 @@
 var _mode = require('./mode.js');
 var _errors = require('./errors.js');
 var _rand = require('./rand.js');
+var _stringUtils = require('./stringUtils.js');
 
 var Mode = _mode.Mode;
 var BMLSyntaxError = _errors.BMLSyntaxError;
 var JavascriptSyntaxError = _errors.JavascriptSyntaxError;
+var UnknownModeError = _errors.UnknownModeError;
 
 var normalizeWeights = _rand.normalizeWeights;
+
+var lineAndColumnOf = _stringUtils.lineAndColumnOf;
+var lineColumnString = _stringUtils.lineColumnString;
 
 settings = {
   renderMarkdown: false,
@@ -15,39 +20,14 @@ settings = {
 
 modes = {};
 
+activeMode = null;
+
 function changeSettings(newSettings) {
   Object.keys(newSettings).forEach(function(key, index) {
     if (settings.hasOwnProperty(key)) {
       settings[key] = newSettings[key];
     }
   });
-}
-
-function lineAndColumnOf(string, charIndex) {
-  if (charIndex > string.length) {
-    throw new Error('charIndex > string.length');
-  }
-  var line = 1;
-  var column = -1;
-  var newLine = false;
-  for (var i = 0; i <= charIndex; i++) {
-    if (newLine) {
-      line++;
-      column = 0;
-      newLine = false;
-    } else {
-      column++;
-    }
-    if (string[i] === '\n') {
-      newLine = true;
-    }
-  }
-  return {line: line, column: column};
-}
-
-function lineColumnString(string, charIndex) {
-  var lineAndColumn = lineAndColumnOf(string, charIndex);
-  return 'line: ' + lineAndColumn.line + ', column: ' + lineAndColumn.column;
 }
 
 /**
@@ -84,18 +64,14 @@ function findCodeBlockEnd(string, curlyBraceStartIndex) {
     if (string[index] === '\'' && !isEscaped) {
         state = "code";
       } else if (string[index] === '\n') {
-        throw new Error('Syntax error in javascript at '
-                        + lineColumnString(string, index)
-                        + '  ' + string.slice(index-10, index+10));
+        throw new JavascriptSyntaxError(string, index);
       }
       break;
     case 'double-quote string':
       if (string[index] === '"' && !isEscaped) {
         state = "code";
       } else if (string[index] === '\n') {
-        throw new Error('Syntax error in javascript at '
-                        + lineColumnString(string, index)
-                        + '  ' + string.slice(index-10, index+10));
+        throw new JavascriptSyntaxError(string, index);
       }
       break;
     case 'regex literal':
@@ -144,11 +120,22 @@ function setModes(newModes) {
   modes = newModes;
 }
 
+function getActiveMode() {
+  return activeMode;
+}
+
+function setActiveMode(newMode) {
+  activeMode = newMode;
+}
+
 function parseRule(string, ruleStartIndex, mode) {
   //stub
   throw new Error('not implemented');
 }
 
+/**
+ * @returns {Number} the index of the closing brace of the mode.
+ */
 function parseMode(string, modeNameIndex) {
   // Get mode name
   var openBraceIndex = string.indexOf('{', modeNameIndex);
@@ -188,25 +175,44 @@ function parseMode(string, modeNameIndex) {
  * Parse the prelude of a bml file.
  *
  * @param {String} string The contents of a bml file
- * @returns {Number} the index of end of the prelude
+ * @returns {Number} the index after the end of the 'begin' statement.
  */
 function parsePrelude(string) {
-  var beginPattern = /^\s*begin( using ([a-zA-Z]+))?\n/m;
+  var beginPattern = /^\s*begin( using (\w+))? *\n/m;
   var evalPattern = /^\s*evaluate {/gm;
+  var modePattern = /^\s*mode (\w+) *{/gm;
   var beginMatch = string.match(beginPattern);
   if (beginMatch !== null) {
     var beginIndex = beginMatch.index;
     var prelude = string.slice(0, beginIndex);
+
     var evalBlock;
     while ((evalBlock = evalPattern.exec(prelude)) !== null) {
       var codeEndIndex = findCodeBlockEnd(prelude, evalPattern.lastIndex - 1);
       eval(prelude.slice(evalPattern.lastIndex, codeEndIndex - 1));
     }
+
+    var modeBlock;
+    while ((modeBlock = modePattern.exec(prelude)) !== null) {
+      var modeNameIndex = modeBlock.index + modeBlock[0].indexOf(modeBlock[1]);
+      var modeEndIndex = exports.parseMode(prelude, modeNameIndex);
+
+    }
+
+    var modeName = beginMatch[2];
+    if (modeName !== undefined) {
+      if (modes.hasOwnProperty(modeName)) {
+        setActiveMode(modes[modeName]);
+      } else {
+        throw new UnknownModeError(string, beginMatch.index, modeName);
+      }
+    }
+
   } else {
     // No begin pattern found - assume there is no prelude.
     return 0;
   }
-  return beginMatch.index + beginMatch[0].length - 1;
+  return beginMatch.index + beginMatch[0].length;
 }
 
 
@@ -223,6 +229,11 @@ exports.settings = settings;
 exports.changeSettings = changeSettings;
 exports.getModes = getModes;
 exports.setModes = setModes;
+exports.getActiveMode = getActiveMode;
+exports.setActiveMode = setActiveMode;
+exports.JavascriptSyntaxError = JavascriptSyntaxError;
+exports.UnknownModeError = UnknownModeError;
+exports.BMLSyntaxError = BMLSyntaxError;
 exports._private = {
   __unpackPrivates: __unpackPrivates,
   findCodeBlockEnd: findCodeBlockEnd,
