@@ -1,0 +1,47 @@
+evaluate {
+    // arbitrary javascript
+    // global bml interpreter settings
+    bmlSettings({
+        renderMarkdown: true,
+
+    });
+    function not(trigger, context, flag) {
+        return 'some replacement string';
+    }
+}
+mode initial {
+    I as i 20, we 30
+    'not' as '' 30, 'still' 50, call not('some flag' // any javascript)
+    'i', 'we' do 'not'
+    '.' as '?' 10
+    strings without keywords don\'t need to be quoted. as cool!
+    'whoever' call  {
+        return 'some replacement string for ' + trigger;
+    }
+}
+mode literal {
+    // No rules
+}
+begin use intial
+
+
+BML is a superset of natural language which applies stochastic transformations
+on text. Words and strings can be used as triggers for weighted random
+replacements and arbitrary transformations specified with javascript.
+
+A prelude section is used to define maps and evaluate arbitrary
+javascript. An evaluate block provides a location to execute arbitrary code
+and define reusable functions. maps link words in the text to other words
+with weights controlling their relative likelihood and may also call functions
+either defined inline or in the evaluate block.
+
+Strings can be escaped with \<<double angle bracket delimiters.>> and backslashes \\.
+
+The text body can also apply one-time transformations, the common marker
+for them being {curly braces}.
+
+Available one-time transformations include:
+
+* choose: {'x' 20, 'y' 30, 'z' 50}
+* call: {call someFunc('some flag')}
+* use: {use literal}

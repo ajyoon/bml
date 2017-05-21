@@ -1,0 +1,11 @@
+{
+  "name": "bml",
+  "version": "0.0.1",
+  "description": "A stochastic markup language",
+  "main": "bml.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "author": "",
+  "license": "ISC"
+}
