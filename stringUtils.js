@@ -25,5 +25,10 @@ function lineColumnString(string, charIndex) {
   return 'line: ' + lineAndColumn.line + ', column: ' + lineAndColumn.column;
 }
 
+function isWhitespace(string) {
+  return string.trim() === '';
+}
+
 exports.lineAndColumnOf = lineAndColumnOf;
 exports.lineColumnString = lineColumnString;
+exports.isWhitespace = isWhitespace;

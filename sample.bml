@@ -5,16 +5,14 @@ evaluate {
         renderMarkdown: true,
 
     });
-    function not(trigger, context, flag) {
+    function not(trigger, context) {
         return 'some replacement string';
     }
 }
 mode initial {
-    I as i 20, we 30
-    'not' as '' 30, 'still' 50, call not('some flag' // any javascript)
+    'not' as '' 30, 'still' 50, call not
     'i', 'we' do 'not'
     '.' as '?' 10
-    strings without keywords don\'t need to be quoted. as cool!
     'whoever' call  {
         return 'some replacement string for ' + trigger;
     }

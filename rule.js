@@ -2,8 +2,9 @@ var rand = require('./rand.js');
 
 
 class Rule {
-  constructor(matcher) {
-    this.matcher = matcher;
+  constructor(matchers) {
+    this.matchers = matchers;
+    this.getReplacement.replacerType = 'no-op';
   }
 
   getReplacement(match, context, option) {
@@ -13,7 +14,12 @@ class Rule {
 
 function getWeightedOptionReplacer(choices) {
   var normalizedWeights = rand.normalizeWeights;
-  return function(match, context, option) {
+  function replacer(match, context, option) {
     return rand.weightedChoice(normalizedWeights);
   };
+  replacer.replacerType = 'weightedChoice';
+  return replacer;
 }
+
+exports.Rule = Rule;
+exports.getWeightedOptionReplacer = getWeightedOptionReplacer;

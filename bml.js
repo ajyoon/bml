@@ -1,9 +1,11 @@
 var _mode = require('./mode.js');
 var _errors = require('./errors.js');
 var _rand = require('./rand.js');
+var _rule = require('./rule.js');
 var _stringUtils = require('./stringUtils.js');
 
 var Mode = _mode.Mode;
+var Rule = _rule.Rule;
 var BMLSyntaxError = _errors.BMLSyntaxError;
 var JavascriptSyntaxError = _errors.JavascriptSyntaxError;
 var UnknownModeError = _errors.UnknownModeError;
@@ -12,6 +14,9 @@ var normalizeWeights = _rand.normalizeWeights;
 
 var lineAndColumnOf = _stringUtils.lineAndColumnOf;
 var lineColumnString = _stringUtils.lineColumnString;
+var isWhitespace = _stringUtils.isWhitespace;
+
+var getWeightedOptionReplacer = _rule.getWeightedOptionReplacer;
 
 settings = {
   renderMarkdown: false,
@@ -128,10 +133,119 @@ function setActiveMode(newMode) {
   activeMode = newMode;
 }
 
-function parseRule(string, ruleStartIndex, mode) {
-  //stub
-  throw new Error('not implemented');
+function assembleRule(matchers, options, mode) {
+  var rule = new Rule(matchers);
+  rule.getReplacement = getWeightedOptionReplacer(options);
+  mode.rules.push(rule);
 }
+
+function parseRule(string, ruleStartIndex, mode) {
+  var inComment = false;
+  var isEscaped = false;
+  var currentString = null;
+  var matchers = [];
+  var options = [];
+  var state = 'matchers';
+  var afterComma = false;
+  var index = ruleStartIndex;
+  var numberRe = /(\d+(\.\d+)?)|(\.\d+)/g;
+  var numberMatch;
+  var callRe = /call \w+[\w|\d]* {/g;
+  var callMatch;
+  while (index < string.length) {
+    if (inComment) {
+      if (string[index] === '\n') {
+        inComment = false;
+      }
+
+    } else if (currentString !== null) {
+      // Inside string literal
+      if (isEscaped) {
+        if (string[index] === 'n') {
+          currentString += '\n';
+        } else {
+          currentString += string[index];
+        }
+        isEscaped = false;
+      } else {
+        if (string[index] === '\\') {
+          isEscaped = true;
+        } else if (string[index] === '\'') {
+          // end of string
+          if (state === 'matchers') {
+            matchers.push(currentString);
+          } else {
+            options.push({option: currentString, chance: null});
+          }
+          currentString = null;
+        } else {
+          currentString += string[index];
+        }
+      }
+
+    } else {
+      if (string[index] === '\'') {
+        afterComma = false;
+        currentString = '';
+      } else if (string.slice(index, index + 2) === '//') {
+        inComment = true;
+      } else {
+        if (afterComma) {
+          if (!isWhitespace(string[index])) {
+            throw new BMLSyntaxError('error parsing rule at index ' + index);
+          }
+        } else {
+          switch (state) {
+          case 'matchers':
+            if (isWhitespace(string[index])) {
+              break;
+            } else if (string[index] === ',') {
+              afterComma = true;
+            } else if (/as\s/.test(string.slice(index, index + 3))) {
+              state = 'options';
+              index += 3;
+              continue;
+            } else {
+              throw new BMLSyntaxError('error parsing rule at index ' + index);
+            }
+            break;
+          case 'options':
+            numberRe.lastIndex = index;
+            if (isWhitespace(string[index])) {
+              break;
+            } else if ((numberMatch = numberRe.exec(string))) {
+              options[options.length - 1].chance = Number(numberMatch[0]);
+              index += numberMatch[0].length;
+              continue;
+            } else if (string[index] === ',') {
+              afterComma = true;
+            } else if (string[index] === '\'' || string[index] === '}') {
+              assembleRule(matchers, options, mode);
+              return index;
+            } else {
+              throw new BMLSyntaxError('Unknown character in option at index ' + index);
+            }
+            break;
+          default:
+            throw new Error('Unknown state: ' + state);
+          }
+        }
+      }
+    }
+    index++;
+  }
+  console.log('inComment: ' + inComment);
+  console.log('isEscaped: ' + isEscaped);
+  console.log('currentString: ' + currentString);
+  console.log('matchers: ' + matchers);
+  console.log('options: ' + options);
+  console.log('state: ' + state);
+  console.log('afterComma: ' + afterComma);
+  console.log('index: ' + index);
+  throw new BMLSyntaxError('Could not find end of rule');
+}
+// TODO: return index behavior in rule parsing has changed,
+// parseMode needs to be updated accordingly
 
 /**
  * @returns {Number} the index of the closing brace of the mode.
