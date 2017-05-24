@@ -89,7 +89,7 @@ describe('lineAndColumnOf', function() {
 });
 
 describe('parseMode', function() {
-  before(function() {
+  beforeEach(function() {
     bml.setModes({});
   });
 
@@ -127,7 +127,7 @@ describe('parseMode', function() {
 
 describe('parsePrelude', function() {
 
-  before(function() {
+  beforeEach(function() {
     bml.setModes({});
   });
 
@@ -183,18 +183,80 @@ describe('parsePrelude', function() {
     assert(bml.getModes().hasOwnProperty('test'));
     assert.equal(bml.getActiveMode().name, 'test');
   });
+
+  it('supports begin statements with "use" instead of "using"', function() {
+    var testString = `mode test {
+                          // do something
+                      }
+                      begin use test
+                     `;
+    assert.equal(bml.parsePrelude(testString),
+                 testString.indexOf('begin use test\n') + 'begin use test\n'.length);
+    assert(bml.getModes().hasOwnProperty('test'));
+    assert.equal(bml.getActiveMode().name, 'test');
+  });
 });
 
 
 describe('parseRule', function() {
 
   var testMode;
-  before(function() {
+  beforeEach(function() {
     testMode = new bml.Mode('test');
   });
 
-  it('can handle a one-to-one rule', function() {
-    var testString = "'x' as 'y' 50\n}";
+  it('can parse a one-to-one rule', function() {
+    var testString = "'x' as 'y'\n}";
+    assert.equal(bml.parseRule(testString, 0, testMode), testString.length - 1);
+    assert.equal(testMode.rules.length, 1);
+    assert.deepEqual(testMode.rules[0].matchers, ['x']);
+    assert.equal(testMode.rules[0].getReplacement.replacerType, 'weightedChoice');
+  });
+
+  it('can parse a one-to-one rule with a weight', function() {
+    var testString = "'x' as 'y' 40\n}";
+    assert.equal(bml.parseRule(testString, 0, testMode), testString.length - 1);
+    assert.equal(testMode.rules.length, 1);
+    assert.deepEqual(testMode.rules[0].matchers, ['x']);
+    assert.equal(testMode.rules[0].getReplacement.replacerType, 'weightedChoice');
+  });
+
+  it('can parse multiple options', function() {
+    var testString = "'x' as 'y' 40, 'z' 10\n}";
+    assert.equal(bml.parseRule(testString, 0, testMode), testString.length - 1);
+    assert.equal(testMode.rules.length, 1);
+    assert.deepEqual(testMode.rules[0].matchers, ['x']);
+    assert.equal(testMode.rules[0].getReplacement.replacerType, 'weightedChoice');
+  });
+
+  it('can parse multiple matchers', function() {
+    var testString = "'x', 'z' as 'y' 40\n}";
+    assert.equal(bml.parseRule(testString, 0, testMode), testString.length - 1);
+    assert.equal(testMode.rules.length, 1);
+    assert.deepEqual(testMode.rules[0].matchers, ['x', 'z']);
+    assert.equal(testMode.rules[0].getReplacement.replacerType, 'weightedChoice');
+  });
+
+  it('can parse multiple matchers and options', function() {
+    var testString = "'x', 'z' as 'y' 40, 'a' 10\n}";
+    assert.equal(bml.parseRule(testString, 0, testMode), testString.length - 1);
+    assert.equal(testMode.rules.length, 1);
+    assert.deepEqual(testMode.rules[0].matchers, ['x', 'z']);
+    assert.equal(testMode.rules[0].getReplacement.replacerType, 'weightedChoice');
+  });
+
+  it('can parse call statements', function() {
+    bml.__evalInBMLScope('testFunc = function testFunc() {};');
+    testString = "'x' as call testFunc\n}";
+    assert.equal(bml.parseRule(testString, 0, testMode), testString.length - 1);
+    assert.equal(testMode.rules.length, 1);
+    assert.deepEqual(testMode.rules[0].matchers, ['x']);
+    assert.equal(testMode.rules[0].getReplacement.replacerType, 'weightedChoice');
+  });
+
+  it('can parse call statements with chances', function() {
+    bml.__evalInBMLScope('testFunc = function testFunc() {};');
+    testString = "'x' as call testFunc 20\n}";
     assert.equal(bml.parseRule(testString, 0, testMode), testString.length - 1);
     assert.equal(testMode.rules.length, 1);
     assert.deepEqual(testMode.rules[0].matchers, ['x']);

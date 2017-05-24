@@ -7,6 +7,7 @@ var _stringUtils = require('./stringUtils.js');
 var Mode = _mode.Mode;
 var Rule = _rule.Rule;
 var BMLSyntaxError = _errors.BMLSyntaxError;
+var BMLNameError = _errors.BMLNameError;
 var JavascriptSyntaxError = _errors.JavascriptSyntaxError;
 var UnknownModeError = _errors.UnknownModeError;
 
@@ -148,9 +149,9 @@ function parseRule(string, ruleStartIndex, mode) {
   var state = 'matchers';
   var afterComma = false;
   var index = ruleStartIndex;
-  var numberRe = /(\d+(\.\d+)?)|(\.\d+)/g;
+  var numberRe = /(\d+(\.\d+)?)|(\.\d+)/y;
   var numberMatch;
-  var callRe = /call \w+[\w|\d]* {/g;
+  var callRe = /call (\w+[\w|\d]*)/y;
   var callMatch;
   while (index < string.length) {
     if (inComment) {
@@ -211,11 +212,24 @@ function parseRule(string, ruleStartIndex, mode) {
             break;
           case 'options':
             numberRe.lastIndex = index;
+            callRe.lastIndex = index;
             if (isWhitespace(string[index])) {
               break;
             } else if ((numberMatch = numberRe.exec(string))) {
               options[options.length - 1].chance = Number(numberMatch[0]);
               index += numberMatch[0].length;
+              continue;
+            } else if ((callMatch = callRe.exec(string))) {
+              try {
+                options.push({option: eval(callMatch[1]), chance: null});
+              } catch (e) {
+                if (e instanceof ReferenceError) {
+                  throw new BMLNameError(callMatch[1], string, index);
+                } else {
+                  throw e;
+                }
+              }
+              index += callMatch[0].length;
               continue;
             } else if (string[index] === ',') {
               afterComma = true;
@@ -275,6 +289,7 @@ function parseMode(string, modeNameIndex) {
       } else {
         // Rule encountered. (Go through exports for mocking)
         index = exports.parseRule(string, index, mode);
+        continue;
       }
       break;
     default:
@@ -292,7 +307,7 @@ function parseMode(string, modeNameIndex) {
  * @returns {Number} the index after the end of the 'begin' statement.
  */
 function parsePrelude(string) {
-  var beginPattern = /^\s*begin( using (\w+))? *\n/m;
+  var beginPattern = /^\s*begin( (using|use) (\w+))? *\n/m;
   var evalPattern = /^\s*evaluate {/gm;
   var modePattern = /^\s*mode (\w+) *{/gm;
   var beginMatch = string.match(beginPattern);
@@ -313,7 +328,7 @@ function parsePrelude(string) {
 
     }
 
-    var modeName = beginMatch[2];
+    var modeName = beginMatch[3];
     if (modeName !== undefined) {
       if (modes.hasOwnProperty(modeName)) {
         setActiveMode(modes[modeName]);
@@ -339,6 +354,11 @@ function __unpackPrivates() {
   }
 }
 
+// For testing purposes only.
+function __evalInBMLScope(string) {
+  eval(string);
+}
+
 exports.settings = settings;
 exports.changeSettings = changeSettings;
 exports.getModes = getModes;
@@ -356,5 +376,6 @@ exports._private = {
   parsePrelude: parsePrelude,
   parseMode: parseMode,
   Mode: Mode,
-  normalizeWeights: normalizeWeights
+  normalizeWeights: normalizeWeights,
+  __evalInBMLScope: __evalInBMLScope
 };

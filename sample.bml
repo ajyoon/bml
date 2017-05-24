@@ -13,9 +13,6 @@ mode initial {
     'not' as '' 30, 'still' 50, call not
     'i', 'we' do 'not'
     '.' as '?' 10
-    'whoever' call  {
-        return 'some replacement string for ' + trigger;
-    }
 }
 mode literal {
     // No rules

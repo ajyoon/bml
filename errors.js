@@ -17,6 +17,19 @@ function BMLSyntaxError(message) {
   error.name = this.name;
   this.stack = error.stack;
 }
+BMLSyntaxError.prototype = Object.create(Error.prototype);
+
+
+function BMLNameError(name, string, charIndex) {
+  this.name = 'BMLNameError';
+  this.message = 'Unknown name: "' + name + '" at '
+    + stringUtils.lineColumnString(string, charIndex);
+  var error = new Error(this.message);
+  error.name = this.name;
+  this.stack = error.stack;
+}
+JavascriptSyntaxError.prototype = Object.create(Error.prototype);
+
 
 function UnknownModeError(string, charIndex, modeName) {
   this.name = 'JavascriptSyntaxError';
@@ -26,7 +39,9 @@ function UnknownModeError(string, charIndex, modeName) {
   error.name = this.name;
   this.stack = error.stack;
 }
+UnknownModeError.prototype = Object.create(Error.prototype);
 
 exports.JavascriptSyntaxError = JavascriptSyntaxError;
 exports.BMLSyntaxError = BMLSyntaxError;
+exports.BMLNameError = BMLNameError;
 exports.UnknownModeError = UnknownModeError;
