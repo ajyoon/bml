@@ -5,8 +5,12 @@ evaluate {
         renderMarkdown: true,
 
     });
-    function not(trigger, context) {
+    function not(trigger, sourceIndex) {
         return 'some replacement string';
+    }
+    // Copy the prelude into literal text.
+    function copyPrelude(trigger, sourceIndex) {
+        return '```\n' + sourceText.slice(0, sourceIndex) + '```\n';
     }
 }
 mode initial {
@@ -17,8 +21,9 @@ mode initial {
 mode literal {
     // No rules
 }
-begin use intial
+begin using intial
 
+{call copyPrelude}
 
 BML is a superset of natural language which applies stochastic transformations
 on text. Words and strings can be used as triggers for weighted random
