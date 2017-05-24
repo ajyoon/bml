@@ -28,6 +28,8 @@ modes = {};
 
 activeMode = null;
 
+sourceText = '';
+
 function changeSettings(newSettings) {
   Object.keys(newSettings).forEach(function(key, index) {
     if (settings.hasOwnProperty(key)) {
