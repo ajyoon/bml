@@ -7,14 +7,14 @@ class Rule {
     this.getReplacement.replacerType = 'no-op';
   }
 
-  getReplacement(match, context, option) {
+  getReplacement(match, fullText, matchIndex, option) {
     return match;
   }
 }
 
 function getWeightedOptionReplacer(choices) {
-  var normalizedWeights = rand.normalizeWeights;
-  function replacer(match, context, option) {
+  var normalizedWeights = rand.normalizeWeights(choices);
+  function replacer(match, fullText, matchIndex, option) {
     return rand.weightedChoice(normalizedWeights);
   };
   replacer.replacerType = 'weightedChoice';

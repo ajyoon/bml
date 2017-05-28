@@ -4,6 +4,8 @@ var _rand = require('./rand.js');
 var _rule = require('./rule.js');
 var _stringUtils = require('./stringUtils.js');
 
+var marked = require('marked');
+
 var Mode = _mode.Mode;
 var Rule = _rule.Rule;
 var BMLSyntaxError = _errors.BMLSyntaxError;
@@ -149,18 +151,17 @@ function parseRule(string, ruleStartIndex, mode) {
   var matchers = [];
   var options = [];
   var state = 'matchers';
-  var afterComma = false;
+  var canAcceptElement = false;
   var index = ruleStartIndex;
   var numberRe = /(\d+(\.\d+)?)|(\.\d+)/y;
   var numberMatch;
-  var callRe = /call (\w+[\w|\d]*)/y;
+  var callRe = /call (\w+[\w\d\.]*)/y;
   var callMatch;
   while (index < string.length) {
     if (inComment) {
       if (string[index] === '\n') {
         inComment = false;
       }
-
     } else if (currentString !== null) {
       // Inside string literal
       if (isEscaped) {
@@ -188,62 +189,74 @@ function parseRule(string, ruleStartIndex, mode) {
 
     } else {
       if (string[index] === '\'') {
-        afterComma = false;
-        currentString = '';
+        if (!canAcceptElement && state === 'options') {
+          assembleRule(matchers, options, mode);
+          return index;
+        } else {
+          canAcceptElement = false;
+          currentString = '';
+        }
       } else if (string.slice(index, index + 2) === '//') {
         inComment = true;
       } else {
-        if (afterComma) {
-          if (!isWhitespace(string[index])) {
+        switch (state) {
+        case 'matchers':
+          if (isWhitespace(string[index])) {
+            break;
+          } else if (string[index] === ',') {
+            canAcceptElement = true;
+          } else if (/as\s/.test(string.slice(index, index + 3))) {
+            state = 'options';
+            index += 3;
+            canAcceptElement = true;
+            continue;
+          } else {
             throw new BMLSyntaxError('error parsing rule at index ' + index);
           }
-        } else {
-          switch (state) {
-          case 'matchers':
-            if (isWhitespace(string[index])) {
-              break;
-            } else if (string[index] === ',') {
-              afterComma = true;
-            } else if (/as\s/.test(string.slice(index, index + 3))) {
-              state = 'options';
-              index += 3;
-              continue;
-            } else {
-              throw new BMLSyntaxError('error parsing rule at index ' + index);
-            }
+          break;
+        case 'options':
+          numberRe.lastIndex = index;
+          callRe.lastIndex = index;
+          if (isWhitespace(string[index])) {
             break;
-          case 'options':
-            numberRe.lastIndex = index;
-            callRe.lastIndex = index;
-            if (isWhitespace(string[index])) {
-              break;
-            } else if ((numberMatch = numberRe.exec(string))) {
-              options[options.length - 1].chance = Number(numberMatch[0]);
-              index += numberMatch[0].length;
-              continue;
-            } else if ((callMatch = callRe.exec(string))) {
-              try {
-                options.push({option: eval(callMatch[1]), chance: null});
-              } catch (e) {
-                if (e instanceof ReferenceError) {
-                  throw new BMLNameError(callMatch[1], string, index);
-                } else {
-                  throw e;
-                }
+          } else if ((numberMatch = numberRe.exec(string))) {
+            options[options.length - 1].chance = Number(numberMatch[0]);
+            index += numberMatch[0].length;
+            continue;
+          } else if ((callMatch = callRe.exec(string))) {
+            try {
+              options.push({option: eval(callMatch[1]), chance: null});
+            } catch (e) {
+              if (e instanceof ReferenceError) {
+                throw new BMLNameError(callMatch[1], string, index);
+              } else {
+                throw e;
               }
-              index += callMatch[0].length;
-              continue;
-            } else if (string[index] === ',') {
-              afterComma = true;
-            } else if (string[index] === '\'' || string[index] === '}') {
-              assembleRule(matchers, options, mode);
-              return index;
-            } else {
-              throw new BMLSyntaxError('Unknown character in option at index ' + index);
             }
-            break;
-          default:
-            throw new Error('Unknown state: ' + state);
+            index += callMatch[0].length;
+            canAcceptElement = false;
+            continue;
+          } else if (string[index] === ',') {
+            canAcceptElement = true;
+          } else if (string[index] === '}') {
+            assembleRule(matchers, options, mode);
+            return index;
+          } else {
+            console.log('inComment: ' + inComment);
+            console.log('isEscaped: ' + isEscaped);
+            console.log('currentString: ' + currentString);
+            console.log('matchers: ' + matchers);
+            console.log('options: ' + options);
+            console.log('state: ' + state);
+            console.log('canAcceptElement: ' + canAcceptElement);
+            console.log('index: ' + index);
+            console.log('string[index]: ' + string[index]);
+            throw new BMLSyntaxError('Unknown character in option at index ' + index);
+          }
+          break;
+        default:
+          if (!isWhitespace(string[index])) {
+            throw new BMLSyntaxError('error parsing rule at index ' + index);
           }
         }
       }
@@ -256,12 +269,10 @@ function parseRule(string, ruleStartIndex, mode) {
   console.log('matchers: ' + matchers);
   console.log('options: ' + options);
   console.log('state: ' + state);
-  console.log('afterComma: ' + afterComma);
+  console.log('canAcceptElement: ' + canAcceptElement);
   console.log('index: ' + index);
   throw new BMLSyntaxError('Could not find end of rule');
 }
-// TODO: return index behavior in rule parsing has changed,
-// parseMode needs to be updated accordingly
 
 /**
  * @returns {Number} the index of the closing brace of the mode.
@@ -289,8 +300,7 @@ function parseMode(string, modeNameIndex) {
       } else if (string[index] === '}') {
         return index;
       } else {
-        // Rule encountered. (Go through exports for mocking)
-        index = exports.parseRule(string, index, mode);
+        index = parseRule(string, index, mode);
         continue;
       }
       break;
@@ -326,7 +336,7 @@ function parsePrelude(string) {
     var modeBlock;
     while ((modeBlock = modePattern.exec(prelude)) !== null) {
       var modeNameIndex = modeBlock.index + modeBlock[0].indexOf(modeBlock[1]);
-      var modeEndIndex = exports.parseMode(prelude, modeNameIndex);
+      var modeEndIndex = parseMode(prelude, modeNameIndex);
 
     }
 
@@ -346,6 +356,93 @@ function parsePrelude(string) {
   return beginMatch.index + beginMatch[0].length;
 }
 
+/**
+ * The main loop which processes the text component of a bml document.
+ *
+ * Iterates through the body of the text exactly once, applying rules
+ * whenever a matching string is encountered. Rules are processed in
+ * the order they are listed in the active mode's declaration.
+ *
+ * If markdown postprocessing is enabled, it will be called at the end
+ * of rule processing.
+ *
+ * @returns {String} the rendered text.
+ */
+function renderText(string, startIndex) {
+  var isEscaped = false;
+  var inLiteralBlock = false;
+  var out = '';
+  var index = startIndex;
+  var currentRule = null;
+  var foundMatch = false;
+  var replacement = null;
+  while (index < string.length) {
+    if (isEscaped) {
+      isEscaped = false;
+      out += string[index];
+    } else if (inLiteralBlock) {
+      if (string[index] == '>' && string[index + 1]) {
+        inLiteralBlock = false;
+        index += 2;
+        continue;
+      } else {
+        out += string[index];
+      }
+    } else {
+      if (string[index] == '\\') {
+        isEscaped = true;
+      } else if (string[index] == '<' && string[index + 1] == '<') {
+        inLiteralBlock = true;
+      } else {
+        // Optimize me when extending to support regexps
+        ruleLoop:
+        for (var r = 0; r < activeMode.rules.length; r++) {
+          currentRule = activeMode.rules[r];
+          for (var m = 0; m < currentRule.matchers.length; m++) {
+            if (string.indexOf(currentRule.matchers[m], index) == index) {
+              replacement = currentRule.getReplacement(currentRule.matchers[m],
+                                                string, index);
+              if (replacement instanceof Function) {
+                out += replacement(currentRule.matchers[m], string, index);
+              } else {
+                out += replacement;
+              }
+              index += currentRule.matchers[m].length;
+              foundMatch = true;
+              break ruleLoop;
+            }
+          }
+        }
+        if (foundMatch) {
+          foundMatch = false;
+          continue;
+        } else {
+          out += string[index];
+        }
+      }
+    }
+    index++;
+  }
+
+  if (settings.renderMarkdown) {
+    out = marked(out);
+  }
+  return out;
+}
+
+function renderBML(string) {
+  startIndex = parsePrelude(string);
+  return renderText(string, startIndex);
+}
+
+
+// for experimenting
+function renderFile(path) {
+  var string = '' + fs.readFileSync(path);
+  var rendered = renderBML(string);
+  console.log(rendered);
+  return rendered;
+}
 
 // For testing purposes only.
 function __unpackPrivates() {
@@ -367,6 +464,10 @@ exports.getModes = getModes;
 exports.setModes = setModes;
 exports.getActiveMode = getActiveMode;
 exports.setActiveMode = setActiveMode;
+exports.renderBML = renderBML;
+
+exports.renderFile = renderFile;
+
 exports.JavascriptSyntaxError = JavascriptSyntaxError;
 exports.UnknownModeError = UnknownModeError;
 exports.BMLSyntaxError = BMLSyntaxError;

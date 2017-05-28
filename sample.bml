@@ -1,11 +1,13 @@
 evaluate {
     // arbitrary javascript
     // global bml interpreter settings
-    bmlSettings({
+    changeSettings({
         renderMarkdown: true,
-
     });
-    function not(trigger, sourceIndex) {
+    //function not(trigger, sourceIndex) {
+    //    return 'some replacement string';
+    //}
+    bml.not = function(trigger, sourceIndex) {
         return 'some replacement string';
     }
     // Copy the prelude into literal text.
@@ -14,16 +16,21 @@ evaluate {
     }
 }
 mode initial {
-    'not' as '' 30, 'still' 50, call not
-    'i', 'we' do 'not'
+    'not' as '' 30, 'still' 50, call bml.not
     '.' as '?' 10
 }
 mode literal {
     // No rules
 }
-begin using intial
+begin using initial
 
 {call copyPrelude}
+
+not
+not
+not
+not
+not
 
 BML is a superset of natural language which applies stochastic transformations
 on text. Words and strings can be used as triggers for weighted random

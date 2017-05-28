@@ -254,6 +254,16 @@ describe('parseRule', function() {
     assert.equal(testMode.rules[0].getReplacement.replacerType, 'weightedChoice');
   });
 
+  it('can parse call statements after commas', function() {
+    bml.__evalInBMLScope('testFunc = function testFunc() {};');
+    testString = "'x' as 'y', call testFunc\n}";
+    assert.equal(bml.parseRule(testString, 0, testMode), testString.length - 1);
+    assert.equal(testMode.rules.length, 1);
+    assert.deepEqual(testMode.rules[0].matchers, ['x']);
+    assert.equal(testMode.rules[0].getReplacement.replacerType, 'weightedChoice');
+    assert.equal(testMode.rules[1].getReplacement.replacerType, 'weightedChoice');
+  });
+
   it('can parse call statements with chances', function() {
     bml.__evalInBMLScope('testFunc = function testFunc() {};');
     testString = "'x' as call testFunc 20\n}";

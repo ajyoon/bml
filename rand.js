@@ -53,3 +53,4 @@ function weightedChoice(weights) {
 
 
 exports.normalizeWeights = normalizeWeights;
+exports.weightedChoice = weightedChoice
