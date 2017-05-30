@@ -7,7 +7,7 @@ evaluate {
     //function not(trigger, sourceIndex) {
     //    return 'some replacement string';
     //}
-    bml.not = function(trigger, sourceIndex) {
+    function not(trigger, sourceIndex) {
         return 'some replacement string';
     }
     // Copy the prelude into literal text.
@@ -16,7 +16,7 @@ evaluate {
     }
 }
 mode initial {
-    'not' as '' 30, 'still' 50, call bml.not
+    'not' as '' 30, 'still' 50, call not
     '.' as '?' 10
 }
 mode literal {

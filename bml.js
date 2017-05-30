@@ -1,17 +1,17 @@
-var _mode = require('./mode.js');
-var _errors = require('./errors.js');
-var _rand = require('./rand.js');
-var _rule = require('./rule.js');
-var _stringUtils = require('./stringUtils.js');
+var _errors = require('./src/errors.js');
+var _rand = require('./src/rand.js');
+var _stringUtils = require('./src/stringUtils.js');
+var EvalBlock = require('./src/evalBlock.js').EvalBlock;
+var _rule = require('./src/rule.js');
+var Mode = require('./src/mode.js').Mode;
 
 var marked = require('marked');
 
-var Mode = _mode.Mode;
-var Rule = _rule.Rule;
 var BMLSyntaxError = _errors.BMLSyntaxError;
 var BMLNameError = _errors.BMLNameError;
 var JavascriptSyntaxError = _errors.JavascriptSyntaxError;
 var UnknownModeError = _errors.UnknownModeError;
+var Rule = _rule.Rule;
 
 var normalizeWeights = _rand.normalizeWeights;
 
@@ -31,6 +31,8 @@ modes = {};
 activeMode = null;
 
 sourceText = '';
+
+functions = {};
 
 function changeSettings(newSettings) {
   Object.keys(newSettings).forEach(function(key, index) {
@@ -224,15 +226,10 @@ function parseRule(string, ruleStartIndex, mode) {
             index += numberMatch[0].length;
             continue;
           } else if ((callMatch = callRe.exec(string))) {
-            try {
-              options.push({option: eval(callMatch[1]), chance: null});
-            } catch (e) {
-              if (e instanceof ReferenceError) {
-                throw new BMLNameError(callMatch[1], string, index);
-              } else {
-                throw e;
-              }
-            }
+            options.push({
+              option: new EvalBlock(callMatch[1]),
+              chance: null
+            });
             index += callMatch[0].length;
             canAcceptElement = false;
             continue;
@@ -242,15 +239,6 @@ function parseRule(string, ruleStartIndex, mode) {
             assembleRule(matchers, options, mode);
             return index;
           } else {
-            console.log('inComment: ' + inComment);
-            console.log('isEscaped: ' + isEscaped);
-            console.log('currentString: ' + currentString);
-            console.log('matchers: ' + matchers);
-            console.log('options: ' + options);
-            console.log('state: ' + state);
-            console.log('canAcceptElement: ' + canAcceptElement);
-            console.log('index: ' + index);
-            console.log('string[index]: ' + string[index]);
             throw new BMLSyntaxError('Unknown character in option at index ' + index);
           }
           break;
@@ -263,14 +251,6 @@ function parseRule(string, ruleStartIndex, mode) {
     }
     index++;
   }
-  console.log('inComment: ' + inComment);
-  console.log('isEscaped: ' + isEscaped);
-  console.log('currentString: ' + currentString);
-  console.log('matchers: ' + matchers);
-  console.log('options: ' + options);
-  console.log('state: ' + state);
-  console.log('canAcceptElement: ' + canAcceptElement);
-  console.log('index: ' + index);
   throw new BMLSyntaxError('Could not find end of rule');
 }
 
@@ -316,28 +296,27 @@ function parseMode(string, modeNameIndex) {
  * Parse the prelude of a bml file.
  *
  * @param {String} string The contents of a bml file
- * @returns {Number} the index after the end of the 'begin' statement.
+ * @returns {Object} containing: evalBlock, preludeEndIndex
  */
 function parsePrelude(string) {
   var beginPattern = /^\s*begin( (using|use) (\w+))? *\n/m;
   var evalPattern = /^\s*evaluate {/gm;
   var modePattern = /^\s*mode (\w+) *{/gm;
   var beginMatch = string.match(beginPattern);
+  var evalBlock = '';
   if (beginMatch !== null) {
     var beginIndex = beginMatch.index;
     var prelude = string.slice(0, beginIndex);
-
-    var evalBlock;
-    while ((evalBlock = evalPattern.exec(prelude)) !== null) {
+    var evalMatch;
+    while ((evalMatch = evalPattern.exec(prelude)) !== null) {
       var codeEndIndex = findCodeBlockEnd(prelude, evalPattern.lastIndex - 1);
-      eval(prelude.slice(evalPattern.lastIndex, codeEndIndex - 1));
+      evalBlock += prelude.slice(evalPattern.lastIndex, codeEndIndex - 1);
     }
 
     var modeBlock;
     while ((modeBlock = modePattern.exec(prelude)) !== null) {
       var modeNameIndex = modeBlock.index + modeBlock[0].indexOf(modeBlock[1]);
       var modeEndIndex = parseMode(prelude, modeNameIndex);
-
     }
 
     var modeName = beginMatch[3];
@@ -353,7 +332,11 @@ function parsePrelude(string) {
     // No begin pattern found - assume there is no prelude.
     return 0;
   }
-  return beginMatch.index + beginMatch[0].length;
+  console.log('extracted eval block: ' + evalBlock);
+  return {
+    evalBlock: evalBlock,
+    preludeEndIndex: beginMatch.index + beginMatch[0].length
+  };
 }
 
 /**
@@ -368,7 +351,7 @@ function parsePrelude(string) {
  *
  * @returns {String} the rendered text.
  */
-function renderText(string, startIndex) {
+function renderText(string, startIndex, evalBlock) {
   var isEscaped = false;
   var inLiteralBlock = false;
   var out = '';
@@ -376,6 +359,10 @@ function renderText(string, startIndex) {
   var currentRule = null;
   var foundMatch = false;
   var replacement = null;
+
+  console.log('evaluating... ' + evalBlock);
+  eval(evalBlock);
+
   while (index < string.length) {
     if (isEscaped) {
       isEscaped = false;
@@ -402,8 +389,8 @@ function renderText(string, startIndex) {
             if (string.indexOf(currentRule.matchers[m], index) == index) {
               replacement = currentRule.getReplacement(currentRule.matchers[m],
                                                 string, index);
-              if (replacement instanceof Function) {
-                out += replacement(currentRule.matchers[m], string, index);
+              if (replacement instanceof EvalBlock) {
+                out += eval(replacement.string)(currentRule.matchers[m], string, index);
               } else {
                 out += replacement;
               }
@@ -431,8 +418,8 @@ function renderText(string, startIndex) {
 }
 
 function renderBML(string) {
-  startIndex = parsePrelude(string);
-  return renderText(string, startIndex);
+  var {evalBlock, preludeEndIndex} = parsePrelude(string);
+  return renderText(string, preludeEndIndex, evalBlock);
 }
 
 

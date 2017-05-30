@@ -261,7 +261,6 @@ describe('parseRule', function() {
     assert.equal(testMode.rules.length, 1);
     assert.deepEqual(testMode.rules[0].matchers, ['x']);
     assert.equal(testMode.rules[0].getReplacement.replacerType, 'weightedChoice');
-    assert.equal(testMode.rules[1].getReplacement.replacerType, 'weightedChoice');
   });
 
   it('can parse call statements with chances', function() {
@@ -272,5 +271,4 @@ describe('parseRule', function() {
     assert.deepEqual(testMode.rules[0].matchers, ['x']);
     assert.equal(testMode.rules[0].getReplacement.replacerType, 'weightedChoice');
   });
-
 });
