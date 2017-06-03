@@ -1,3 +1,21 @@
+var marked = require('marked');
+var fs = require('fs');
+
+var _parsers = require('./parsers.js');
+var _settings = require('./settings.js');
+
+var defaultSettings = _settings.defaultSettings;
+var mergeSettings = _settings.mergeSettings;
+var parsePrelude = _parsers.parsePrelude;
+var EvalBlock = require('./evalBlock.js').EvalBlock;
+
+/**
+ * We import many functions which are not directly used in the module
+ * so that embedded code in bml documents can access them.
+ */
+
+
+
 /**
  * The main loop which processes the text component of a bml document.
  *
@@ -10,7 +28,7 @@
  *
  * @returns {String} the rendered text.
  */
-function renderText(string, startIndex) {
+function renderText(string, startIndex, evalBlock, modes, activeMode) {
   var isEscaped = false;
   var inLiteralBlock = false;
   var out = '';
@@ -18,6 +36,17 @@ function renderText(string, startIndex) {
   var currentRule = null;
   var foundMatch = false;
   var replacement = null;
+
+  if (evalBlock) {
+    eval(evalBlock.string);
+  }
+
+  if (typeof settings === 'undefined') {
+    var settings = defaultSettings;
+  } else {
+    settings = mergeSettings(defaultSettings, settings);
+  }
+
   while (index < string.length) {
     if (isEscaped) {
       isEscaped = false;
@@ -44,8 +73,8 @@ function renderText(string, startIndex) {
             if (string.indexOf(currentRule.matchers[m], index) == index) {
               replacement = currentRule.getReplacement(currentRule.matchers[m],
                                                 string, index);
-              if (replacement instanceof Function) {
-                out += replacement(currentRule.matchers[m], string, index);
+              if (replacement instanceof EvalBlock) {
+                out += eval(replacement.string)(currentRule.matchers[m], string, index);
               } else {
                 out += replacement;
               }
@@ -72,4 +101,17 @@ function renderText(string, startIndex) {
   return out;
 }
 
+function renderBML(string) {
+  var {preludeEndIndex, evalBlock, modes, initialMode} = parsePrelude(string);
+  return renderText(string, preludeEndIndex, evalBlock, modes, initialMode);
+}
+
+function renderFile(path) {
+  var string = '' + fs.readFileSync(path);
+  var rendered = renderBML(string);
+  return rendered;
+}
+
 exports.renderText = renderText;
+exports.renderBML = renderBML;
+exports.renderFile = renderFile;

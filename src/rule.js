@@ -21,5 +21,12 @@ function getWeightedOptionReplacer(choices) {
   return replacer;
 }
 
+function createRule(matchers, options) {
+  var rule = new Rule(matchers);
+  rule.getReplacement = getWeightedOptionReplacer(options);
+  return rule;
+}
+
+exports.createRule = createRule;
 exports.Rule = Rule;
 exports.getWeightedOptionReplacer = getWeightedOptionReplacer;

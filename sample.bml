@@ -1,9 +1,9 @@
 evaluate {
     // arbitrary javascript
     // global bml interpreter settings
-    changeSettings({
+    settings = {
         renderMarkdown: true,
-    });
+    };
     //function not(trigger, sourceIndex) {
     //    return 'some replacement string';
     //}
