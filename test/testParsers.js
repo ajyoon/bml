@@ -6,11 +6,15 @@ var errors = require('../src/errors.js');
 var Mode = require('../src/mode.js').Mode;
 
 var JavascriptSyntaxError = errors.JavascriptSyntaxError;
+var UnknownTransformError = errors.UnknownTransformError;
 
 var findCodeBlockEnd = parsers.findCodeBlockEnd;
 var parseRule = parsers.parseRule;
 var parseMode = parsers.parseMode;
 var parsePrelude = parsers.parsePrelude;
+var parseUse = parsers.parseUse;
+var parseStringLiteral = parsers.parseStringLiteral;
+var parseChoose = parsers.parseChoose;
 
 
 describe('findCodeBlockEnd', function() {
@@ -238,4 +242,61 @@ describe('parseRule', function() {
     assert.deepEqual(result.rule.matchers, ['x']);
     assert.equal(result.rule.getReplacement.replacerType, 'weightedChoice');
   });
+});
+
+
+describe('parseUse', function() {
+
+  it('Extracts the mode name with "use" syntax', function() {
+    var testString = "{{use testMode}}";
+    var result = parseUse(testString, 0);
+    assert.equal(result.blockEndIndex, testString.length);
+    assert.equal(result.modeName, 'testMode');
+  });
+
+  it('Extracts the mode name with "using" syntax', function() {
+    var testString = "{{using testMode}}";
+    var result = parseUse(testString, 0);
+    assert.equal(result.blockEndIndex, testString.length);
+    assert.equal(result.modeName, 'testMode');
+  });
+
+  it('Throws an UnknownTransformError when there is a syntax error.', function() {
+    var testString = "{{using ????}}";
+    try {
+      parseUse(testString, 0);
+      assert(false, 'error expected');
+    } catch (e) {
+      assert(e instanceof UnknownTransformError);
+    }
+  });
+});
+
+
+describe('parseStringLiteral', function() {
+
+  it('can parse normal strings', function() {
+    var testString = "'testing testing'";
+    var result = parseStringLiteral(testString, 0);
+    assert.equal(result.closeQuoteIndex, testString.length - 1);
+    assert.equal(result.extractedString, 'testing testing');
+  });
+
+  it('can parse strings with escaped quotes', function() {
+    var testString = "'testing \\'testing'";
+    var result = parseStringLiteral(testString, 0);
+    assert.equal(result.closeQuoteIndex, testString.length - 1);
+    assert.equal(result.extractedString, 'testing \\\'testing');
+  });
+});
+
+
+describe('parseChoose', function() {
+
+  it('allows a single unweighted item', function() {
+    var testString = "{{'test'}}";
+    var result = parseChoose(testString, 0);
+    assert.equal(result.blockEndIndex, testString.length);
+  });
+
 });

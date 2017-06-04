@@ -4,6 +4,7 @@ var createRule = require('./rule.js').createRule;
 var EvalBlock = require('./evalBlock.js').EvalBlock;
 var Mode = require('./mode.js').Mode;
 
+var UnknownTransformError = _errors.UnknownTransformError;
 var UnknownModeError = _errors.UnknownModeError;
 var JavascriptSyntaxError = _errors.JavascriptSyntaxError;
 var BMLSyntaxError = _errors.BMLSyntaxError;
@@ -313,7 +314,71 @@ function parsePrelude(string) {
   };
 }
 
+/**
+ * Parse a `use` block of the form `{{use|using modeName}}`
+ *
+ * @returns {blockEndIndex, modeName} The returned index is the index immediately
+ * after the closing brace.
+ */
+function parseUse(string, openBraceIndex) {
+  var useRe = /{{(use|using)\s+(\w[\w\d]*)\s*}}/y;
+  useRe.lastIndex = openBraceIndex;
+  var match = useRe.exec(string);
+  if (match === null) {
+    throw new UnknownTransformError(string, openBraceIndex);
+  }
+  return {
+    blockEndIndex: useRe.lastIndex,
+    modeName: match[2]
+  };
+}
+
+// TODO: use me in similar logic in other parsers
+// {closeQuoteIndex, extractedString}
+function parseStringLiteral(string, openQuoteIndex) {
+  var index = openQuoteIndex + 1;
+  var isEscaped = false;
+  while (index < string.length) {
+    if (isEscaped) {
+      isEscaped = false;
+    } else {
+      if (string[index] === '\\') {
+        isEscaped = true;
+      } else if (string[index] === '\'') {
+        return {
+          closeQuoteIndex: index,
+          extractedString: string.slice(openQuoteIndex + 1, index)
+        };
+      }
+    }
+    index++;
+  }
+  throw new BMLSyntaxError('could not find end of string at index: '
+                           + openQuoteIndex);
+}
+
+
+/**
+ * Parse an option block.
+ *
+ * @returns {blockEndIndex, replacementFunction}
+ */
+function parseChoose(string, openBraceIndex) {
+  var isEscaped = false;
+  var index = openBraceIndex;
+  var state = 'code';
+  var options = [];
+  while (index < string.length) {
+
+    index++;
+  }
+}
+
+
 exports.findCodeBlockEnd = findCodeBlockEnd;
 exports.parseRule = parseRule;
 exports.parseMode = parseMode;
 exports.parsePrelude = parsePrelude;
+exports.parseUse = parseUse;
+exports.parseStringLiteral = parseStringLiteral;
+exports.parseChoose = parseChoose;

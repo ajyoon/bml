@@ -41,7 +41,20 @@ function UnknownModeError(string, charIndex, modeName) {
 }
 UnknownModeError.prototype = Object.create(Error.prototype);
 
+
+function UnknownTransformError(string, charIndex) {
+  this.name = 'UnknownTransformError';
+  this.message = "Unknown transform at "
+    + stringUtils.lineColumnString(string, charIndex);
+  var error = new Error(this.message);
+  error.name = this.name;
+  this.stack = error.stack;
+}
+UnknownTransformError.prototype = Object.create(Error.prototype);
+
+
 exports.JavascriptSyntaxError = JavascriptSyntaxError;
 exports.BMLSyntaxError = BMLSyntaxError;
 exports.BMLNameError = BMLNameError;
 exports.UnknownModeError = UnknownModeError;
+exports.UnknownTransformError = UnknownTransformError;
