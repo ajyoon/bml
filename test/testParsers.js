@@ -296,7 +296,36 @@ describe('parseChoose', function() {
   it('allows a single unweighted item', function() {
     var testString = "{{'test'}}";
     var result = parseChoose(testString, 0);
-    assert.equal(result.blockEndIndex, testString.length);
+    assert.equal(result.blockEndIndex, testString.length - 1);
+    assert(result.replacementFunction instanceof Function);
+  });
+
+  it('allows a single weighted item', function() {
+    var testString = "{{'test' 100}}";
+    var result = parseChoose(testString, 0);
+    assert.equal(result.blockEndIndex, testString.length - 1);
+    assert(result.replacementFunction instanceof Function);
+  });
+
+  it('allows a single unweighted call item', function() {
+    var testString = "{{call someFunc}}";
+    var result = parseChoose(testString, 0);
+    assert.equal(result.blockEndIndex, testString.length - 1);
+    assert(result.replacementFunction instanceof Function);
+  });
+
+  it('allows a single weighted call item', function() {
+    var testString = "{{call someFunc 100}}";
+    var result = parseChoose(testString, 0);
+    assert.equal(result.blockEndIndex, testString.length - 1);
+    assert(result.replacementFunction instanceof Function);
+  });
+
+  it('allows a comma separated mix of literals and calls', function() {
+    var testString = "{{'test' 50, call someFunc 40}}";
+    var result = parseChoose(testString, 0);
+    assert.equal(result.blockEndIndex, testString.length - 1);
+    assert(result.replacementFunction instanceof Function);
   });
 
 });

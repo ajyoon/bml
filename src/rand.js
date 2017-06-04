@@ -51,6 +51,15 @@ function weightedChoice(weights) {
   return weights[randomInt(0, weights.length)].option;
 }
 
+function getWeightedOptionReplacer(choices) {
+  var normalizedWeights = normalizeWeights(choices);
+  function replacer(match, fullText, matchIndex, option) {
+    return weightedChoice(normalizedWeights);
+  };
+  replacer.replacerType = 'weightedChoice';
+  return replacer;
+}
 
 exports.normalizeWeights = normalizeWeights;
 exports.weightedChoice = weightedChoice;
+exports.getWeightedOptionReplacer = getWeightedOptionReplacer;

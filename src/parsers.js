@@ -1,5 +1,7 @@
+var _rand = require('./rand.js');
 var _errors = require('./errors.js');
 var _stringUtils = require('./stringUtils.js');
+var _rule = require('./rule.js');
 var createRule = require('./rule.js').createRule;
 var EvalBlock = require('./evalBlock.js').EvalBlock;
 var Mode = require('./mode.js').Mode;
@@ -11,6 +13,7 @@ var BMLSyntaxError = _errors.BMLSyntaxError;
 var lineAndColumnOf = _stringUtils.lineAndColumnOf;
 var lineColumnString = _stringUtils.lineColumnString;
 var isWhitespace = _stringUtils.isWhitespace;
+var getWeightedOptionReplacer = _rand.getWeightedOptionReplacer;
 
 
 
@@ -184,6 +187,7 @@ function parseRule(string, ruleStartIndex) {
             index += numberMatch[0].length;
             continue;
           } else if ((callMatch = callRe.exec(string))) {
+            // TODO: is this wrong? Call matches should accept weights.
             options.push({
               option: new EvalBlock(callMatch[1]),
               chance: null
@@ -358,20 +362,84 @@ function parseStringLiteral(string, openQuoteIndex) {
 }
 
 
+// {lastDigitIndex, extractedNumber}
+function extractNumberLiteral(string, numberIndex) {
+  var numberRe = /(\d+(\.\d+)?)|(\.\d+)/y;
+  numberRe.lastIndex = numberIndex;
+  var match = numberRe.exec(string);
+  if (match === null) {
+    return null;
+  }
+  return {
+    lastDigitIndex: numberIndex + match[0].length,
+    extractedNumber: Number(match[0])
+  };
+}
+
+
 /**
  * Parse an option block.
  *
  * @returns {blockEndIndex, replacementFunction}
  */
 function parseChoose(string, openBraceIndex) {
-  var isEscaped = false;
-  var index = openBraceIndex;
+  var index = openBraceIndex + 2;
+  var numberRe = /(\d+(\.\d+)?)|(\.\d+)/y;
+  var callRe = /call (\w+[\w\d\.]*)/y;
   var state = 'code';
+  var acceptOption = true;;
   var options = [];
+  var currentOption = null;
+  var currentWeight = null;
   while (index < string.length) {
-
+    if (isWhitespace(string[index])) {
+      // Ignore
+    } else if (string.slice(index, index + 2) === '}}') {
+      if (currentOption !== null) {
+        options.push({option: currentOption, weight: currentWeight});
+      }
+      return {
+        blockEndIndex: index + 1,
+        replacementFunction: getWeightedOptionReplacer(options)
+      };
+    } else if (acceptOption) {
+      callRe.lastIndex = index;
+      var callMatch = callRe.exec(string);
+      if (string[index] === '\'') {
+        acceptOption = false;
+        var literalExtractionResult = parseStringLiteral(string, index);
+        currentOption = literalExtractionResult.extractedString;
+        index = literalExtractionResult.closeQuoteIndex;
+      } else if (callMatch !== null) {
+        acceptOption = false;
+        currentOption = new EvalBlock(callMatch[1]);
+        index += callMatch[0].length - 1;
+      } else {
+        throw new BMLSyntaxError('Unexpected character at: ' + index);
+      }
+    } else {
+      numberRe.lastIndex = index;
+      var numberMatch = numberRe.exec(string);
+      if (string[index] === ',') {
+        acceptOption = true;
+        options.push({option: currentOption, weight: currentWeight});
+        currentOption = null;
+        currentWeight = null;
+      } else if (numberMatch !== null) {
+        if (currentOption !== null) {
+          currentWeight = Number(numberMatch[0]);
+        } else {
+          throw new BMLSyntaxError(
+            'Cannot have a weight without an option. Index: ' + index);
+        }
+      } else {
+        throw new BMLSyntaxError('Invalid syntax at: ' + index);
+      }
+    }
     index++;
   }
+  throw new BMLSyntaxError('Could not find end of choice block at index: '
+                           + openBraceIndex);
 }
 
 
