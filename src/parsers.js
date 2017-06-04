@@ -297,7 +297,7 @@ function parsePrelude(string) {
       if (modes.hasOwnProperty(modeName)) {
         initialMode = modes[modeName];
       } else {
-        throw new UnknownModeError(String, beginMatch.index, modeName);
+        throw new UnknownModeError(string, beginMatch.index, modeName);
       }
     }
 

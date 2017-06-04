@@ -4,19 +4,16 @@ evaluate {
     settings = {
         renderMarkdown: true,
     };
-    //function not(trigger, sourceIndex) {
-    //    return 'some replacement string';
-    //}
-    function not(trigger, sourceIndex) {
+    function someFunc(trigger, string, sourceIndex) {
         return 'some replacement string';
     }
     // Copy the prelude into literal text.
-    function copyPrelude(trigger, sourceIndex) {
-        return '```\n' + sourceText.slice(0, sourceIndex) + '```\n';
+    function copyPrelude(trigger, string, sourceIndex) {
+        return '```\n' + string.slice(0, sourceIndex) + '```\n';
     }
 }
 mode initial {
-    'not' as '' 30, 'still' 50, call not
+    'not' as '' 30, 'still' 50, call someFunc
     '.' as '?' 10
 }
 mode literal {
@@ -24,7 +21,7 @@ mode literal {
 }
 begin using initial
 
-{call copyPrelude}
+{{call copyPrelude}}
 
 not
 not
@@ -49,6 +46,5 @@ for them being {curly braces}.
 
 Available one-time transformations include:
 
-* choose: {'x' 20, 'y' 30, 'z' 50}
-* call: {call someFunc('some flag')}
-* using: {using literal}
+* choose: {{'x' 20, 'y' 30, 'z' 50, call someFunc}}
+* using: {{using literal}}
