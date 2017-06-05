@@ -1,3 +1,6 @@
+var Replacer = require('./replacer.js').Replacer;
+
+
 function normalizeWeights(weights) {
   var normalized = [];
   var sum = 0;
@@ -51,15 +54,14 @@ function weightedChoice(weights) {
   return weights[randomInt(0, weights.length)].option;
 }
 
-function getWeightedOptionReplacer(choices) {
+function createWeightedOptionReplacer(choices) {
   var normalizedWeights = normalizeWeights(choices);
-  function replacer(match, fullText, matchIndex, option) {
+  function replacerFunction(match, fullText, matchIndex, option) {
     return weightedChoice(normalizedWeights);
   };
-  replacer.replacerType = 'weightedChoice';
-  return replacer;
+  return new Replacer(replacerFunction);
 }
 
 exports.normalizeWeights = normalizeWeights;
 exports.weightedChoice = weightedChoice;
-exports.getWeightedOptionReplacer = getWeightedOptionReplacer;
+exports.createWeightedOptionReplacer = createWeightedOptionReplacer;

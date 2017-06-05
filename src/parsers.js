@@ -13,7 +13,7 @@ var BMLSyntaxError = _errors.BMLSyntaxError;
 var lineAndColumnOf = _stringUtils.lineAndColumnOf;
 var lineColumnString = _stringUtils.lineColumnString;
 var isWhitespace = _stringUtils.isWhitespace;
-var getWeightedOptionReplacer = _rand.getWeightedOptionReplacer;
+var createWeightedOptionReplacer = _rand.createWeightedOptionReplacer;
 
 
 
@@ -380,7 +380,7 @@ function extractNumberLiteral(string, numberIndex) {
 /**
  * Parse an option block.
  *
- * @returns {blockEndIndex, replacementFunction}
+ * @returns {blockEndIndex, replacer}
  */
 function parseChoose(string, openBraceIndex) {
   var index = openBraceIndex + 2;
@@ -400,7 +400,7 @@ function parseChoose(string, openBraceIndex) {
       }
       return {
         blockEndIndex: index + 1,
-        replacementFunction: getWeightedOptionReplacer(options)
+        replacer: createWeightedOptionReplacer(options)
       };
     } else if (acceptOption) {
       callRe.lastIndex = index;

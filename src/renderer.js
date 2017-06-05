@@ -71,7 +71,7 @@ function renderText(string, startIndex, evalBlock, modes, activeMode) {
       if (chooseRe.test(string)) {
         var parseChooseResult = parseChoose(string, index);
         index = parseChooseResult.blockEndIndex;
-        replacement = parseChooseResult.replacementFunction(
+        replacement = parseChooseResult.replacer.call(
           currentRule.matchers[m], string, index);
         if (replacement instanceof EvalBlock) {
           out += eval(replacement.string)(currentRule.matchers[m], string, index);
@@ -99,8 +99,8 @@ function renderText(string, startIndex, evalBlock, modes, activeMode) {
           currentRule = activeMode.rules[r];
           for (var m = 0; m < currentRule.matchers.length; m++) {
             if (string.indexOf(currentRule.matchers[m], index) == index) {
-              replacement = currentRule.getReplacement(currentRule.matchers[m],
-                                                string, index);
+              replacement = currentRule.replacer
+                .call(currentRule.matchers[m], string, index);
               if (replacement instanceof EvalBlock) {
                 out += eval(replacement.string)(currentRule.matchers[m], string, index);
               } else {

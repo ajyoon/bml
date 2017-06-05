@@ -1,20 +1,18 @@
 var rand = require('./rand.js');
+var Replacer = require('./replacer.js').Replacer;
 
 
 class Rule {
   constructor(matchers) {
     this.matchers = matchers;
-    this.getReplacement.replacerType = 'no-op';
-  }
-
-  getReplacement(match, fullText, matchIndex, option) {
-    return match;
+    // Default replacer is a no-op
+    this.replacer = new Replacer(function(match, ...rest) {return match;});
   }
 }
 
 function createRule(matchers, options) {
   var rule = new Rule(matchers);
-  rule.getReplacement = rand.getWeightedOptionReplacer(options);
+  rule.replacer = rand.createWeightedOptionReplacer(options);
   return rule;
 }
 

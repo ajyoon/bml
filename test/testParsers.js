@@ -4,6 +4,7 @@ var fs = require('fs');
 var parsers = require('../src/parsers.js');
 var errors = require('../src/errors.js');
 var Mode = require('../src/mode.js').Mode;
+var Replacer = require('../src/replacer.js').Replacer;
 
 var JavascriptSyntaxError = errors.JavascriptSyntaxError;
 var UnknownTransformError = errors.UnknownTransformError;
@@ -184,7 +185,6 @@ describe('parseRule', function() {
     var result = parseRule(testString, 0);
     assert.equal(result.ruleEndIndex, testString.length - 1);
     assert.deepEqual(result.rule.matchers, ['x']);
-    assert.equal(result.rule.getReplacement.replacerType, 'weightedChoice');
   });
 
   it('can parse a one-to-one rule with a weight', function() {
@@ -192,7 +192,6 @@ describe('parseRule', function() {
     var result = parseRule(testString, 0);
     assert.equal(result.ruleEndIndex, testString.length - 1);
     assert.deepEqual(result.rule.matchers, ['x']);
-    assert.equal(result.rule.getReplacement.replacerType, 'weightedChoice');
   });
 
   it('can parse multiple options', function() {
@@ -200,7 +199,6 @@ describe('parseRule', function() {
     var result = parseRule(testString, 0);
     assert.equal(result.ruleEndIndex, testString.length - 1);
     assert.deepEqual(result.rule.matchers, ['x']);
-    assert.equal(result.rule.getReplacement.replacerType, 'weightedChoice');
   });
 
   it('can parse multiple matchers', function() {
@@ -208,7 +206,6 @@ describe('parseRule', function() {
     var result = parseRule(testString, 0);
     assert.equal(result.ruleEndIndex, testString.length - 1);
     assert.deepEqual(result.rule.matchers, ['x', 'z']);
-    assert.equal(result.rule.getReplacement.replacerType, 'weightedChoice');
   });
 
   it('can parse multiple matchers and options', function() {
@@ -216,7 +213,6 @@ describe('parseRule', function() {
     var result = parseRule(testString, 0);
     assert.equal(result.ruleEndIndex, testString.length - 1);
     assert.deepEqual(result.rule.matchers, ['x', 'z']);
-    assert.equal(result.rule.getReplacement.replacerType, 'weightedChoice');
   });
 
   it('can parse call statements', function() {
@@ -224,7 +220,6 @@ describe('parseRule', function() {
     var result = parseRule(testString, 0);
     assert.equal(result.ruleEndIndex, testString.length - 1);
     assert.deepEqual(result.rule.matchers, ['x']);
-    assert.equal(result.rule.getReplacement.replacerType, 'weightedChoice');
   });
 
   it('can parse call statements after commas', function() {
@@ -232,7 +227,6 @@ describe('parseRule', function() {
     var result = parseRule(testString, 0);
     assert.equal(result.ruleEndIndex, testString.length - 1);
     assert.deepEqual(result.rule.matchers, ['x']);
-    assert.equal(result.rule.getReplacement.replacerType, 'weightedChoice');
   });
 
   it('can parse call statements with chances', function() {
@@ -240,7 +234,6 @@ describe('parseRule', function() {
     var result = parseRule(testString, 0);
     assert.equal(result.ruleEndIndex, testString.length - 1);
     assert.deepEqual(result.rule.matchers, ['x']);
-    assert.equal(result.rule.getReplacement.replacerType, 'weightedChoice');
   });
 });
 
@@ -297,35 +290,35 @@ describe('parseChoose', function() {
     var testString = "{{'test'}}";
     var result = parseChoose(testString, 0);
     assert.equal(result.blockEndIndex, testString.length - 1);
-    assert(result.replacementFunction instanceof Function);
+    assert(result.replacer instanceof Replacer);
   });
 
   it('allows a single weighted item', function() {
     var testString = "{{'test' 100}}";
     var result = parseChoose(testString, 0);
     assert.equal(result.blockEndIndex, testString.length - 1);
-    assert(result.replacementFunction instanceof Function);
+    assert(result.replacer instanceof Replacer);
   });
 
   it('allows a single unweighted call item', function() {
     var testString = "{{call someFunc}}";
     var result = parseChoose(testString, 0);
     assert.equal(result.blockEndIndex, testString.length - 1);
-    assert(result.replacementFunction instanceof Function);
+    assert(result.replacer instanceof Replacer);
   });
 
   it('allows a single weighted call item', function() {
     var testString = "{{call someFunc 100}}";
     var result = parseChoose(testString, 0);
     assert.equal(result.blockEndIndex, testString.length - 1);
-    assert(result.replacementFunction instanceof Function);
+    assert(result.replacer instanceof Replacer);
   });
 
   it('allows a comma separated mix of literals and calls', function() {
     var testString = "{{'test' 50, call someFunc 40}}";
     var result = parseChoose(testString, 0);
     assert.equal(result.blockEndIndex, testString.length - 1);
-    assert(result.replacementFunction instanceof Function);
+    assert(result.replacer instanceof Replacer);
   });
 
 });
