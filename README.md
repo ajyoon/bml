@@ -1,3 +1,5 @@
+
+```
 evaluate {
     // arbitrary javascript
     // global bml interpreter settings
@@ -20,7 +22,9 @@ mode literal {
 }
 begin using initial
 
-{{call copyPrelude}}
+{{call copyPrelude}
+```
+
 
 BML is a superset of natural language which applies stochastic transformations
 on text. Words and strings can be used as triggers for weighted random
@@ -58,15 +62,15 @@ and define reusable functions. maps link words in the text to other words
 with weights controlling their relative likelihood and may also call functions
 either defined inline or in the evaluate block.
 
-Strings can be escaped with \<<double angle bracket delimiters.>> and backslashes \\.
+Strings can be escaped with <<double angle bracket delimiters.>> and backslashes \.
 
 The text body can also apply one-time transformations, the common marker
-for them being {{double curly braces}}.
+for them being {double curly braces}}.
 
 Available one-time transformations include:
 
-* choose: \{{'x' 20, 'y' 30, 'z' 50, call someFunc}}
-* using: \{{using literal}}
+* choose: {{'x' 20, 'y' 30, 'z' 50, call someFunc}}
+* using: {{using literal}}
 
 This is a very early, very unstable project. Lots of fixes and improvements coming soon!
 

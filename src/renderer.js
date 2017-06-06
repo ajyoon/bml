@@ -1,5 +1,4 @@
 var marked = require('marked');
-var fs = require('fs');
 
 var _parsers = require('./parsers.js');
 var _settings = require('./settings.js');
@@ -72,9 +71,9 @@ function renderText(string, startIndex, evalBlock, modes, activeMode) {
         var parseChooseResult = parseChoose(string, index);
         index = parseChooseResult.blockEndIndex;
         replacement = parseChooseResult.replacer.call(
-          currentRule.matchers[m], string, index);
+          '', string, index);
         if (replacement instanceof EvalBlock) {
-          out += eval(replacement.string)(currentRule.matchers[m], string, index);
+          out += eval(replacement.string)('', string, index);
         } else {
           out += replacement;
         }
@@ -94,21 +93,23 @@ function renderText(string, startIndex, evalBlock, modes, activeMode) {
         inLiteralBlock = true;
       } else {
         // Optimize me when extending to support regexps
-        ruleLoop:
-        for (var r = 0; r < activeMode.rules.length; r++) {
-          currentRule = activeMode.rules[r];
-          for (var m = 0; m < currentRule.matchers.length; m++) {
-            if (string.indexOf(currentRule.matchers[m], index) == index) {
-              replacement = currentRule.replacer
-                .call(currentRule.matchers[m], string, index);
-              if (replacement instanceof EvalBlock) {
-                out += eval(replacement.string)(currentRule.matchers[m], string, index);
-              } else {
-                out += replacement;
+        if (activeMode !== null) {
+          ruleLoop:
+          for (var r = 0; r < activeMode.rules.length; r++) {
+            currentRule = activeMode.rules[r];
+            for (var m = 0; m < currentRule.matchers.length; m++) {
+              if (string.indexOf(currentRule.matchers[m], index) == index) {
+                replacement = currentRule.replacer
+                  .call(currentRule.matchers[m], string, index);
+                if (replacement instanceof EvalBlock) {
+                  out += eval(replacement.string)(currentRule.matchers[m], string, index);
+                } else {
+                  out += replacement;
+                }
+                index += currentRule.matchers[m].length;
+                foundMatch = true;
+                break ruleLoop;
               }
-              index += currentRule.matchers[m].length;
-              foundMatch = true;
-              break ruleLoop;
             }
           }
         }
@@ -134,12 +135,5 @@ function renderBML(string) {
   return renderText(string, preludeEndIndex, evalBlock, modes, initialMode);
 }
 
-function renderFile(path) {
-  var string = '' + fs.readFileSync(path);
-  var rendered = renderBML(string);
-  return rendered;
-}
-
 exports.renderText = renderText;
 exports.renderBML = renderBML;
-exports.renderFile = renderFile;

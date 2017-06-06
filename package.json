@@ -2,19 +2,31 @@
   "name": "bml",
   "version": "0.0.1",
   "description": "A stochastic markup language",
+  "author": {
+    "name": "Andrew Yoon",
+    "email": "andrewyoon2@gmail.com",
+    "url": "http://andrewjyoon.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ajyoon/bml"
+  },
   "main": "bml.js",
   "scripts": {
-    "test": "mocha"
+    "test": "mocha",
+    "build": "webpack"
   },
   "devDependencies": {
-    "mocha": "3.4.1"
+    "babel-core": "^6.24.1",
+    "babel-loader": "^7.0.0",
+    "babel-preset-env": "^1.5.1",
+    "mocha": "3.4.1",
+    "uglifyjs-webpack-plugin": "^0.4.3",
+    "webpack": "^2.6.1"
   },
   "dependencies": {
-    "marked": "0.3.6"
-  },
-  "author": "Andrew Yoon",
-  "license": "BSD",
-  "dependencies": {
+    "expose-loader": "^0.7.3",
     "marked": "^0.3.6"
-  }
+  },
+  "license": "BSD-3-Clause"
 }

@@ -5,8 +5,8 @@ function normalizeWeights(weights) {
   var normalized = [];
   var sum = 0;
   var nullChanceCount = 0;
-  for (w_index in weights) {
-    weight = weights[w_index];
+  for (var w_index in weights) {
+    var weight = weights[w_index];
     normalized.push({option: weight.option, chance: weight.chance});
     if (weight.chance === null) {
       nullChanceCount++;
@@ -16,7 +16,7 @@ function normalizeWeights(weights) {
   }
   if (sum < 100) {
     var nullChance = (100 - sum) / nullChanceCount;
-    for (normWeight in normalized) {
+    for (var normWeight in normalized) {
       if (normWeight.chance === null) {
         normWeight.chance = nullChance;
       }
@@ -37,20 +37,20 @@ function randomInt(min, max) {
 
 function weightedChoice(weights) {
   var sum = 0;
-  for (i in weights) {
+  for (var i in weights) {
     sum += i.chance;
   }
   var progress = 0;
   var pickedValue = randomFloat(0, sum);
-  for (i in weights) {
-    progress += weights[i].chance;
+  for (var w in weights) {
+    progress += weights[w].chance;
     if (progress >= sum) {
-      return weights[i].option;
+      return weights[w].option;
     }
   }
   // If we're still here, something went wrong.
   // Log a warning but try to return a random value anyways.
-  process.emitWarning('Unable to pick randomChoice for weights: ' + weights);
+  console.log('Unable to pick randomChoice for weights: ' + weights);
   return weights[randomInt(0, weights.length)].option;
 }
 
