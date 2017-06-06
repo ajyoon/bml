@@ -22,10 +22,10 @@
     "babel-preset-env": "^1.5.1",
     "mocha": "3.4.1",
     "uglifyjs-webpack-plugin": "^0.4.3",
-    "webpack": "^2.6.1"
+    "webpack": "^2.6.1",
+    "expose-loader": "^0.7.3"
   },
   "dependencies": {
-    "expose-loader": "^0.7.3",
     "marked": "^0.3.6"
   },
   "license": "BSD-3-Clause"
