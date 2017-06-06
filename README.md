@@ -1,4 +1,6 @@
 
+# bml
+
 ```
 evaluate {
     // arbitrary javascript
@@ -21,6 +23,8 @@ mode literal {
     // No rules
 }
 begin using initial
+
+# bml
 
 {{call copyPrelude}
 ```
@@ -55,6 +59,7 @@ To use in the web:
 document.getElementById("someTargetId").innerHTML =
     bml.renderBML("some bml loaded as a js string");
 </script>
+```
 
 A prelude section is used to define maps and evaluate arbitrary
 javascript. An evaluate block provides a location to execute arbitrary code
