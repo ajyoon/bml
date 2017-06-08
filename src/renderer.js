@@ -57,7 +57,9 @@ function renderText(string, startIndex, evalBlock, modes, activeMode) {
       isEscaped = false;
       out += string[index];
     } else if (inLiteralBlock) {
-      if (string.slice(index, index + 2) === '>>') {
+      if (string[index] === '\\') {
+        isEscaped = true;
+      } else if (string.slice(index, index + 2) === ']]') {
         inLiteralBlock = false;
         index += 2;
         continue;
@@ -87,9 +89,11 @@ function renderText(string, startIndex, evalBlock, modes, activeMode) {
         }
       }
     } else {
-      if (string[index] == '\\') {
+      if (string[index] === '\\') {
+        console.log('escaping char: ' + string[index+ 1])
         isEscaped = true;
-      } else if (string[index] == '<' && string[index + 1] == '<') {
+      } else if (string.slice(index, index + 2) === '[[') {
+        index++;
         inLiteralBlock = true;
       } else {
         // Optimize me when extending to support regexps
