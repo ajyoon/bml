@@ -8,11 +8,14 @@ class Rule {
     // Default replacer is a no-op
     this.replacer = new Replacer(function(match, ...rest) {return match;});
   }
+  toString() {
+    return `Rule{matchers: ${this.matchers}, replacer: ${this.replacer}}`;
+  }
 }
 
-function createRule(matchers, options) {
+function createRule(matchers, choices) {
   var rule = new Rule(matchers);
-  rule.replacer = rand.createWeightedOptionReplacer(options);
+  rule.replacer = rand.createWeightedOptionReplacer(choices);
   return rule;
 }
 

@@ -1,24 +1,24 @@
 var Replacer = require('./replacer.js').Replacer;
 
 
-function normalizeWeights(weights) {
+function normalizeWeights(weightedChoices) {
   var normalized = [];
   var sum = 0;
-  var nullChanceCount = 0;
-  for (var w_index in weights) {
-    var weight = weights[w_index];
-    normalized.push({option: weight.option, chance: weight.chance});
-    if (weight.chance === null) {
-      nullChanceCount++;
+  var nullWeightCount = 0;
+  for (var w_index in weightedChoices) {
+    var weightedChoice = weightedChoices[w_index];
+    normalized.push(weightedChoice.clone());
+    if (weightedChoice.weight === null) {
+      nullWeightCount++;
     } else {
-      sum += weight.chance;
+      sum += weightedChoice.weight;
     }
   }
   if (sum < 100) {
-    var nullChance = (100 - sum) / nullChanceCount;
+    var nullWeight = (100 - sum) / nullWeightCount;
     for (var normWeight in normalized) {
-      if (normWeight.chance === null) {
-        normWeight.chance = nullChance;
+      if (normWeight.weight === null) {
+        normWeight.weight = nullWeight;
       }
     }
   }
@@ -35,7 +35,7 @@ function randomInt(min, max) {
   return Math.floor(Math.random() * (max - min)) + min;
 }
 
-function weightedChoice(weights) {
+function weightedChoose(weights) {
   var sum = 0;
   for (var i in weights) {
     sum += i.chance;
@@ -50,18 +50,18 @@ function weightedChoice(weights) {
   }
   // If we're still here, something went wrong.
   // Log a warning but try to return a random value anyways.
-  console.log('Unable to pick randomChoice for weights: ' + weights);
-  return weights[randomInt(0, weights.length)].option;
+  console.log('Unable to pick weighted choice for weights: ' + weights);
+  return weights[randomInt(0, weights.length)].choice;
 }
 
 function createWeightedOptionReplacer(choices) {
   var normalizedWeights = normalizeWeights(choices);
   function replacerFunction(match, fullText, matchIndex, option) {
-    return weightedChoice(normalizedWeights);
+    return weightedChoose(normalizedWeights);
   };
   return new Replacer(replacerFunction);
 }
 
 exports.normalizeWeights = normalizeWeights;
-exports.weightedChoice = weightedChoice;
+exports.weightedChoose = weightedChoose;
 exports.createWeightedOptionReplacer = createWeightedOptionReplacer;

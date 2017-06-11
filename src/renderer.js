@@ -90,7 +90,6 @@ function renderText(string, startIndex, evalBlock, modes, activeMode) {
       }
     } else {
       if (string[index] === '\\') {
-        console.log('escaping char: ' + string[index+ 1])
         isEscaped = true;
       } else if (string.slice(index, index + 2) === '[[') {
         index++;

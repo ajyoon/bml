@@ -5,6 +5,7 @@ var _rule = require('./rule.js');
 var createRule = require('./rule.js').createRule;
 var EvalBlock = require('./evalBlock.js').EvalBlock;
 var Mode = require('./mode.js').Mode;
+var WeightedChoice = require('./weightedChoice.js').WeightedChoice;
 
 var UnknownTransformError = _errors.UnknownTransformError;
 var UnknownModeError = _errors.UnknownModeError;
@@ -110,7 +111,7 @@ function parseRule(string, ruleStartIndex) {
   var isEscaped = false;
   var currentString = null;
   var matchers = [];
-  var options = [];
+  var weightedChoices = [];
   var state = 'matchers';
   var canAcceptElement = false;
   var index = ruleStartIndex;
@@ -140,7 +141,7 @@ function parseRule(string, ruleStartIndex) {
           if (state === 'matchers') {
             matchers.push(currentString);
           } else {
-            options.push({option: currentString, chance: null});
+            weightedChoices.push(new WeightedChoice(currentString, null));
           }
           currentString = null;
         } else {
@@ -150,9 +151,9 @@ function parseRule(string, ruleStartIndex) {
 
     } else {
       if (string[index] === '\'') {
-        if (!canAcceptElement && state === 'options') {
+        if (!canAcceptElement && state === 'weightedChoices') {
           return {
-            rule: createRule(matchers, options),
+            rule: createRule(matchers, weightedChoices),
             ruleEndIndex: index
           };
         } else {
@@ -169,7 +170,7 @@ function parseRule(string, ruleStartIndex) {
           } else if (string[index] === ',') {
             canAcceptElement = true;
           } else if (/as\s/.test(string.slice(index, index + 3))) {
-            state = 'options';
+            state = 'weightedChoices';
             index += 3;
             canAcceptElement = true;
             continue;
@@ -177,21 +178,18 @@ function parseRule(string, ruleStartIndex) {
             throw new BMLSyntaxError('error parsing rule at index ' + index);
           }
           break;
-        case 'options':
+        case 'weightedChoices':
           numberRe.lastIndex = index;
           callRe.lastIndex = index;
           if (isWhitespace(string[index])) {
             break;
           } else if ((numberMatch = numberRe.exec(string))) {
-            options[options.length - 1].chance = Number(numberMatch[0]);
+            weightedChoices[weightedChoices.length - 1].weight = Number(numberMatch[0]);
             index += numberMatch[0].length;
             continue;
           } else if ((callMatch = callRe.exec(string))) {
             // TODO: is this wrong? Call matches should accept weights.
-            options.push({
-              option: new EvalBlock(callMatch[1]),
-              chance: null
-            });
+            weightedChoices.push(new WeightedChoice(new EvalBlock(callMatch[1]), null));
             index += callMatch[0].length;
             canAcceptElement = false;
             continue;
@@ -199,7 +197,7 @@ function parseRule(string, ruleStartIndex) {
             canAcceptElement = true;
           } else if (string[index] === '}') {
             return {
-              rule: createRule(matchers, options),
+              rule: createRule(matchers, weightedChoices),
               ruleEndIndex: index
             };
           } else {
@@ -387,32 +385,32 @@ function parseChoose(string, openBraceIndex) {
   var numberRe = /(\d+(\.\d+)?)|(\.\d+)/y;
   var callRe = /call (\w+[\w\d\.]*)/y;
   var state = 'code';
-  var acceptOption = true;;
-  var options = [];
-  var currentOption = null;
+  var acceptChoice = true;;
+  var weightedChoices = [];
+  var currentChoice = null;
   var currentWeight = null;
   while (index < string.length) {
     if (isWhitespace(string[index])) {
       // Ignore
     } else if (string.slice(index, index + 2) === '}}') {
-      if (currentOption !== null) {
-        options.push({option: currentOption, weight: currentWeight});
+      if (currentChoice !== null) {
+        weightedChoices.push(new WeightedChoice(currentChoice, currentWeight));
       }
       return {
         blockEndIndex: index + 1,
-        replacer: createWeightedOptionReplacer(options)
+        replacer: createWeightedOptionReplacer(weightedChoices)
       };
-    } else if (acceptOption) {
+    } else if (acceptChoice) {
       callRe.lastIndex = index;
       var callMatch = callRe.exec(string);
       if (string[index] === '\'') {
-        acceptOption = false;
+        acceptChoice = false;
         var literalExtractionResult = parseStringLiteral(string, index);
-        currentOption = literalExtractionResult.extractedString;
+        currentChoice = literalExtractionResult.extractedString;
         index = literalExtractionResult.closeQuoteIndex;
       } else if (callMatch !== null) {
-        acceptOption = false;
-        currentOption = new EvalBlock(callMatch[1]);
+        acceptChoice = false;
+        currentChoice = new EvalBlock(callMatch[1]);
         index += callMatch[0].length - 1;
       } else {
         throw new BMLSyntaxError('Unexpected character at: ' + index);
@@ -421,12 +419,12 @@ function parseChoose(string, openBraceIndex) {
       numberRe.lastIndex = index;
       var numberMatch = numberRe.exec(string);
       if (string[index] === ',') {
-        acceptOption = true;
-        options.push({option: currentOption, weight: currentWeight});
-        currentOption = null;
+        acceptChoice = true;
+        weightedChoices.push(new WeightedChoice(currentChoice, currentWeight));
+        currentChoice = null;
         currentWeight = null;
       } else if (numberMatch !== null) {
-        if (currentOption !== null) {
+        if (currentChoice !== null) {
           currentWeight = Number(numberMatch[0]);
         } else {
           throw new BMLSyntaxError(

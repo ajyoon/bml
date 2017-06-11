@@ -1,4 +1,4 @@
-function defaultReplacer(match, fullText, matchIndex, option) {
+function defaultReplacer(match, fullText, matchIndex, ...options) {
   return match;
 }
 
@@ -10,6 +10,10 @@ class Replacer {
 
   call(match, fullText, matchIndex, ...options) {
     return this.replacerFunction(match, fullText, matchIndex, ...options);
+  }
+
+  toString() {
+    return `Replacer{replacerFunction: ${this.replacerFunction}}`;
   }
 }
 
