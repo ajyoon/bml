@@ -16,6 +16,7 @@ var parsePrelude = parsers.parsePrelude;
 var parseUse = parsers.parseUse;
 var parseStringLiteral = parsers.parseStringLiteral;
 var parseChoose = parsers.parseChoose;
+var createMatcher = parsers.createMatcher;
 
 
 describe('findCodeBlockEnd', function() {
@@ -93,9 +94,9 @@ describe('parseMode', function() {
     assert.equal(result.mode.name, 'test');
     assert.equal(result.mode.rules.length, 2);
     assert.equal(result.mode.rules[0].matchers.length, 1);
-    assert.equal(result.mode.rules[0].matchers[0], 'bml');
+    assert.deepEqual(result.mode.rules[0].matchers[0], createMatcher('bml'));
     assert.equal(result.mode.rules[1].matchers.length, 1);
-    assert.equal(result.mode.rules[1].matchers[0], 'javascript');
+    assert.deepEqual(result.mode.rules[1].matchers[0], createMatcher('javascript'));
   });
 });
 
@@ -184,56 +185,58 @@ describe('parseRule', function() {
     var testString = "'x' as 'y'\n}";
     var result = parseRule(testString, 0);
     assert.equal(result.ruleEndIndex, testString.length - 1);
-    assert.deepEqual(result.rule.matchers, ['x']);
+    assert.deepEqual(result.rule.matchers, [createMatcher('x')]);
   });
 
   it('can parse a one-to-one rule with a weight', function() {
     var testString = "'x' as 'y' 40\n}";
     var result = parseRule(testString, 0);
     assert.equal(result.ruleEndIndex, testString.length - 1);
-    assert.deepEqual(result.rule.matchers, ['x']);
+    assert.deepEqual(result.rule.matchers, [createMatcher('x')]);
   });
 
   it('can parse multiple options', function() {
     var testString = "'x' as 'y' 40, 'z' 10\n}";
     var result = parseRule(testString, 0);
     assert.equal(result.ruleEndIndex, testString.length - 1);
-    assert.deepEqual(result.rule.matchers, ['x']);
+    assert.deepEqual(result.rule.matchers, [createMatcher('x')]);
   });
 
   it('can parse multiple matchers', function() {
     var testString = "'x', 'z' as 'y' 40\n}";
     var result = parseRule(testString, 0);
     assert.equal(result.ruleEndIndex, testString.length - 1);
-    assert.deepEqual(result.rule.matchers, ['x', 'z']);
+    assert.deepEqual(result.rule.matchers, [createMatcher('x'),
+                                            createMatcher('z')]);
   });
 
   it('can parse multiple matchers and options', function() {
     var testString = "'x', 'z' as 'y' 40, 'a' 10\n}";
     var result = parseRule(testString, 0);
     assert.equal(result.ruleEndIndex, testString.length - 1);
-    assert.deepEqual(result.rule.matchers, ['x', 'z']);
+    assert.deepEqual(result.rule.matchers, [createMatcher('x'),
+                                            createMatcher('z')]);
   });
 
   it('can parse call statements', function() {
     var testString = "'x' as call testFunc\n}";
     var result = parseRule(testString, 0);
     assert.equal(result.ruleEndIndex, testString.length - 1);
-    assert.deepEqual(result.rule.matchers, ['x']);
+    assert.deepEqual(result.rule.matchers, [createMatcher('x')]);
   });
 
   it('can parse call statements after commas', function() {
     var testString = "'x' as 'y', call testFunc\n}";
     var result = parseRule(testString, 0);
     assert.equal(result.ruleEndIndex, testString.length - 1);
-    assert.deepEqual(result.rule.matchers, ['x']);
+    assert.deepEqual(result.rule.matchers, [createMatcher('x')]);
   });
 
   it('can parse call statements with chances', function() {
     var testString = "'x' as call testFunc 20\n}";
     var result = parseRule(testString, 0);
     assert.equal(result.ruleEndIndex, testString.length - 1);
-    assert.deepEqual(result.rule.matchers, ['x']);
+    assert.deepEqual(result.rule.matchers, [createMatcher('x')]);
   });
 });
 

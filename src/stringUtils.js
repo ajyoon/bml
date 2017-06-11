@@ -29,6 +29,12 @@ function isWhitespace(string) {
   return string.trim() === '';
 }
 
+/* Escape all regex-special characters in a string */
+function escapeRegExp(string){
+  return string.replace(/([.*+?^${}()|\[\]\/\\])/g, "\\$1");
+}
+
 exports.lineAndColumnOf = lineAndColumnOf;
 exports.lineColumnString = lineColumnString;
 exports.isWhitespace = isWhitespace;
+exports.escapeRegExp = escapeRegExp;

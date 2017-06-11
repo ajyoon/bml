@@ -14,6 +14,7 @@ var BMLSyntaxError = _errors.BMLSyntaxError;
 var lineAndColumnOf = _stringUtils.lineAndColumnOf;
 var lineColumnString = _stringUtils.lineColumnString;
 var isWhitespace = _stringUtils.isWhitespace;
+var escapeRegExp = _stringUtils.escapeRegExp;
 var createWeightedOptionReplacer = _rand.createWeightedOptionReplacer;
 
 
@@ -101,6 +102,15 @@ function findCodeBlockEnd(string, curlyBraceStartIndex) {
 }
 
 
+function createMatcher(string, isRegex) {
+  if (isRegex) {
+    return new RegExp(string, 'y');
+  } else {
+    return new RegExp(escapeRegExp(string), 'y');
+  }
+}
+
+
 /**
  * @returns {rule, ruleEndIndex} The newly parsed rule and the index of the end of the rule.
  *     Depending on the context, this may either be the beginning of a new rule or the end
@@ -139,7 +149,7 @@ function parseRule(string, ruleStartIndex) {
         } else if (string[index] === '\'') {
           // end of string
           if (state === 'matchers') {
-            matchers.push(currentString);
+            matchers.push(createMatcher(currentString));
           } else {
             weightedChoices.push(new WeightedChoice(currentString, null));
           }
@@ -448,3 +458,4 @@ exports.parsePrelude = parsePrelude;
 exports.parseUse = parseUse;
 exports.parseStringLiteral = parseStringLiteral;
 exports.parseChoose = parseChoose;
+exports.createMatcher = createMatcher;

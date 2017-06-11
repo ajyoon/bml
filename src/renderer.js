@@ -101,11 +101,13 @@ function renderText(string, startIndex, evalBlock, modes, activeMode) {
           for (var r = 0; r < activeMode.rules.length; r++) {
             currentRule = activeMode.rules[r];
             for (var m = 0; m < currentRule.matchers.length; m++) {
-              if (string.indexOf(currentRule.matchers[m], index) == index) {
+              currentRule.matchers[m].lastIndex = index;
+              var currentMatch = currentRule.matchers[m].exec(string);
+              if (currentMatch !== null) {
                 replacement = currentRule.replacer
                   .call(currentRule.matchers[m], string, index);
                 if (replacement instanceof EvalBlock) {
-                  out += eval(replacement.string)(currentRule.matchers[m], string, index);
+                  out += eval(replacement.string)(currentMatch, string, index);
                 } else {
                   out += replacement;
                 }
