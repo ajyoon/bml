@@ -67,7 +67,7 @@ and define reusable functions. maps link words in the text to other words
 with weights controlling their relative likelihood and may also call functions
 either defined inline or in the evaluate block.
 
-Strings can be escaped with [[double angle bracket delimiters.]] and backslashes \\.
+Strings can be escaped with [[double square bracket delimiters.]] and backslashes \\.
 
 The text body can also apply one-time transformations, the common marker
 for them being {{double curly braces}}.
