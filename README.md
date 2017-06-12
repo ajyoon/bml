@@ -57,7 +57,7 @@ To use in the web:
 ...
 <script>
 document.getElementById("someTargetId").innerHTML =
-    bml.renderBML("some bml loaded as a js string");
+    bml("some bml loaded as a js string");
 </script>
 ```
 

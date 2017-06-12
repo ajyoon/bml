@@ -19,3 +19,7 @@
   For example, `r'.*'` gives the RegExp `/.*/y`, while `'.*'` gives
   the RegExp `/\.\*/y`.
 * Transform/replacer functions now take a RegExp match array.
+
+### 0.0.4
+* Remove the explicit bml.renderBML function - to render a string of bml,
+  simply call the package as a function.

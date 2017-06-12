@@ -135,10 +135,10 @@ function renderText(string, startIndex, evalBlock, modes, activeMode) {
   return out;
 }
 
-function renderBML(string) {
+function render(string) {
   var {preludeEndIndex, evalBlock, modes, initialMode} = parsePrelude(string);
   return renderText(string, preludeEndIndex, evalBlock, modes, initialMode);
 }
 
 exports.renderText = renderText;
-exports.renderBML = renderBML;
+exports.render = render;
