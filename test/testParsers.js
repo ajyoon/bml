@@ -179,6 +179,21 @@ describe('parsePrelude', function() {
 });
 
 
+describe('createMatcher', function() {
+
+  it('Escapes strings for regex when asked to', function() {
+    var result = createMatcher('.', false);
+    assert.deepEqual(result, /\./y);
+  });
+
+  it("Doesn't escape strings when asked not to", function() {
+    var result = createMatcher('.', true);
+    assert.deepEqual(result, /./y);
+  });
+
+});
+
+
 describe('parseRule', function() {
 
   it('can parse a one-to-one rule', function() {
@@ -237,6 +252,13 @@ describe('parseRule', function() {
     var result = parseRule(testString, 0);
     assert.equal(result.ruleEndIndex, testString.length - 1);
     assert.deepEqual(result.rule.matchers, [createMatcher('x')]);
+  });
+
+  it('recognizes regex matchers', function() {
+    var testString = "r'.*' as call testFunc 20\n}";
+    var result = parseRule(testString, 0);
+    assert.equal(result.ruleEndIndex, testString.length - 1);
+    assert.deepEqual(result.rule.matchers, [createMatcher('.*', true)]);
   });
 });
 

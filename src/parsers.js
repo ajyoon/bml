@@ -120,6 +120,7 @@ function parseRule(string, ruleStartIndex) {
   var inComment = false;
   var isEscaped = false;
   var currentString = null;
+  var currentStringIsRegExp = false;
   var matchers = [];
   var weightedChoices = [];
   var state = 'matchers';
@@ -149,24 +150,29 @@ function parseRule(string, ruleStartIndex) {
         } else if (string[index] === '\'') {
           // end of string
           if (state === 'matchers') {
-            matchers.push(createMatcher(currentString));
+            matchers.push(createMatcher(currentString, currentStringIsRegExp));
           } else {
             weightedChoices.push(new WeightedChoice(currentString, null));
           }
           currentString = null;
+          currentStringIsRegExp = false;
         } else {
           currentString += string[index];
         }
       }
 
     } else {
-      if (string[index] === '\'') {
+      if (string[index] === '\'' || string.slice(index, index + 2) === 'r\'') {
         if (!canAcceptElement && state === 'weightedChoices') {
           return {
             rule: createRule(matchers, weightedChoices),
             ruleEndIndex: index
           };
         } else {
+          if (string.slice(index, index + 2) === 'r\'') {
+            index += 1;
+            currentStringIsRegExp = true;
+          }
           canAcceptElement = false;
           currentString = '';
         }

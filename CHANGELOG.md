@@ -12,3 +12,10 @@
 * rename `rand.weightedChoice() -> rand.weightedChoose()`
 * Implement toString() methods in all classes
 * Fix rand.normalizeWeights and rand.weightedChoose not correctly calculating values.
+* Regex matchers can be specified with the character `r` immediately before
+  the opening quote of a matcher string. Internally, strings not prepended with an `r`
+  are still stored as regexps, but they are fully escaped. Regex flags cannot
+  be set by users - they will always be the single sticky-y flag.
+  For example, `r'.*'` gives the RegExp `/.*/y`, while `'.*'` gives
+  the RegExp `/\.\*/y`.
+* Transform/replacer functions now take a RegExp match array.

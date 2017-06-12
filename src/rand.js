@@ -54,7 +54,7 @@ function weightedChoose(weights) {
 
 function createWeightedOptionReplacer(choices) {
   var normalizedWeights = normalizeWeights(choices);
-  function replacerFunction(match, fullText, matchIndex, option) {
+  function replacerFunction(match, fullText, matchIndex, ...options) {
     return weightedChoose(normalizedWeights);
   };
   return new Replacer(replacerFunction);
