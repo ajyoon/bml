@@ -11,3 +11,4 @@
   The new class has a `choice` property in place of an `option` one.
 * rename `rand.weightedChoice() -> rand.weightedChoose()`
 * Implement toString() methods in all classes
+* Fix rand.normalizeWeights and rand.weightedChoose not correctly calculating values.

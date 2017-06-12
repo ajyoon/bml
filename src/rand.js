@@ -5,8 +5,8 @@ function normalizeWeights(weightedChoices) {
   var normalized = [];
   var sum = 0;
   var nullWeightCount = 0;
-  for (var w_index in weightedChoices) {
-    var weightedChoice = weightedChoices[w_index];
+  for (var w = 0; w < weightedChoices.length; w++) {
+    var weightedChoice = weightedChoices[w];
     normalized.push(weightedChoice.clone());
     if (weightedChoice.weight === null) {
       nullWeightCount++;
@@ -14,12 +14,10 @@ function normalizeWeights(weightedChoices) {
       sum += weightedChoice.weight;
     }
   }
-  if (sum < 100) {
-    var nullWeight = (100 - sum) / nullWeightCount;
-    for (var normWeight in normalized) {
-      if (normWeight.weight === null) {
-        normWeight.weight = nullWeight;
-      }
+  var nullWeight = (100 - sum) / nullWeightCount;
+  for (var n = 0; n < normalized.length; n++) {
+    if (normalized[n].weight === null) {
+      normalized[n].weight = nullWeight;
     }
   }
   return normalized;
@@ -37,15 +35,15 @@ function randomInt(min, max) {
 
 function weightedChoose(weights) {
   var sum = 0;
-  for (var i in weights) {
-    sum += i.chance;
+  for (var i = 0; i < weights.length; i++) {
+    sum += weights[i].weight;
   }
   var progress = 0;
   var pickedValue = randomFloat(0, sum);
-  for (var w in weights) {
-    progress += weights[w].chance;
-    if (progress >= sum) {
-      return weights[w].option;
+  for (var w = 0; w < weights.length; w++) {
+    progress += weights[w].weight;
+    if (progress >= pickedValue) {
+      return weights[w].choice;
     }
   }
   // If we're still here, something went wrong.
