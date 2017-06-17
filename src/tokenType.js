@@ -1,4 +1,5 @@
 const TokenType = Object.freeze({
+  NEWLINE: Symbol('NEW_LINE'),
   BACKSLASH: Symbol('BACKSLASH'),
   COMMENT: Symbol('COMMENT'),
   SINGLE_QUOTE: Symbol('SINGLE_QUOTE'),
@@ -14,6 +15,7 @@ const TokenType = Object.freeze({
   KW_MODE: Symbol('KW_MODE'),
   KW_BEGIN: Symbol('KW_BEGIN'),
   KW_USE: Symbol('KW_USE'),
+  NUMBER: Symbol('NUMBER'),
   TEXT: Symbol('TEXT')
 });
 exports.TokenType = TokenType;

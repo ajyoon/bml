@@ -5,8 +5,9 @@ class Lexer {
   constructor(string) {
     this.string = string;
     this.index = 0;
+    this._newLineRe = /\r?\n/y;
     this._whitespaceRe = /\s+/y;
-    this._currentTextToken = '';
+    this._numberRe = /(\d+(\.\d+)?)|(\.\d+)/y;
   }
 
   next() {
@@ -16,11 +17,21 @@ class Lexer {
     var tokenType;
     var tokenIndex = this.index;
     var tokenString;
+    this._newLineRe.lastIndex = this.index;
     this._whitespaceRe.lastIndex = this.index;
+    this._numberRe.lastIndex = this.index;
+    var newLineMatch = this._newLineRe.exec(this.string);
     var whitespaceMatch = this._whitespaceRe.exec(this.string);
-    if (whitespaceMatch !== null) {
+    var numberMatch = this._numberRe.exec(this.string);
+    if (newLineMatch !== null) {
+      tokenType = TokenType.NEW_LINE;
+      tokenString = newLineMatch[0];
+    } else if (whitespaceMatch !== null) {
       this.index = this._whitespaceRe.lastIndex;
       return this.next();
+    } else if (numberMatch !== null) {
+      tokenType = TokenType.NUMBER;
+      tokenString = numberMatch[0];
     } else if (this.string[this.index] === '\\') {
       tokenType = TokenType.BACKSLASH;
       tokenString = '\\';

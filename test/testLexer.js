@@ -13,7 +13,19 @@ describe('Lexer', function() {
   });
 
   it("doesn't explode with a string of all-whitespace", function() {
-    var lexer = new Lexer(' \n\t\r ');
+    var lexer = new Lexer('     ');
+    assert.equal(lexer.next(), null);
+  });
+
+  it('tokenizes new lines', function() {
+    var lexer = new Lexer('\n');
+    assert.deepEqual(lexer.next(), new Token(TokenType.NEW_LINE, 0, '\n'));
+    assert.equal(lexer.next(), null);
+  });
+
+  it('tokenizes CLRF new lines', function() {
+    var lexer = new Lexer('\r\n');
+    assert.deepEqual(lexer.next(), new Token(TokenType.NEW_LINE, 0, '\r\n'));
     assert.equal(lexer.next(), null);
   });
 
@@ -114,10 +126,28 @@ describe('Lexer', function() {
   });
 
   it('tokenizes misc characters as individual text tokens', function() {
-    var lexer = new Lexer('a1%');
+    var lexer = new Lexer('ab%');
     assert.deepEqual(lexer.next(), new Token(TokenType.TEXT, 0, 'a'));
-    assert.deepEqual(lexer.next(), new Token(TokenType.TEXT, 1, '1'));
+    assert.deepEqual(lexer.next(), new Token(TokenType.TEXT, 1, 'b'));
     assert.deepEqual(lexer.next(), new Token(TokenType.TEXT, 2, '%'));
+    assert.equal(lexer.next(), null);
+  });
+
+  it('tokenizes numbers', function() {
+    var lexer = new Lexer('12345');
+    assert.deepEqual(lexer.next(), new Token(TokenType.NUMBER, 0, '12345'));
+    assert.equal(lexer.next(), null);
+  });
+
+  it('tokenizes numbers with decimal places', function() {
+    var lexer = new Lexer('12345.67');
+    assert.deepEqual(lexer.next(), new Token(TokenType.NUMBER, 0, '12345.67'));
+    assert.equal(lexer.next(), null);
+  });
+
+  it.skip('tokenizes numbers with a leading decimal', function() {
+    var lexer = new Lexer('.67');
+    assert.deepEqual(lexer.next(), new Token(TokenType.NUMBER, 0, '.67'));
     assert.equal(lexer.next(), null);
   });
 

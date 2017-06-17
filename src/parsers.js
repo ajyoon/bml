@@ -6,6 +6,8 @@ var createRule = require('./rule.js').createRule;
 var EvalBlock = require('./evalBlock.js').EvalBlock;
 var Mode = require('./mode.js').Mode;
 var WeightedChoice = require('./weightedChoice.js').WeightedChoice;
+var Lexer = require('./lexer.js').Lexer;
+var TokenType = require('./tokenType.js').TokenType;
 
 var UnknownTransformError = _errors.UnknownTransformError;
 var UnknownModeError = _errors.UnknownModeError;
@@ -16,7 +18,6 @@ var lineColumnString = _stringUtils.lineColumnString;
 var isWhitespace = _stringUtils.isWhitespace;
 var escapeRegExp = _stringUtils.escapeRegExp;
 var createWeightedOptionReplacer = _rand.createWeightedOptionReplacer;
-
 
 
 /**
@@ -109,6 +110,8 @@ function createMatcher(string, isRegex) {
     return new RegExp(escapeRegExp(string), 'y');
   }
 }
+
+
 
 
 /**
