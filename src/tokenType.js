@@ -2,7 +2,7 @@ const TokenType = Object.freeze({
   BACKSLASH: Symbol('BACKSLASH'),
   COMMENT: Symbol('COMMENT'),
   SINGLE_QUOTE: Symbol('SINGLE_QUOTE'),
-  RE_SINGLE_QUOTE: Symbol('RE_SINGLE_QUOTE'),
+  LETTER_R: Symbol('LETTER_R'),
   OPEN_PAREN: Symbol('OPEN_PAREN'),
   CLOSE_PAREN: Symbol('CLOSE_PAREN'),
   OPEN_BRACE: Symbol('OPEN_BRACE'),
@@ -14,7 +14,6 @@ const TokenType = Object.freeze({
   KW_MODE: Symbol('KW_MODE'),
   KW_BEGIN: Symbol('KW_BEGIN'),
   KW_USE: Symbol('KW_USE'),
-  KW_USING: Symbol('KW_USING'),
   TEXT: Symbol('TEXT')
 });
 exports.TokenType = TokenType;

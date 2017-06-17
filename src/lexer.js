@@ -9,7 +9,10 @@ class Lexer {
     this._currentTextToken = '';
   }
 
-  nextToken() {
+  next() {
+    if (this.index >= this.string.length) {
+      return null;
+    }
     var tokenType;
     var tokenIndex = this.index;
     var tokenString;
@@ -17,22 +20,25 @@ class Lexer {
     var whitespaceMatch = this._whitespaceRe.exec(this.string);
     if (whitespaceMatch !== null) {
       this.index = this._whitespaceRe.lastIndex;
-      return this.nextToken();
+      return this.next();
+    } else if (this.string[this.index] === '\\') {
+      tokenType = TokenType.BACKSLASH;
+      tokenString = '\\';
     } else if (this.string.slice(this.index, this.index + 2) === '//') {
       tokenType = TokenType.COMMENT;
       tokenString = '//';
     } else if (this.string[this.index] === '\'') {
       tokenType = TokenType.SINGLE_QUOTE;
       tokenString = '\'';
-    } else if (this.string.slice(this.index, this.index + 2) === 'r\'') {
-      tokenType = TokenType.RE_SINGLE_QUOTE;
-      tokenString = '';
+    } else if (this.string[this.index] === 'r') {
+      tokenType = TokenType.LETTER_R;
+      tokenString = 'r';
     } else if (this.string[this.index] === '(') {
       tokenType = TokenType.OPEN_PAREN;
       tokenString = '(';
     } else if (this.string[this.index] === ')') {
       tokenType = TokenType.CLOSE_PAREN;
-      tokenString = '(';
+      tokenString = ')';
     } else if (this.string[this.index] === '{') {
       tokenType = TokenType.OPEN_BRACE;
       tokenString = '{';
@@ -41,7 +47,7 @@ class Lexer {
       tokenString = '}';
     } else if (this.string[this.index] === ',') {
       tokenType = TokenType.COMMA;
-      tokenString = '}';
+      tokenString = ',';
     } else if (this.string.slice(this.index, this.index + 2) === 'as') {
       tokenType = TokenType.KW_AS;
       tokenString = 'as';
@@ -61,7 +67,8 @@ class Lexer {
       tokenType = TokenType.KW_USE;
       tokenString = 'use';
     } else if (this.string.slice(this.index, this.index + 5) === 'using') {
-      tokenType = TokenType.KW_USING;
+      // synonym for 'use'
+      tokenType = TokenType.KW_USE;
       tokenString = 'using';
     } else {
       tokenType = TokenType.TEXT;
