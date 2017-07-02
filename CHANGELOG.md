@@ -31,3 +31,7 @@
 * Fix bug in renderer causing halt after first match found
 * Add settings.markdownSettings. Allows users to specify settings
   to pass to marked.js at render time.
+
+### 0.0.5
+* Fix silly bug causing no-op options to never occur
+

@@ -22,7 +22,7 @@ mode literal {
 }
 begin using initial
 
-```
+{{call copyPrelude}```
 
 
 # bml

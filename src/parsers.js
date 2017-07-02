@@ -399,7 +399,7 @@ function extractNumberLiteral(string, numberIndex) {
  *
  * @returns {blockEndIndex, replacer}
  */
-function parseChoose(string, openBraceIndex, includeNoOp=true) {
+function parseChoose(string, openBraceIndex, includeNoOp) {
   var index = openBraceIndex + 2;
   var numberRe = /(\d+(\.\d+)?)|(\.\d+)/y;
   var callRe = /call (\w+[\w\d\.]*)/y;

@@ -15,7 +15,7 @@ class Rule {
 
 function createRule(matchers, choices) {
   var rule = new Rule(matchers);
-  rule.replacer = rand.createWeightedOptionReplacer(choices);
+  rule.replacer = rand.createWeightedOptionReplacer(choices, true);
   return rule;
 }
 
