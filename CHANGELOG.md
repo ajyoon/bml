@@ -23,3 +23,11 @@
 ### 0.0.4
 * Remove the explicit bml.renderBML function - to render a string of bml,
   simply call the package as a function.
+* Implement automatic no-op options in choice rules.
+  Rules now have a default chance to not do anything.
+  A no-op option is automatically inserted for all choice rules
+  with a weight of `null`, to share an equal probability as all
+  other options without explicit weights.
+* Fix bug in renderer causing halt after first match found
+* Add settings.markdownSettings. Allows users to specify settings
+  to pass to marked.js at render time.
