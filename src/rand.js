@@ -1,4 +1,6 @@
 var Replacer = require('./replacer.js').Replacer;
+var WeightedChoice = require('./weightedChoice.js').WeightedChoice;
+var noOp = require('./noOp.js');
 
 
 function normalizeWeights(weightedChoices) {
@@ -52,8 +54,25 @@ function weightedChoose(weights) {
   return weights[randomInt(0, weights.length)].choice;
 }
 
-function createWeightedOptionReplacer(choices) {
-  var normalizedWeights = normalizeWeights(choices);
+/**
+ * Create a Replacer which selects from an array of `WeightedChoice`s
+ *
+ * The sum of the probabilities in `choices` should be less than 100.
+ * All `WeightedChoice`s with a weight of `null` share an equal probability
+ * within whatever probability remains in the input choices.
+ *
+ * If includeNoOp is `true`, a noOp option will be inserted with weight `null`,
+ * to be normalized as described above.
+ */
+function createWeightedOptionReplacer(choices, includeNoOp) {
+  var normalizedWeights;
+  if (includeNoOp === true) {
+    var choicesWithNoOp = choices.slice();
+    choicesWithNoOp.push(new WeightedChoice(noOp, null));
+    normalizedWeights = normalizeWeights(choicesWithNoOp);
+  } else {
+    normalizedWeights = normalizeWeights(choices);
+  }
   function replacerFunction(match, fullText, matchIndex, ...options) {
     return weightedChoose(normalizedWeights);
   };

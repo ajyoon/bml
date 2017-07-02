@@ -10,6 +10,7 @@ var parsePrelude = _parsers.parsePrelude;
 var parseUse = _parsers.parseUse;
 var parseChoose = _parsers.parseChoose;
 var EvalBlock = require('./evalBlock.js').EvalBlock;
+var noOp = require('./noOp.js');
 var UnknownModeError = _errors.UnknownModeError;
 
 /**
@@ -70,15 +71,16 @@ function renderText(string, startIndex, evalBlock, modes, activeMode) {
       chooseRe.lastIndex = index + 2;
       useRe.lastIndex = index + 2;
       if (chooseRe.test(string)) {
-        var parseChooseResult = parseChoose(string, index);
-        index = parseChooseResult.blockEndIndex;
+          var parseChooseResult = parseChoose(string, index, false);
         replacement = parseChooseResult.replacer.call(
-          '', string, index);
+          [''], string, index);
         if (replacement instanceof EvalBlock) {
-          out += eval(replacement.string)('', string, index);
+            console.log(replacement);
+          out += eval(replacement.string)([''], string, index);
         } else {
           out += replacement;
         }
+        index = parseChooseResult.blockEndIndex;
       } else if (useRe.test(string)) {
         var parseUseResult = parseUse(string, index);
         index = parseUseResult.blockEndIndex;
@@ -108,6 +110,8 @@ function renderText(string, startIndex, evalBlock, modes, activeMode) {
                   .call(currentRule.matchers[m], string, index);
                 if (replacement instanceof EvalBlock) {
                   out += eval(replacement.string)(currentMatch, string, index);
+                } else if (replacement === noOp) {
+                  out += currentMatch[0];
                 } else {
                   out += replacement;
                 }
