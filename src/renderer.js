@@ -111,7 +111,7 @@ function renderText(string, startIndex, evalBlock, modes, activeMode) {
                 } else {
                   out += replacement;
                 }
-                index += currentRule.matchers[m].length;
+                index += currentMatch[0].length;
                 foundMatch = true;
                 break ruleLoop;
               }
