@@ -3,7 +3,7 @@
  */
 var defaultSettings = {
   renderMarkdown: false,
-  contextSize: 20
+  markdownSettings: {}
 };
 
 /**

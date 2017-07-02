@@ -134,7 +134,7 @@ function renderText(string, startIndex, evalBlock, modes, activeMode) {
   }
 
   if (settings.renderMarkdown) {
-    out = marked(out);
+    out = marked(out, settings.markdownSettings);
   }
   return out;
 }
