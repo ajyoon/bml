@@ -6,6 +6,8 @@ var errors = require('../src/errors.js');
 var Mode = require('../src/mode.js').Mode;
 var Replacer = require('../src/replacer.js').Replacer;
 var Lexer = require('../src/lexer.js').Lexer;
+var Token = require('../src/token.js').Token;
+var TokenType = require('../src/tokenType.js').TokenType;
 
 var JavascriptSyntaxError = errors.JavascriptSyntaxError;
 var UnknownTransformError = errors.UnknownTransformError;
@@ -19,6 +21,7 @@ var parseStringLiteral = parsers.parseStringLiteral;
 var parseStringLiteralWithLexer = parsers.parseStringLiteralWithLexer;
 var parseChoose = parsers.parseChoose;
 var createMatcher = parsers.createMatcher;
+var parseMatchers = parsers.parseMatchers;
 
 
 describe('findCodeBlockEnd', function() {
@@ -316,19 +319,18 @@ describe('parseStringLiteralWithLexer', function() {
   it('can parse strings wrapped in single quotes', function() {
     var testString = "'testing testing'";
     var lexer = new Lexer(testString);
-    lexer.next();
     var result = parseStringLiteralWithLexer(lexer);
     assert.equal(result, 'testing testing');
     assert.equal(lexer.index, testString.length);
   });
 
-  //it('can parse strings with escaped quotes', function() {
-  //  var testString = "'testing \\'testing'";
-  //  var result = parseStringLiteral(testString, 0);
-  //  assert.equal(result.closeQuoteIndex, testString.length - 1);
-  //  assert.equal(result.extractedString, 'testing \\\'testing');
-  //});
-//
+  it('can parse strings with escaped quotes', function() {
+    var testString = "'testing \\'testing'";
+    var lexer = new Lexer(testString);
+    var result = parseStringLiteralWithLexer(lexer);
+    assert.equal(result, 'testing \'testing');
+    assert.equal(lexer.index, testString.length);
+  });
 });
 
 
@@ -367,6 +369,51 @@ describe('parseChoose', function() {
     var result = parseChoose(testString, 0);
     assert.equal(result.blockEndIndex, testString.length - 1);
     assert(result.replacer instanceof Replacer);
+  });
+
+});
+
+
+describe('parseMatchers', function() {
+
+  it('parsers a single matcher', function() {
+    var testString = "'test' as";
+    var lexer = new Lexer(testString);
+    var result = parseMatchers(lexer);
+    assert.deepEqual(result, [/test/y]);
+    assert.deepEqual(lexer.peek(), new Token(TokenType.KW_AS,
+                                             testString.indexOf('as'),
+                                             'as'));
+  });
+
+  it('parses a single simple regex matcher', function() {
+    var testString = "r'test' as";
+    var lexer = new Lexer(testString);
+    var result = parseMatchers(lexer);
+    assert.deepEqual(result, [/test/y]);
+    assert.deepEqual(lexer.peek(), new Token(TokenType.KW_AS,
+                                             testString.indexOf('as'),
+                                             'as'));
+  });
+
+  it('parses a regex matcher with escaped chars', function() {
+    var testString = "r'\\stest' as";
+    var lexer = new Lexer(testString);
+    var result = parseMatchers(lexer);
+    assert.deepEqual(result, [/\stest/y]);
+    assert.deepEqual(lexer.peek(), new Token(TokenType.KW_AS,
+                                             testString.indexOf('as'),
+                                             'as'));
+  });
+
+  it('parses multiple matchers', function() {
+    var testString = "'test', 'test2' as";
+    var lexer = new Lexer(testString);
+    var result = parseMatchers(lexer);
+    assert.deepEqual(result, [/test/y, /test2/y]);
+    assert.deepEqual(lexer.peek(), new Token(TokenType.KW_AS,
+                                             testString.indexOf('as'),
+                                             'as'));
   });
 
 });
