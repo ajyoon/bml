@@ -6,14 +6,17 @@ class Lexer {
     this.string = string;
     this.index = 0;
     this.lastToken = null;
+    this._cachedNext = null;
     this._newLineRe = /\r?\n/y;
     this._whitespaceRe = /\s+/y;
     this._numberRe = /(\d+(\.\d+)?)|(\.\d+)/y;
   }
 
-  next() {
+  /**
+   * Determine the next item in the token stream
+   */
+  _determineNext() {
     if (this.index >= this.string.length) {
-      this.lastToken = null;
       return null;
     }
     var tokenType;
@@ -111,9 +114,28 @@ class Lexer {
         tokenString = this.string[this.index];
       }
     }
-    this.index += tokenString.length;
     var token = new Token(tokenType, tokenIndex, tokenString);
+    return token;
+  }
+
+  next() {
+    var token;
+    if (this._cachedNext != null) {
+      token = this._cachedNext;
+      this._cachedNext = null;
+    } else {
+      token = this._determineNext();
+    }
     this.lastToken = token;
+    if (token !== null) {
+      this.index += token.string.length;
+    }
+    return token;
+  }
+
+  peek() {
+    var token = this._determineNext();
+    this._cachedNext = token;
     return token;
   }
 }
