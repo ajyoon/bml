@@ -12,11 +12,6 @@ describe('Lexer', function() {
     assert.equal(lexer.next(), null);
   });
 
-  it("doesn't explode with a string of all-whitespace", function() {
-    var lexer = new Lexer('     ');
-    assert.equal(lexer.next(), null);
-  });
-
   it('tokenizes new lines', function() {
     var lexer = new Lexer('\n');
     assert.deepEqual(lexer.next(), new Token(TokenType.NEW_LINE, 0, '\n'));
@@ -29,9 +24,13 @@ describe('Lexer', function() {
     assert.equal(lexer.next(), null);
   });
 
-  it('tokenizes backslashes', function() {
-    var lexer = new Lexer('\\');
-    assert.deepEqual(lexer.next(), new Token(TokenType.BACKSLASH, 0, '\\'));
+  it("tokenizes spaces and tabs as WHITESPACE", function() {
+    var lexer = new Lexer(' ');
+    assert.deepEqual(lexer.next(), new Token(TokenType.WHITESPACE, 0, ' '));
+    assert.equal(lexer.next(), null);
+
+    lexer = new Lexer('\t');
+    assert.deepEqual(lexer.next(), new Token(TokenType.WHITESPACE, 0, '\t'));
     assert.equal(lexer.next(), null);
   });
 
@@ -145,9 +144,48 @@ describe('Lexer', function() {
     assert.equal(lexer.next(), null);
   });
 
-  it.skip('tokenizes numbers with a leading decimal', function() {
+  it('tokenizes numbers with a leading decimal', function() {
     var lexer = new Lexer('.67');
     assert.deepEqual(lexer.next(), new Token(TokenType.NUMBER, 0, '.67'));
+    assert.equal(lexer.next(), null);
+  });
+
+  it('tokenizes known escape sequences', function() {
+    var lexer = new Lexer('\\n');
+    assert.deepEqual(lexer.next(), new Token(TokenType.TEXT, 0, '\n'));
+    assert.equal(lexer.next(), null);
+
+    lexer = new Lexer('\\t');
+    assert.deepEqual(lexer.next(), new Token(TokenType.TEXT, 0, '\t'));
+    assert.equal(lexer.next(), null);
+
+    lexer = new Lexer('\\r');
+    assert.deepEqual(lexer.next(), new Token(TokenType.TEXT, 0, '\r'));
+    assert.equal(lexer.next(), null);
+
+    lexer = new Lexer("\\'");
+    assert.deepEqual(lexer.next(), new Token(TokenType.TEXT, 0, '\''));
+    assert.equal(lexer.next(), null);
+
+    lexer = new Lexer('\\"');
+    assert.deepEqual(lexer.next(), new Token(TokenType.TEXT, 0, '\"'));
+    assert.equal(lexer.next(), null);
+  });
+
+  it('treats backslashes before unknown escape sequences as literal', function() {
+    var lexer = new Lexer('\\f');
+    assert.deepEqual(lexer.next(), new Token(TokenType.TEXT, 0, '\\'));
+    assert.deepEqual(lexer.next(), new Token(TokenType.TEXT, 1, 'f'));
+    assert.equal(lexer.next(), null);
+  });
+
+  it('remembers the last token it saw', function() {
+    var lexer = new Lexer('ab');
+    assert.equal(lexer.lastToken, null);
+    assert.deepEqual(lexer.next(), new Token(TokenType.TEXT, 0, 'a'));
+    assert.deepEqual(lexer.lastToken, new Token(TokenType.TEXT, 0, 'a'));
+    assert.deepEqual(lexer.next(), new Token(TokenType.TEXT, 1, 'b'));
+    assert.deepEqual(lexer.lastToken, new Token(TokenType.TEXT, 1, 'b'));
     assert.equal(lexer.next(), null);
   });
 

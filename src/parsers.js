@@ -111,6 +111,60 @@ function createMatcher(string, isRegex) {
   }
 }
 
+/**
+ * @returns {[RegExp]}
+ */
+function parseMatchers(lexer) {
+  var startIndex = lexer.index;
+  var token;
+  var afterLetterR = false;
+  var acceptMatcher = true;
+  var inComment = false;
+  var matchers = [];
+  while ((token = lexer.next()) !== null) {
+    if (afterLetterR && !(token.tokenType === TokenType.SINGLE_QUOTE ||
+                          token.tokenType === TokenType.DOUBLE_QUOTE)) {
+      throw new BMLSyntaxError('regex matcher signifier (\'r\') not '
+                               + 'immediately preceding string literal',
+                               lexer.string, startIndex);
+    }
+    if (inComment) {
+      if (token.tokenType === TokenType.NEW_LINE) {
+        inComment = false;
+      }
+      continue;
+    }
+    switch (token.tokenType) {
+    case TokenType.COMMENT:
+      inComment = true;
+      break;
+    case TokenType.KW_AS:
+      return matchers;
+    case TokenType.SINGLE_QUOTE:
+    case TokenType.DOUBLE_QUOTE:
+      if (acceptMatcher) {
+        matchers.push(createMatcher(parseStringLiteralWithLexer(lexer),
+                                    afterLetterR));
+        afterLetterR = false;
+        acceptMatcher = false;
+      } else {
+        throw new BMLSyntaxError('unexpected string literal.',
+                                 lexer.string, token.index);
+      }
+      break;
+    case TokenType.COMMA:
+      acceptMatcher = true;
+      break;
+    default:
+      throw new BMLSyntaxError(`Unexpected token ${token}`,
+                               lexer.string, token.index);
+    }
+  }
+  throw new BMLSyntaxError('Could not find end of matcher.',
+                           lexer.string, startIndex);
+}
+
+
 
 
 
@@ -354,6 +408,27 @@ function parseUse(string, openBraceIndex) {
   };
 }
 
+/**
+ * @param lexer {Lexer} a lexer whose lastToken is either TokenType.SINGLE_QUOTE
+ * or TokenType.DOUBLE_QUOTE.
+ *
+ * @return {String} the parsed string literal.
+ */
+function parseStringLiteralWithLexer(lexer) {
+  var startIndex = lexer.index;
+  var stringLiteral = '';
+  var token;
+  var openStringToken = lexer.lastToken;
+  while ((token = lexer.next()) !== null) {
+    if (token.tokenType === openStringToken.tokenType) {
+      return stringLiteral;
+    }
+    stringLiteral += token.string;
+  }
+  throw new BMLSyntaxError('Could not find end of string.',
+                           lexer.string, startIndex);
+}
+
 // TODO: use me in similar logic in other parsers
 // {closeQuoteIndex, extractedString}
 function parseStringLiteral(string, openQuoteIndex) {
@@ -466,5 +541,6 @@ exports.parseMode = parseMode;
 exports.parsePrelude = parsePrelude;
 exports.parseUse = parseUse;
 exports.parseStringLiteral = parseStringLiteral;
+exports.parseStringLiteralWithLexer = parseStringLiteralWithLexer;
 exports.parseChoose = parseChoose;
 exports.createMatcher = createMatcher;

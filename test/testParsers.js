@@ -5,6 +5,7 @@ var parsers = require('../src/parsers.js');
 var errors = require('../src/errors.js');
 var Mode = require('../src/mode.js').Mode;
 var Replacer = require('../src/replacer.js').Replacer;
+var Lexer = require('../src/lexer.js').Lexer;
 
 var JavascriptSyntaxError = errors.JavascriptSyntaxError;
 var UnknownTransformError = errors.UnknownTransformError;
@@ -15,6 +16,7 @@ var parseMode = parsers.parseMode;
 var parsePrelude = parsers.parsePrelude;
 var parseUse = parsers.parseUse;
 var parseStringLiteral = parsers.parseStringLiteral;
+var parseStringLiteralWithLexer = parsers.parseStringLiteralWithLexer;
 var parseChoose = parsers.parseChoose;
 var createMatcher = parsers.createMatcher;
 
@@ -306,6 +308,27 @@ describe('parseStringLiteral', function() {
     assert.equal(result.closeQuoteIndex, testString.length - 1);
     assert.equal(result.extractedString, 'testing \\\'testing');
   });
+});
+
+
+describe('parseStringLiteralWithLexer', function() {
+
+  it('can parse strings wrapped in single quotes', function() {
+    var testString = "'testing testing'";
+    var lexer = new Lexer(testString);
+    lexer.next();
+    var result = parseStringLiteralWithLexer(lexer);
+    assert.equal(result, 'testing testing');
+    assert.equal(lexer.index, testString.length);
+  });
+
+  //it('can parse strings with escaped quotes', function() {
+  //  var testString = "'testing \\'testing'";
+  //  var result = parseStringLiteral(testString, 0);
+  //  assert.equal(result.closeQuoteIndex, testString.length - 1);
+  //  assert.equal(result.extractedString, 'testing \\\'testing');
+  //});
+//
 });
 
 

@@ -1,6 +1,6 @@
 const TokenType = Object.freeze({
+  WHITESPACE: Symbol('WHITESPACE'),
   NEWLINE: Symbol('NEW_LINE'),
-  BACKSLASH: Symbol('BACKSLASH'),
   COMMENT: Symbol('COMMENT'),
   SINGLE_QUOTE: Symbol('SINGLE_QUOTE'),
   LETTER_R: Symbol('LETTER_R'),
