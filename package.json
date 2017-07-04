@@ -26,6 +26,7 @@
     "expose-loader": "^0.7.3"
   },
   "dependencies": {
+    "chai": "^4.0.2",
     "marked": "^0.3.6"
   },
   "license": "BSD-3-Clause"

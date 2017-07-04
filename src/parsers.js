@@ -179,12 +179,15 @@ function parseMatchers(lexer) {
 }
 
 function parseCall(lexer) {
-  var token;
-  token = lexer.next();
-  if (token.tokenType !== TokenType.KW_CALL) {
-    throw new BMLSyntaxError('`call` statements must begin with keyword `call`');
+  var callRe = /call\s+([_$a-zA-Z\xA0-\uFFFF][_$a-zA-Z0-9\xA0-\uFFFF]*)/y;
+  callRe.lastIndex = lexer.index;
+  var callMatch = callRe.exec(lexer.string);
+  if (callMatch === null) {
+    throw new BMLSyntaxError('invalid call statement',
+                             lexer.string, lexer.index);
   }
-
+  lexer.overrideIndex(lexer.index + callMatch[0].length);
+  return new EvalBlock(callMatch[1]);
 }
 
 function parseReplacer(lexer) {
@@ -489,8 +492,6 @@ function parseUse(string, openBraceIndex) {
 /**
  * @param lexer {Lexer} a lexer whose next token is either TokenType.SINGLE_QUOTE
  * or TokenType.DOUBLE_QUOTE.
- *
- * Upon return, the lexer's lastToken will be the closing quote.
  *
  * @return {String} the parsed string literal.
  */

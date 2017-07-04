@@ -1,8 +1,10 @@
 var assert = require('assert');
+var expect = require('chai').expect;
 var fs = require('fs');
 
 var parsers = require('../src/parsers.js');
 var errors = require('../src/errors.js');
+var EvalBlock = require('../src/evalBlock.js').EvalBlock;
 var Mode = require('../src/mode.js').Mode;
 var Replacer = require('../src/replacer.js').Replacer;
 var Lexer = require('../src/lexer.js').Lexer;
@@ -424,15 +426,35 @@ describe('parseMatchers', function() {
 
 describe('parseCall', function() {
 
-  it('errors without beginning on a KW_CALL', function() {
-    var testString = 'fails';
-    var lexer = new Lexer(testString);
-    try {
-      parseCall(lexer);
-      assert(false, 'error expected');
-    } catch (e) {
-      assert(e instanceof BMLSyntaxError);
+  it('errors on malformed call statements', function() {
+    var failingStrings = [
+      'fails',
+      'call 1234876',
+      'call',
+      'call,',
+      'call \''
+    ];
+    for (var i = 0; i < failingStrings.length; i++) {
+      var testString = failingStrings[i];
+      var lexer = new Lexer(testString);
+      try {
+        parseCall(lexer);
+        assert(false, `error expected for test string: '${testString}'`);
+      } catch (e) {
+        expect(e).to.be.an.instanceof(
+          BMLSyntaxError,
+          `failure for test string: '${testString}'`);
+      }
     }
+  });
+
+  it('moves the lexer to the character after the call block', function() {
+    var testString = 'call test,';
+    var lexer = new Lexer(testString);
+    var evalBlock = parseCall(lexer);
+    expect(evalBlock).to.be.an.instanceof(EvalBlock);
+    expect(evalBlock.string).to.equal('test');
+    expect(lexer.index).to.equal(testString.length - 1);
   });
 
 });

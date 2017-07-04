@@ -179,24 +179,12 @@ describe('Lexer', function() {
     assert.equal(lexer.next(), null);
   });
 
-  it('remembers the last token it saw', function() {
-    var lexer = new Lexer('ab');
-    assert.equal(lexer.lastToken, null);
-    assert.deepEqual(lexer.next(), new Token(TokenType.TEXT, 0, 'a'));
-    assert.deepEqual(lexer.lastToken, new Token(TokenType.TEXT, 0, 'a'));
-    assert.deepEqual(lexer.next(), new Token(TokenType.TEXT, 1, 'b'));
-    assert.deepEqual(lexer.lastToken, new Token(TokenType.TEXT, 1, 'b'));
-    assert.equal(lexer.next(), null);
-  });
-
-  it('can peek at the next token', function() {
+  it('can peek at the next token without consuming it', function() {
     var lexer = new Lexer('ab');
     assert.deepEqual(lexer.peek(), new Token(TokenType.TEXT, 0, 'a'));
     assert.deepEqual(lexer.next(), new Token(TokenType.TEXT, 0, 'a'));
-    assert.deepEqual(lexer.lastToken, new Token(TokenType.TEXT, 0, 'a'));
     assert.deepEqual(lexer.peek(), new Token(TokenType.TEXT, 1, 'b'));
     assert.deepEqual(lexer.next(), new Token(TokenType.TEXT, 1, 'b'));
-    assert.deepEqual(lexer.lastToken, new Token(TokenType.TEXT, 1, 'b'));
     assert.equal(lexer.peek(), null);
     assert.equal(lexer.next(), null);
   });

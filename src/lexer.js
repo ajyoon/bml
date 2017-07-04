@@ -5,11 +5,18 @@ class Lexer {
   constructor(string) {
     this.string = string;
     this.index = 0;
-    this.lastToken = null;
     this._cachedNext = null;
     this._newLineRe = /\r?\n/y;
     this._whitespaceRe = /\s+/y;
     this._numberRe = /(\d+(\.\d+)?)|(\.\d+)/y;
+  }
+
+  /**
+   * Set this.index and invalidate the next-token cache
+   */
+  overrideIndex(newIndex) {
+    this._cachedNext = null;
+    this.index = newIndex;
   }
 
   /**
@@ -126,7 +133,6 @@ class Lexer {
     } else {
       token = this._determineNext();
     }
-    this.lastToken = token;
     if (token !== null) {
       this.index += token.string.length;
     }
