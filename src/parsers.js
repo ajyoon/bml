@@ -285,12 +285,7 @@ function parseReplacements(lexer) {
 }
 
 
-function parseRule(string, ruleStartIndex) {
-  // TODO: once parseMode is reimplemented with lexer,
-  // change signature here to take just a lexer and
-  // return just a rule
-  var lexer = new Lexer(string);
-  lexer.overrideIndex(ruleStartIndex);
+function parseRule(lexer) {
   var matchers = parseMatchers(lexer);
   if (lexer.peek().tokenType !== TokenType.KW_AS) {
     throw new BMLSyntaxError('matchers must be followed with keyword "as"',
@@ -298,50 +293,63 @@ function parseRule(string, ruleStartIndex) {
   }
   lexer.next();  // consume KW_AS
   var replacements = parseReplacements(lexer);
-  return {rule: createRule(matchers, replacements), ruleEndIndex: lexer.index};
+  return createRule(matchers, replacements);
 }
 
-/**
- * @returns {mode, modeEndIndex} The newly parsed Mode and the index of the block-closing brace.
- */
 function parseMode(string, modeNameIndex) {
-  // Get mode name
-  var openBraceIndex = string.indexOf('{', modeNameIndex);
-  var name = string.slice(modeNameIndex,openBraceIndex).trim();
-  var rule;
-  var mode = new Mode(name);
-  var state = 'mode';
-  var index = openBraceIndex + 1;
-  while (index < string.length) {
-    switch (state) {
-    case 'comment':
-      if (string[index] === '\n') {
-        state = 'mode';
-      }
-      break;
-    case 'mode':
-      if ('\n\t '.indexOf(string[index]) !== -1) {
-        break;
-      } else if (string.slice(index, index + 2) === '//') {
-        state = 'comment';
-      } else if (string[index] === '}') {
-        return {
-          mode: mode,
-          modeEndIndex: index
-        };
-      } else {
-        var parseRuleResults = parseRule(string, index);
-        mode.rules.push(parseRuleResults.rule);
-        index = parseRuleResults.ruleEndIndex;
-        continue;
-      }
-      break;
-    default:
-      throw Error('Invalid state: ' + state);
-    }
-    index++;
+  var lexer = new Lexer(string);
+  lexer.overrideIndex(modeNameIndex);
+  var startIndex = lexer.index;
+  //if (lexer.peek().tokenType !== TokenType.KW_MODE) {
+  //  throw new BMLSyntaxError('modes must begin with keyword "mode"',
+  //                           lexer.string, lexer.index);
+  //}
+  //var token = lexer.next();
+  var token;
+  var modeNameRe = /(\s*(\w+)\s*)/y;
+  modeNameRe.lastIndex = lexer.index;
+  var modeNameMatch = modeNameRe.exec(lexer.string);
+  var mode = new Mode(modeNameMatch[2]);
+  lexer.overrideIndex(lexer.index + modeNameMatch[1].length);
+
+  if (lexer.peek().tokenType !== TokenType.OPEN_BRACE) {
+    throw new BMLSyntaxError('modes must be opened with a curly brace ("{")',
+                             lexer.string, lexer.index);
   }
-  throw new BMLSyntaxError('Could not find end of mode: ' + name);
+  lexer.next();  // consume open brace
+
+  var inComment = false;
+  while ((token = lexer.peek()) !== null) {
+    if (inComment) {
+      if (token.tokenType === TokenType.NEW_LINE) {
+        inComment = false;
+      }
+    } else {
+      switch (token.tokenType) {
+      case TokenType.WHITESPACE:
+      case TokenType.NEW_LINE:
+        break;
+      case TokenType.COMMENT:
+        inComment = true;
+        break;
+      case TokenType.SINGLE_QUOTE:
+      case TokenType.DOUBLE_QUOTE:
+        mode.rules.push(parseRule(lexer));
+        continue;
+      case TokenType.CLOSE_BRACE:
+        // consume closing brace
+        lexer.next();
+        return {mode: mode, modeEndIndex: lexer.index};
+      default:
+        throw new BMLSyntaxError(`Unexpected token ${token}`,
+                                 lexer.string, token.index);
+      }
+    }
+    // Accept and consume the token
+    lexer.next();
+  }
+  throw new BMLSyntaxError('Could not find end of mode',
+                           lexer.string, startIndex);
 }
 
 /**
@@ -373,7 +381,6 @@ function parsePrelude(string) {
       var {mode, modeEndIndex} = parseMode(prelude, modeNameIndex);
       modes[mode.name] = mode;
     }
-
     var modeName = beginMatch[3];
     if (modeName !== undefined) {
       if (modes.hasOwnProperty(modeName)) {

@@ -85,7 +85,7 @@ describe('parseMode', function() {
   it('should allow empty modes', function() {
     var testString = 'mode test {}end';
     var result = parseMode(testString, 5);
-    assert.equal(result.modeEndIndex, testString.indexOf('end') - 1);
+    assert.equal(result.modeEndIndex, testString.indexOf('end'));
     assert(result.mode instanceof Mode);
     assert.equal(result.mode.name, 'test');
   });
@@ -101,7 +101,7 @@ describe('parseMode', function() {
              // more comments
         }`;
     var result = parseMode(testString, 5);
-    assert.equal(result.modeEndIndex, testString.length - 1);
+    assert.equal(result.modeEndIndex, testString.length);
     assert.equal(result.mode.name, 'test');
     assert.equal(result.mode.rules.length, 2);
     assert.equal(result.mode.rules[0].matchers.length, 1);
@@ -209,68 +209,12 @@ describe('parseRule', function() {
 
   it('can parse a one-to-one rule', function() {
     var testString = "'x' as 'y'\n}";
-    var result = parseRule(testString, 0);
-    assert.equal(result.ruleEndIndex, testString.length - 1);
-    assert.deepEqual(result.rule.matchers, [createMatcher('x')]);
+    var lexer = new Lexer(testString);
+    var rule = parseRule(lexer);
+    expect(lexer.index).to.equal(testString.length - 1);
+    expect(rule.matchers.length).to.equal(1);
   });
 
-  it('can parse a one-to-one rule with a weight', function() {
-    var testString = "'x' as 'y' 40\n}";
-    var result = parseRule(testString, 0);
-    assert.equal(result.ruleEndIndex, testString.length - 1);
-    assert.deepEqual(result.rule.matchers, [createMatcher('x')]);
-  });
-
-  it('can parse multiple options', function() {
-    var testString = "'x' as 'y' 40, 'z' 10\n}";
-    var result = parseRule(testString, 0);
-    assert.equal(result.ruleEndIndex, testString.length - 1);
-    assert.deepEqual(result.rule.matchers, [createMatcher('x')]);
-  });
-
-  it('can parse multiple matchers', function() {
-    var testString = "'x', 'z' as 'y' 40\n}";
-    var result = parseRule(testString, 0);
-    assert.equal(result.ruleEndIndex, testString.length - 1);
-    assert.deepEqual(result.rule.matchers, [createMatcher('x'),
-                                            createMatcher('z')]);
-  });
-
-  it('can parse multiple matchers and options', function() {
-    var testString = "'x', 'z' as 'y' 40, 'a' 10\n}";
-    var result = parseRule(testString, 0);
-    assert.equal(result.ruleEndIndex, testString.length - 1);
-    assert.deepEqual(result.rule.matchers, [createMatcher('x'),
-                                            createMatcher('z')]);
-  });
-
-  it('can parse call statements', function() {
-    var testString = "'x' as call testFunc\n}";
-    var result = parseRule(testString, 0);
-    assert.equal(result.ruleEndIndex, testString.length - 1);
-    assert.deepEqual(result.rule.matchers, [createMatcher('x')]);
-  });
-
-  it('can parse call statements after commas', function() {
-    var testString = "'x' as 'y', call testFunc\n}";
-    var result = parseRule(testString, 0);
-    assert.equal(result.ruleEndIndex, testString.length - 1);
-    assert.deepEqual(result.rule.matchers, [createMatcher('x')]);
-  });
-
-  it('can parse call statements with chances', function() {
-    var testString = "'x' as call testFunc 20\n}";
-    var result = parseRule(testString, 0);
-    assert.equal(result.ruleEndIndex, testString.length - 1);
-    assert.deepEqual(result.rule.matchers, [createMatcher('x')]);
-  });
-
-  it('recognizes regex matchers', function() {
-    var testString = "r'.*' as call testFunc 20\n}";
-    var result = parseRule(testString, 0);
-    assert.equal(result.ruleEndIndex, testString.length - 1);
-    assert.deepEqual(result.rule.matchers, [createMatcher('.*', true)]);
-  });
 });
 
 
