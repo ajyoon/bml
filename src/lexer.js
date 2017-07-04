@@ -50,6 +50,9 @@ class Lexer {
     } else if (this.string[this.index] === '\'') {
       tokenType = TokenType.SINGLE_QUOTE;
       tokenString = '\'';
+    } else if (this.string[this.index] === '"') {
+      tokenType = TokenType.DOUBLE_QUOTE;
+      tokenString = '"';
     } else if (this.string[this.index] === '(') {
       tokenType = TokenType.OPEN_PAREN;
       tokenString = '(';

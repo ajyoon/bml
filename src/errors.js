@@ -15,12 +15,12 @@ function BMLSyntaxError(message, string, charIndex) {
   if (message) {
     this.message = message;
     if (charIndex) {
-      this.message += ' ' + stringUtils.lineColumnString(string, charIndex);
+      this.message += ' at ' + stringUtils.lineColumnString(string, charIndex);
     }
   } else {
-    this.message = 'Syntax error found while parsing bml.';
+    this.message = 'Syntax error found while parsing bml';
     if (charIndex) {
-      this.message += ' ' + stringUtils.lineColumnString(string, charIndex);
+      this.message += ' at ' + stringUtils.lineColumnString(string, charIndex);
     }
   }
   var error = new Error(this.message);

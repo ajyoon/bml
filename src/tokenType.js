@@ -3,6 +3,7 @@ const TokenType = Object.freeze({
   NEWLINE: Symbol('NEW_LINE'),
   COMMENT: Symbol('COMMENT'),
   SINGLE_QUOTE: Symbol('SINGLE_QUOTE'),
+  DOUBLE_QUOTE: Symbol('DOUBLE_QUOTE'),
   LETTER_R: Symbol('LETTER_R'),
   OPEN_PAREN: Symbol('OPEN_PAREN'),
   CLOSE_PAREN: Symbol('CLOSE_PAREN'),

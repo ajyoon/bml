@@ -197,6 +197,8 @@ function parseReplacer(lexer) {
   var choices = [];
   var acceptReplacement = true;
   var acceptWeight = false;
+  var acceptComma = false;
+  var acceptReplacerEnd = false;
 
   while ((token = lexer.peek()) !== null) {
     if (inComment) {
@@ -216,30 +218,67 @@ function parseReplacer(lexer) {
         if (acceptReplacement) {
           acceptReplacement = false;
           acceptWeight = true;
+          acceptComma = true;
+          acceptReplacerEnd = true;
           choices.push(new WeightedChoice(
             parseStringLiteralWithLexer(lexer), null));
           // break out of loop since the string literal token
-          // stream has already been consumed.
+          // stream is consumed by parseStringLiteralWithLexer
           continue;
+        } else if (acceptReplacerEnd){
+          return choices;
         } else {
-          throw new BMLSyntaxError('unexpected string literal.',
+          throw new BMLSyntaxError('unexpected string literal',
+                                   lexer.string, token.index);
+        }
+      case TokenType.CLOSE_BRACE:
+        if (acceptReplacerEnd){
+          return choices;
+        } else {
+          throw new BMLSyntaxError('unexpected closing brace',
                                    lexer.string, token.index);
         }
       case TokenType.KW_CALL:
         if (acceptReplacement) {
           acceptReplacement = false;
           acceptWeight = true;
+          acceptComma = true;
+          acceptReplacerEnd = true;
           choices.push(new WeightedChoice(parseCall(lexer), null));
-          continue;
+        } else {
+          throw new BMLSyntaxError('unexpected call statement.',
+                                   lexer.string, token.index);
         }
+        continue;
+      case TokenType.NUMBER:
+        if (acceptWeight) {
+          acceptWeight = false;
+          acceptComma = true;
+          acceptReplacerEnd = true;
+          choices[choices.length - 1].weight = Number(token.string);
+        } else {
+          throw new BMLSyntaxError('unexpected number literal.',
+                                   lexer.string, token.index);
+        }
+        break;
+      case TokenType.COMMA:
+        if (acceptComma) {
+          acceptComma = false;
+          acceptReplacement = true;
+          acceptWeight = false;
+          acceptReplacerEnd = false;
+        } else {
+          throw new BMLSyntaxError('unexpected comma.',
+                                   lexer.string, token.index);
+        }
+        break;
       default:
         throw new BMLSyntaxError(`Unexpected token ${token}`,
                                  lexer.string, token.index);
       }
     }
-
     // If we haven't broken out or thrown an error by now, consume this token.
-    token.next();
+    lexer.next();
   }
   throw new BMLSyntaxError('Could not find end of replacer.',
                            lexer.string, startIndex);

@@ -46,6 +46,12 @@ describe('Lexer', function() {
     assert.equal(lexer.next(), null);
   });
 
+  it('tokenizes double quotes', function() {
+    var lexer = new Lexer('"');
+    assert.deepEqual(lexer.next(), new Token(TokenType.DOUBLE_QUOTE, 0, '"'));
+    assert.equal(lexer.next(), null);
+  });
+
   it('tokenizes the letter r', function() {
     var lexer = new Lexer('r');
     assert.deepEqual(lexer.next(), new Token(TokenType.LETTER_R, 0, 'r'));
