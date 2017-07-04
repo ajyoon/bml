@@ -13,7 +13,7 @@ evaluate {
     }
 }
 mode initial {
-    'evalulate' as 'eval',
+    'evalulate' as 'eval'
 }
 mode literal {
     // No rules

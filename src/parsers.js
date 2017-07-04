@@ -190,7 +190,7 @@ function parseCall(lexer) {
   return new EvalBlock(callMatch[1]);
 }
 
-function parseReplacer(lexer) {
+function parseReplacements(lexer) {
   var startIndex = lexer.index;
   var token;
   var inComment = false;
@@ -285,130 +285,21 @@ function parseReplacer(lexer) {
 }
 
 
-
-
-
-/**
- * @returns {rule, ruleEndIndex} The newly parsed rule and the index of the end of the rule.
- *     Depending on the context, this may either be the beginning of a new rule or the end
- *     of the mode block.
- */
 function parseRule(string, ruleStartIndex) {
-  var inComment = false;
-  var isEscaped = false;
-  var currentString = null;
-  var currentStringIsRegExp = false;
-  var matchers = [];
-  var weightedChoices = [];
-  var state = 'matchers';
-  var canAcceptElement = false;
-  var index = ruleStartIndex;
-  var numberRe = /(\d+(\.\d+)?)|(\.\d+)/y;
-  var numberMatch;
-  var callRe = /call (\w+[\w\d\.]*)/y;
-  var callMatch;
-  while (index < string.length) {
-    if (inComment) {
-      if (string[index] === '\n') {
-        inComment = false;
-      }
-    } else if (currentString !== null) {
-      // Inside string literal
-      if (isEscaped) {
-        if (string[index] === 'n') {
-          currentString += '\n';
-        } else {
-          currentString += string[index];
-        }
-        isEscaped = false;
-      } else {
-        if (string[index] === '\\') {
-          isEscaped = true;
-        } else if (string[index] === '\'') {
-          // end of string
-          if (state === 'matchers') {
-            matchers.push(createMatcher(currentString, currentStringIsRegExp));
-          } else {
-            weightedChoices.push(new WeightedChoice(currentString, null));
-          }
-          currentString = null;
-          currentStringIsRegExp = false;
-        } else {
-          currentString += string[index];
-        }
-      }
-
-    } else {
-      if (string[index] === '\'' || string.slice(index, index + 2) === 'r\'') {
-        if (!canAcceptElement && state === 'weightedChoices') {
-          return {
-            rule: createRule(matchers, weightedChoices),
-            ruleEndIndex: index
-          };
-        } else {
-          if (string.slice(index, index + 2) === 'r\'') {
-            index += 1;
-            currentStringIsRegExp = true;
-          }
-          canAcceptElement = false;
-          currentString = '';
-        }
-      } else if (string.slice(index, index + 2) === '//') {
-        inComment = true;
-      } else {
-        switch (state) {
-        case 'matchers':
-          if (isWhitespace(string[index])) {
-            break;
-          } else if (string[index] === ',') {
-            canAcceptElement = true;
-          } else if (/as\s/.test(string.slice(index, index + 3))) {
-            state = 'weightedChoices';
-            index += 3;
-            canAcceptElement = true;
-            continue;
-          } else {
-            throw new BMLSyntaxError('error parsing rule at index ' + index);
-          }
-          break;
-        case 'weightedChoices':
-          numberRe.lastIndex = index;
-          callRe.lastIndex = index;
-          if (isWhitespace(string[index])) {
-            break;
-          } else if ((numberMatch = numberRe.exec(string))) {
-            weightedChoices[weightedChoices.length - 1].weight = Number(numberMatch[0]);
-            index += numberMatch[0].length;
-            continue;
-          } else if ((callMatch = callRe.exec(string))) {
-            // TODO: is this wrong? Call matches should accept weights.
-            weightedChoices.push(new WeightedChoice(new EvalBlock(callMatch[1]), null));
-            index += callMatch[0].length;
-            canAcceptElement = false;
-            continue;
-          } else if (string[index] === ',') {
-            canAcceptElement = true;
-          } else if (string[index] === '}') {
-            return {
-              rule: createRule(matchers, weightedChoices),
-              ruleEndIndex: index
-            };
-          } else {
-            throw new BMLSyntaxError('Unknown character in option at index ' + index);
-          }
-          break;
-        default:
-          if (!isWhitespace(string[index])) {
-            throw new BMLSyntaxError('error parsing rule at index ' + index);
-          }
-        }
-      }
-    }
-    index++;
+  // TODO: once parseMode is reimplemented with lexer,
+  // change signature here to take just a lexer and
+  // return just a rule
+  var lexer = new Lexer(string);
+  lexer.overrideIndex(ruleStartIndex);
+  var matchers = parseMatchers(lexer);
+  if (lexer.peek().tokenType !== TokenType.KW_AS) {
+    throw new BMLSyntaxError('matchers must be followed with keyword "as"',
+                             lexer.string, lexer.index);
   }
-  throw new BMLSyntaxError('Could not find end of rule');
+  lexer.next();  // consume KW_AS
+  var replacements = parseReplacements(lexer);
+  return {rule: createRule(matchers, replacements), ruleEndIndex: lexer.index};
 }
-
 
 /**
  * @returns {mode, modeEndIndex} The newly parsed Mode and the index of the block-closing brace.
@@ -666,4 +557,4 @@ exports.parseChoose = parseChoose;
 exports.createMatcher = createMatcher;
 exports.parseMatchers = parseMatchers;
 exports.parseCall = parseCall;
-exports.parseReplacer = parseReplacer;
+exports.parseReplacements = parseReplacements;

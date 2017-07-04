@@ -27,7 +27,7 @@ var parseChoose = parsers.parseChoose;
 var createMatcher = parsers.createMatcher;
 var parseMatchers = parsers.parseMatchers;
 var parseCall = parsers.parseCall;
-var parseReplacer = parsers.parseReplacer;
+var parseReplacements = parsers.parseReplacements;
 
 
 describe('findCodeBlockEnd', function() {
@@ -461,12 +461,12 @@ describe('parseCall', function() {
 });
 
 
-describe('parseReplacer', function() {
+describe('parseReplacements', function() {
 
   it('parses a string literal replacer with single quotes', function() {
     var testString = "'test'}";
     var lexer = new Lexer(testString);
-    var result = parseReplacer(lexer);
+    var result = parseReplacements(lexer);
     expect(result.length).to.equal(1);
     expect(result[0]).to.be.an.instanceof(WeightedChoice);
     expect(result[0].choice).to.equal('test');
@@ -477,7 +477,7 @@ describe('parseReplacer', function() {
   it('parses a string literal replacer with double quotes', function() {
     var testString = '"test"}';
     var lexer = new Lexer(testString);
-    var result = parseReplacer(lexer);
+    var result = parseReplacements(lexer);
     expect(result.length).to.equal(1);
     expect(result[0]).to.be.an.instanceof(WeightedChoice);
     expect(result[0].choice).to.equal('test');
@@ -488,7 +488,7 @@ describe('parseReplacer', function() {
   it('parses a call replacer', function() {
     var testString = 'call test}';
     var lexer = new Lexer(testString);
-    var result = parseReplacer(lexer);
+    var result = parseReplacements(lexer);
     expect(result.length).to.equal(1);
     expect(result[0]).to.be.an.instanceof(WeightedChoice);
     expect(result[0].choice).to.be.an.instanceof(EvalBlock);
@@ -500,7 +500,7 @@ describe('parseReplacer', function() {
   it('parses strings with weights', function() {
     var testString = '"test" 5}';
     var lexer = new Lexer(testString);
-    var result = parseReplacer(lexer);
+    var result = parseReplacements(lexer);
     expect(result.length).to.equal(1);
     expect(result[0]).to.be.an.instanceof(WeightedChoice);
     expect(result[0].choice).to.equal('test');
@@ -511,7 +511,7 @@ describe('parseReplacer', function() {
   it('parses call replacers with weights', function() {
     var testString = 'call test 5}';
     var lexer = new Lexer(testString);
-    var result = parseReplacer(lexer);
+    var result = parseReplacements(lexer);
     expect(result.length).to.equal(1);
     expect(result[0]).to.be.an.instanceof(WeightedChoice);
     expect(result[0].choice).to.be.an.instanceof(EvalBlock);
@@ -523,7 +523,7 @@ describe('parseReplacer', function() {
   it('parses many replacers with and without weights', function() {
     var testString = 'call test 5, "test2", "test3" 3}';
     var lexer = new Lexer(testString);
-    var result = parseReplacer(lexer);
+    var result = parseReplacements(lexer);
     expect(result.length).to.equal(3);
 
     expect(result[0]).to.be.an.instanceof(WeightedChoice);
@@ -545,7 +545,7 @@ describe('parseReplacer', function() {
   it('treats a new replacement not after a comma as the end of the replacer', function() {
     var testString = '"test" "part of next rule"';
     var lexer = new Lexer(testString);
-    var result = parseReplacer(lexer);
+    var result = parseReplacements(lexer);
     expect(result.length).to.equal(1);
     expect(result[0]).to.be.an.instanceof(WeightedChoice);
     expect(result[0].choice).to.equal('test');
