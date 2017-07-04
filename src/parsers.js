@@ -122,16 +122,15 @@ function parseMatchers(lexer) {
   var inComment = false;
   var matchers = [];
   while ((token = lexer.peek()) !== null) {
-    if (afterLetterR && !(token.tokenType === TokenType.SINGLE_QUOTE ||
-                          token.tokenType === TokenType.DOUBLE_QUOTE)) {
-      throw new BMLSyntaxError('regex matcher signifier (\'r\') not '
-                               + 'immediately preceding string literal',
-                               lexer.string, startIndex);
-    }
     if (inComment) {
       if (token.tokenType === TokenType.NEW_LINE) {
         inComment = false;
       }
+    } else if (afterLetterR && !(token.tokenType === TokenType.SINGLE_QUOTE ||
+                            token.tokenType === TokenType.DOUBLE_QUOTE)) {
+      throw new BMLSyntaxError('regex matcher signifier (\'r\') not '
+                               + 'immediately preceding string literal',
+                               lexer.string, startIndex);
     } else {
       switch (token.tokenType) {
       case TokenType.WHITESPACE:
@@ -149,13 +148,15 @@ function parseMatchers(lexer) {
                                       afterLetterR));
           afterLetterR = false;
           acceptMatcher = false;
+          // break out of loop since the string literal token
+          // stream has already been consumed.
+          continue;
         } else {
           throw new BMLSyntaxError('unexpected string literal.',
                                    lexer.string, token.index);
         }
         break;
       case TokenType.COMMA:
-        console.log('wtf');
         acceptMatcher = true;
         break;
       case TokenType.LETTER_R:
@@ -170,10 +171,74 @@ function parseMatchers(lexer) {
                                  lexer.string, token.index);
       }
     }
-    // If we haven't returned or thrown an error by now, this token is consumed.
+    // If we haven't broken out or thrown an error by now, consume this token.
     lexer.next();
   }
   throw new BMLSyntaxError('Could not find end of matcher.',
+                           lexer.string, startIndex);
+}
+
+function parseCall(lexer) {
+  var token;
+  token = lexer.next();
+  if (token.tokenType !== TokenType.KW_CALL) {
+    throw new BMLSyntaxError('`call` statements must begin with keyword `call`');
+  }
+
+}
+
+function parseReplacer(lexer) {
+  var startIndex = lexer.index;
+  var token;
+  var inComment = false;
+  var choices = [];
+  var acceptReplacement = true;
+  var acceptWeight = false;
+
+  while ((token = lexer.peek()) !== null) {
+    if (inComment) {
+      if (token.tokenType === TokenType.NEW_LINE) {
+        inComment = false;
+      }
+    } else {
+      switch (token.tokenType) {
+      case TokenType.WHITESPACE:
+      case TokenType.NEW_LINE:
+        break;
+      case TokenType.COMMENT:
+        inComment = true;
+        break;
+      case TokenType.SINGLE_QUOTE:
+      case TokenType.DOUBLE_QUOTE:
+        if (acceptReplacement) {
+          acceptReplacement = false;
+          acceptWeight = true;
+          choices.push(new WeightedChoice(
+            parseStringLiteralWithLexer(lexer), null));
+          // break out of loop since the string literal token
+          // stream has already been consumed.
+          continue;
+        } else {
+          throw new BMLSyntaxError('unexpected string literal.',
+                                   lexer.string, token.index);
+        }
+      case TokenType.KW_CALL:
+        if (acceptReplacement) {
+          acceptReplacement = false;
+          acceptWeight = true;
+          choices.push(new WeightedChoice(parseCall(lexer), null));
+          continue;
+        }
+      default:
+        throw new BMLSyntaxError(`Unexpected token ${token}`,
+                                 lexer.string, token.index);
+      }
+    }
+
+    // If we haven't broken out or thrown an error by now, consume this token.
+    token.next();
+  }
+  throw new BMLSyntaxError('Could not find end of replacer.',
                            lexer.string, startIndex);
 }
 
@@ -560,3 +625,5 @@ exports.parseStringLiteralWithLexer = parseStringLiteralWithLexer;
 exports.parseChoose = parseChoose;
 exports.createMatcher = createMatcher;
 exports.parseMatchers = parseMatchers;
+exports.parseCall = parseCall;
+exports.parseReplacer = parseReplacer;

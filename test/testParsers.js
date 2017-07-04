@@ -11,6 +11,7 @@ var TokenType = require('../src/tokenType.js').TokenType;
 
 var JavascriptSyntaxError = errors.JavascriptSyntaxError;
 var UnknownTransformError = errors.UnknownTransformError;
+var BMLSyntaxError = errors.BMLSyntaxError;
 
 var findCodeBlockEnd = parsers.findCodeBlockEnd;
 var parseRule = parsers.parseRule;
@@ -22,6 +23,8 @@ var parseStringLiteralWithLexer = parsers.parseStringLiteralWithLexer;
 var parseChoose = parsers.parseChoose;
 var createMatcher = parsers.createMatcher;
 var parseMatchers = parsers.parseMatchers;
+var parseCall = parsers.parseCall;
+var parseReplacer = parsers.parseReplacer;
 
 
 describe('findCodeBlockEnd', function() {
@@ -414,6 +417,22 @@ describe('parseMatchers', function() {
     assert.deepEqual(lexer.peek(), new Token(TokenType.KW_AS,
                                              testString.indexOf('as'),
                                              'as'));
+  });
+
+});
+
+
+describe('parseCall', function() {
+
+  it('errors without beginning on a KW_CALL', function() {
+    var testString = 'fails';
+    var lexer = new Lexer(testString);
+    try {
+      parseCall(lexer);
+      assert(false, 'error expected');
+    } catch (e) {
+      assert(e instanceof BMLSyntaxError);
+    }
   });
 
 });
