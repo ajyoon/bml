@@ -1,3 +1,11 @@
+### 0.0.6
+* Support double-quotes in addition to single quotes
+  for all string literals
+* support escaping special tokens in regex matchers without
+  needing a double-backslash. e.g. `r'\\\\s+' -> r'\\s+'`
+* a major internal refactor of all parsers increases long-term
+  stability and flexibility of the language implementation.
+
 ### 0.0.5
 * Fix silly bug causing no-op options to never occur
 
