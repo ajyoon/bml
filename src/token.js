@@ -6,8 +6,8 @@ class Token {
   }
 
   toString() {
-    return `Token{tokenType: ${this.tokenType}, index: ${this.index}, `
-      + `string: ${this.string}`;
+    return `Token{tokenType: ${this.tokenType.toString()}, index: ${this.index}, `
+      + `string: '${this.string}'}`;
   }
 }
 exports.Token = Token;

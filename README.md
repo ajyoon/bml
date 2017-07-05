@@ -1,4 +1,5 @@
 
+
 ```
 evaluate {
     // arbitrary javascript
@@ -15,14 +16,14 @@ evaluate {
     }
 }
 mode initial {
-    'evalulate' as 'eval',
+    'evaluate' as 'eval'
 }
 mode literal {
     // No rules
 }
 begin using initial
 
-{{call copyPrelude}```
+```
 
 
 # bml
@@ -58,11 +59,11 @@ document.getElementById("someTargetId").innerHTML =
 </script>
 ```
 
-A prelude section is used to define maps and evaluate arbitrary
+A prelude section is used to define maps and eval arbitrary
 javascript. An evaluate block provides a location to execute arbitrary code
 and define reusable functions. maps link words in the text to other words
 with weights controlling their relative likelihood and may also call functions
-either defined inline or in the evaluate block.
+either defined inline or in the eval block.
 
 Strings can be escaped with [[double square bracket delimiters.]] and backslashes \\.
 
@@ -71,8 +72,8 @@ for them being {{double curly braces}}.
 
 Available one-time transformations include:
 
-* choose: {{'x' 20, 'y' 30, 'z' 50, call someFunc}}
-* using: {{using literal}}
+* choose: `{{'x' 20, 'y' 30, 'z' 50, call someFunc}}`
+* using: `{{using literal}}`
 
 This is a very early, very unstable project. Lots of fixes and improvements coming soon!
 

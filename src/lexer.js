@@ -5,12 +5,24 @@ class Lexer {
   constructor(string) {
     this.string = string;
     this.index = 0;
+    this._cachedNext = null;
     this._newLineRe = /\r?\n/y;
     this._whitespaceRe = /\s+/y;
     this._numberRe = /(\d+(\.\d+)?)|(\.\d+)/y;
   }
 
-  next() {
+  /**
+   * Set this.index and invalidate the next-token cache
+   */
+  overrideIndex(newIndex) {
+    this._cachedNext = null;
+    this.index = newIndex;
+  }
+
+  /**
+   * Determine the next item in the token stream
+   */
+  _determineNext() {
     if (this.index >= this.string.length) {
       return null;
     }
@@ -27,23 +39,20 @@ class Lexer {
       tokenType = TokenType.NEW_LINE;
       tokenString = newLineMatch[0];
     } else if (whitespaceMatch !== null) {
-      this.index = this._whitespaceRe.lastIndex;
-      return this.next();
+      tokenType = TokenType.WHITESPACE;
+      tokenString = whitespaceMatch[0];
     } else if (numberMatch !== null) {
       tokenType = TokenType.NUMBER;
       tokenString = numberMatch[0];
-    } else if (this.string[this.index] === '\\') {
-      tokenType = TokenType.BACKSLASH;
-      tokenString = '\\';
     } else if (this.string.slice(this.index, this.index + 2) === '//') {
       tokenType = TokenType.COMMENT;
       tokenString = '//';
     } else if (this.string[this.index] === '\'') {
       tokenType = TokenType.SINGLE_QUOTE;
       tokenString = '\'';
-    } else if (this.string[this.index] === 'r') {
-      tokenType = TokenType.LETTER_R;
-      tokenString = 'r';
+    } else if (this.string[this.index] === '"') {
+      tokenType = TokenType.DOUBLE_QUOTE;
+      tokenString = '"';
     } else if (this.string[this.index] === '(') {
       tokenType = TokenType.OPEN_PAREN;
       tokenString = '(';
@@ -81,13 +90,90 @@ class Lexer {
       // synonym for 'use'
       tokenType = TokenType.KW_USE;
       tokenString = 'using';
+    } else if (this.string[this.index] === 'r') {
+      tokenType = TokenType.LETTER_R;
+      tokenString = 'r';
     } else {
       tokenType = TokenType.TEXT;
-      tokenString = this.string[this.index];
+      if (this.string[this.index] === '\\') {
+        switch (this.string[this.index + 1]) {
+        case 'n':
+          tokenString = '\n';
+          this.index++;
+          break;
+        case 't':
+          tokenString = '\t';
+          this.index++;
+          break;
+        case 'r':
+          tokenString = '\r';
+          this.index++;
+          break;
+        case '\'':
+          tokenString = '\'';
+          this.index++;
+          break;
+        case '\"':
+          tokenString = '\"';
+          this.index++;
+          break;
+        default:
+          tokenString = '\\';
+        }
+      } else {
+        tokenString = this.string[this.index];
+      }
     }
-    this.index += tokenString.length;
-    return new Token(tokenType, tokenIndex, tokenString);
+    var token = new Token(tokenType, tokenIndex, tokenString);
+    return token;
   }
+
+  next() {
+    var token;
+    if (this._cachedNext != null) {
+      token = this._cachedNext;
+      this._cachedNext = null;
+    } else {
+      token = this._determineNext();
+    }
+    if (token !== null) {
+      this.index += token.string.length;
+    }
+    return token;
+  }
+
+  peek() {
+    var token = this._determineNext();
+    this._cachedNext = token;
+    return token;
+  }
+
+  skipWhitespaceAndComments() {
+    var whitespaceTokenTypes = [TokenType.WHITESPACE, TokenType.NEW_LINE];
+    var inComment = false;
+    var token;
+    while ((token = this.peek()) !== null) {
+      if (inComment) {
+        if (token.tokenType === TokenType.NEW_LINE) {
+          inComment = false;
+        }
+      } else {
+        switch (token.tokenType) {
+        case TokenType.NEW_LINE:
+        case TokenType.WHITESPACE:
+          break;
+        case TokenType.COMMENT:
+          inComment = true;
+          break;
+        default:
+          return;
+        }
+      }
+      // consume whitespace-or-comment token
+      this.next();
+    }
+  }
+
 }
 
 exports.Lexer = Lexer;

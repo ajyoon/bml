@@ -1,4 +1,5 @@
 var assert = require('assert');
+var expect = require('chai').expect;
 
 var Lexer = require('../src/lexer.js').Lexer;
 var Token = require('../src/token.js').Token;
@@ -9,11 +10,6 @@ describe('Lexer', function() {
 
   it("doesn't explode with an empty string", function() {
     var lexer = new Lexer('');
-    assert.equal(lexer.next(), null);
-  });
-
-  it("doesn't explode with a string of all-whitespace", function() {
-    var lexer = new Lexer('     ');
     assert.equal(lexer.next(), null);
   });
 
@@ -29,9 +25,13 @@ describe('Lexer', function() {
     assert.equal(lexer.next(), null);
   });
 
-  it('tokenizes backslashes', function() {
-    var lexer = new Lexer('\\');
-    assert.deepEqual(lexer.next(), new Token(TokenType.BACKSLASH, 0, '\\'));
+  it("tokenizes spaces and tabs as WHITESPACE", function() {
+    var lexer = new Lexer(' ');
+    assert.deepEqual(lexer.next(), new Token(TokenType.WHITESPACE, 0, ' '));
+    assert.equal(lexer.next(), null);
+
+    lexer = new Lexer('\t');
+    assert.deepEqual(lexer.next(), new Token(TokenType.WHITESPACE, 0, '\t'));
     assert.equal(lexer.next(), null);
   });
 
@@ -44,6 +44,12 @@ describe('Lexer', function() {
   it('tokenizes single quotes', function() {
     var lexer = new Lexer('\'');
     assert.deepEqual(lexer.next(), new Token(TokenType.SINGLE_QUOTE, 0, '\''));
+    assert.equal(lexer.next(), null);
+  });
+
+  it('tokenizes double quotes', function() {
+    var lexer = new Lexer('"');
+    assert.deepEqual(lexer.next(), new Token(TokenType.DOUBLE_QUOTE, 0, '"'));
     assert.equal(lexer.next(), null);
   });
 
@@ -145,10 +151,68 @@ describe('Lexer', function() {
     assert.equal(lexer.next(), null);
   });
 
-  it.skip('tokenizes numbers with a leading decimal', function() {
+  it('tokenizes numbers with a leading decimal', function() {
     var lexer = new Lexer('.67');
     assert.deepEqual(lexer.next(), new Token(TokenType.NUMBER, 0, '.67'));
     assert.equal(lexer.next(), null);
+  });
+
+  it('tokenizes known escape sequences', function() {
+    var lexer = new Lexer('\\n');
+    assert.deepEqual(lexer.next(), new Token(TokenType.TEXT, 0, '\n'));
+    assert.equal(lexer.next(), null);
+
+    lexer = new Lexer('\\t');
+    assert.deepEqual(lexer.next(), new Token(TokenType.TEXT, 0, '\t'));
+    assert.equal(lexer.next(), null);
+
+    lexer = new Lexer('\\r');
+    assert.deepEqual(lexer.next(), new Token(TokenType.TEXT, 0, '\r'));
+    assert.equal(lexer.next(), null);
+
+    lexer = new Lexer("\\'");
+    assert.deepEqual(lexer.next(), new Token(TokenType.TEXT, 0, '\''));
+    assert.equal(lexer.next(), null);
+
+    lexer = new Lexer('\\"');
+    assert.deepEqual(lexer.next(), new Token(TokenType.TEXT, 0, '\"'));
+    assert.equal(lexer.next(), null);
+  });
+
+  it('treats backslashes before unknown escape sequences as literal', function() {
+    var lexer = new Lexer('\\f');
+    assert.deepEqual(lexer.next(), new Token(TokenType.TEXT, 0, '\\'));
+    assert.deepEqual(lexer.next(), new Token(TokenType.TEXT, 1, 'f'));
+    assert.equal(lexer.next(), null);
+  });
+
+  it('can peek at the next token without consuming it', function() {
+    var lexer = new Lexer('ab');
+    assert.deepEqual(lexer.peek(), new Token(TokenType.TEXT, 0, 'a'));
+    assert.deepEqual(lexer.next(), new Token(TokenType.TEXT, 0, 'a'));
+    assert.deepEqual(lexer.peek(), new Token(TokenType.TEXT, 1, 'b'));
+    assert.deepEqual(lexer.next(), new Token(TokenType.TEXT, 1, 'b'));
+    assert.equal(lexer.peek(), null);
+    assert.equal(lexer.next(), null);
+  });
+
+  it('can pass over whitespace and comments', function() {
+    var testString = `test
+
+        test2
+        // comment
+        test3`;
+    var lexer = new Lexer(testString);
+    lexer.skipWhitespaceAndComments();
+    expect(lexer.index).to.equal(0);
+
+    lexer.overrideIndex(testString.indexOf('test') + 'test'.length);
+    lexer.skipWhitespaceAndComments();
+    expect(lexer.index).to.equal(testString.indexOf('test2'));
+
+    lexer.overrideIndex(testString.indexOf('test2') + 'test2'.length);
+    lexer.skipWhitespaceAndComments();
+    expect(lexer.index).to.equal(testString.indexOf('test3'));
   });
 
 });

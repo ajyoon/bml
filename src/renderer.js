@@ -8,7 +8,7 @@ var defaultSettings = _settings.defaultSettings;
 var mergeSettings = _settings.mergeSettings;
 var parsePrelude = _parsers.parsePrelude;
 var parseUse = _parsers.parseUse;
-var parseChoose = _parsers.parseChoose;
+var parseInlineChoose = _parsers.parseInlineChoose;
 var EvalBlock = require('./evalBlock.js').EvalBlock;
 var noOp = require('./noOp.js');
 var UnknownModeError = _errors.UnknownModeError;
@@ -71,16 +71,16 @@ function renderText(string, startIndex, evalBlock, modes, activeMode) {
       chooseRe.lastIndex = index + 2;
       useRe.lastIndex = index + 2;
       if (chooseRe.test(string)) {
-          var parseChooseResult = parseChoose(string, index, false);
-        replacement = parseChooseResult.replacer.call(
+          var parseInlineChooseResult = parseInlineChoose(string, index, false);
+        replacement = parseInlineChooseResult.replacer.call(
           [''], string, index);
         if (replacement instanceof EvalBlock) {
-            console.log(replacement);
           out += eval(replacement.string)([''], string, index);
         } else {
           out += replacement;
         }
-        index = parseChooseResult.blockEndIndex;
+        index = parseInlineChooseResult.blockEndIndex;
+        continue;
       } else if (useRe.test(string)) {
         var parseUseResult = parseUse(string, index);
         index = parseUseResult.blockEndIndex;
@@ -97,7 +97,6 @@ function renderText(string, startIndex, evalBlock, modes, activeMode) {
         index++;
         inLiteralBlock = true;
       } else {
-        // Optimize me when extending to support regexps
         if (activeMode !== null) {
           ruleLoop:
           for (var r = 0; r < activeMode.rules.length; r++) {
