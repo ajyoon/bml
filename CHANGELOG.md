@@ -1,3 +1,8 @@
+# Changelog
+
+### 0.0.7
+* Fix regression breaking regex matchers
+
 ### 0.0.6
 * Support double-quotes in addition to single quotes
   for all string literals

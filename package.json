@@ -1,6 +1,6 @@
 {
   "name": "bml",
-  "version": "0.0.7-dev",
+  "version": "0.0.7",
   "description": "A stochastic markup language",
   "author": {
     "name": "Andrew Yoon",
