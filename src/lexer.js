@@ -147,6 +147,33 @@ class Lexer {
     this._cachedNext = token;
     return token;
   }
+
+  skipWhitespaceAndComments() {
+    var whitespaceTokenTypes = [TokenType.WHITESPACE, TokenType.NEW_LINE];
+    var inComment = false;
+    var token;
+    while ((token = this.peek()) !== null) {
+      if (inComment) {
+        if (token.tokenType === TokenType.NEW_LINE) {
+          inComment = false;
+        }
+      } else {
+        switch (token.tokenType) {
+        case TokenType.NEW_LINE:
+        case TokenType.WHITESPACE:
+          break;
+        case TokenType.COMMENT:
+          inComment = true;
+          break;
+        default:
+          return;
+        }
+      }
+      // consume whitespace-or-comment token
+      this.next();
+    }
+  }
+
 }
 
 exports.Lexer = Lexer;

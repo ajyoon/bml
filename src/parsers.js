@@ -20,86 +20,97 @@ var escapeRegExp = _stringUtils.escapeRegExp;
 var createWeightedOptionReplacer = _rand.createWeightedOptionReplacer;
 
 
-/**
- * Extract an arbitrary javascript block enclosed in braces
- * @returns (Number) the index after the ending curly brace.
- */
-function findCodeBlockEnd(string, curlyBraceStartIndex) {
-  var openBraceCount = 0;
+function parseEvaluate(lexer) {
+  if (lexer.peek().tokenType !== TokenType.KW_EVALUATE) {
+    throw new BMLSyntaxError('evalulate blocks must start with keyword "evaluate"',
+                             lexer.string, lexer.index);
+  }
+  lexer.next();  // consume KW_EVALUATE
+  lexer.skipWhitespaceAndComments();
+  if (lexer.peek().tokenType !== TokenType.OPEN_BRACE) {
+    throw new BMLSyntaxError('evalulate blocks must be opened with a curly brace ("{")',
+                             lexer.string, lexer.index);
+  }
+  lexer.next();  // consume OPEN_BRACE
+
   var state = 'code';
   var isEscaped = false;
-  var index = curlyBraceStartIndex;
-  while(openBraceCount >= 0) {
-    index++;
-    if (index > string.length) {
-      throw new Error('Syntax error extracting javascript. No close-brace found.');
-    }
+  var index = lexer.index;
+  var startIndex = index;
+  var openBraceCount = 1;
+  while(index < lexer.string.length) {
     switch (state) {
     case 'block':
-      if (string.slice(index, index + 2) === '*/') {
+      if (lexer.string.slice(index, index + 2) === '*/') {
         state = 'code';
       }
       break;
     case 'inline':
-      if (string[index] === '\n') {
+      if (lexer.string[index] === '\n') {
         state = 'code';
       }
       break;
     case 'backtick string':
-      if (string[index] === '`' && !isEscaped) {
+      if (lexer.string[index] === '`' && !isEscaped) {
         state = 'code';
       }
       break;
     case 'single-quote string':
-    if (string[index] === '\'' && !isEscaped) {
+    if (lexer.string[index] === '\'' && !isEscaped) {
         state = "code";
-      } else if (string[index] === '\n') {
-        throw new JavascriptSyntaxError(string, index);
+      } else if (lexer.string[index] === '\n') {
+        throw new JavascriptSyntaxError(lexer.string, index);
       }
       break;
     case 'double-quote string':
-      if (string[index] === '"' && !isEscaped) {
+      if (lexer.string[index] === '"' && !isEscaped) {
         state = "code";
-      } else if (string[index] === '\n') {
-        throw new JavascriptSyntaxError(string, index);
+      } else if (lexer.string[index] === '\n') {
+        throw new JavascriptSyntaxError(lexer.string, index);
       }
       break;
     case 'regex literal':
-      if (string[index] === '/' && !isEscaped) {
+      if (lexer.string[index] === '/' && !isEscaped) {
         state = 'code';
       }
       break;
     case 'code':
-      if (string[index] === '{') {
+      if (lexer.string[index] === '{') {
         openBraceCount++;
-      } else if (string[index] === '}') {
+      } else if (lexer.string[index] === '}') {
         openBraceCount--;
-      } else if (string.slice(index, index + 2) === '//') {
+        if (openBraceCount < 1) {
+          lexer.overrideIndex(index + 1);
+          return lexer.string.slice(startIndex, index);
+        }
+      } else if (lexer.string.slice(index, index + 2) === '//') {
         state = 'inline';
-      } else if (string.slice(index, index + 2) === '/*') {
+      } else if (lexer.string.slice(index, index + 2) === '/*') {
         state = 'block';
-      } else if (string[index] === '`') {
+      } else if (lexer.string[index] === '`') {
         state = 'backtick string';
-      } else if (string[index] === '\'') {
+      } else if (lexer.string[index] === '\'') {
         state = 'single-quote string';
-      } else if (string[index] === '\"') {
+      } else if (lexer.string[index] === '\"') {
         state = 'double-quote string';
-      } else if (string[index] === '/' && string[index - 1] !== '*') {
+      } else if (lexer.string[index] === '/' && lexer.string[index - 1] !== '*') {
         state = 'regex literal';
       }
       break;
     default:
       throw new Error('Invalid state: ' + state);
     }
-    if (string[index] === '\\') {
+    if (lexer.string[index] === '\\') {
       isEscaped = !isEscaped;
     } else {
       if (isEscaped) {
         isEscaped = false;
       }
     }
+    index++;
   }
-  return index + 1;
+  throw new BMLSyntaxError('could not find end of `evaluate` block',
+                           lexer.string, startIndex);
 }
 
 
@@ -296,16 +307,13 @@ function parseRule(lexer) {
   return createRule(matchers, replacements);
 }
 
-function parseMode(string, modeNameIndex) {
-  var lexer = new Lexer(string);
-  lexer.overrideIndex(modeNameIndex);
+function parseMode(lexer) {
   var startIndex = lexer.index;
-  //if (lexer.peek().tokenType !== TokenType.KW_MODE) {
-  //  throw new BMLSyntaxError('modes must begin with keyword "mode"',
-  //                           lexer.string, lexer.index);
-  //}
-  //var token = lexer.next();
-  var token;
+  if (lexer.peek().tokenType !== TokenType.KW_MODE) {
+    throw new BMLSyntaxError('modes must begin with keyword "mode"',
+                             lexer.string, lexer.index);
+  }
+  var token = lexer.next();  // consume KW_MODE
   var modeNameRe = /(\s*(\w+)\s*)/y;
   modeNameRe.lastIndex = lexer.index;
   var modeNameMatch = modeNameRe.exec(lexer.string);
@@ -339,7 +347,7 @@ function parseMode(string, modeNameIndex) {
       case TokenType.CLOSE_BRACE:
         // consume closing brace
         lexer.next();
-        return {mode: mode, modeEndIndex: lexer.index};
+        return mode;
       default:
         throw new BMLSyntaxError(`Unexpected token ${token}`,
                                  lexer.string, token.index);
@@ -352,59 +360,56 @@ function parseMode(string, modeNameIndex) {
                            lexer.string, startIndex);
 }
 
-/**
- * Parse the prelude of a bml file.
- *
- * @param {String} string The contents of a bml file
- * @returns {preludeEndIndex, evalBlock, modes, initialMode}
- */
-function parsePrelude(string) {
-  var modes = {};
-  var initialMode;
-  var beginPattern = /^\s*begin( (using|use) (\w+))? *\n/m;
-  var evalPattern = /^\s*evaluate {/gm;
-  var modePattern = /^\s*mode (\w+) *{/gm;
-  var beginMatch = string.match(beginPattern);
-  var evalString = '';
-  if (beginMatch !== null) {
-    var beginIndex = beginMatch.index;
-    var prelude = string.slice(0, beginIndex);
-    var evalMatch;
-    while ((evalMatch = evalPattern.exec(prelude)) !== null) {
-      var codeEndIndex = findCodeBlockEnd(prelude, evalPattern.lastIndex - 1);
-      evalString += prelude.slice(evalPattern.lastIndex, codeEndIndex - 1) + '\n';
-    }
 
-    var modeBlock;
-    while ((modeBlock = modePattern.exec(prelude)) !== null) {
-      var modeNameIndex = modeBlock.index + modeBlock[0].indexOf(modeBlock[1]);
-      var {mode, modeEndIndex} = parseMode(prelude, modeNameIndex);
-      modes[mode.name] = mode;
-    }
-    var modeName = beginMatch[3];
-    if (modeName !== undefined) {
-      if (modes.hasOwnProperty(modeName)) {
-        initialMode = modes[modeName];
-      } else {
-        throw new UnknownModeError(string, beginMatch.index, modeName);
+function parsePrelude(string) {
+  var lexer = new Lexer(string);
+  var inComment = false;
+  var evalString = '';
+  var modes = {};
+  var token;
+  while ((token = lexer.peek()) !== null) {
+    if (inComment) {
+      if (token.tokenType === TokenType.NEW_LINE) {
+        inComment = false;
+      }
+    } else {
+      switch (token.tokenType) {
+      case TokenType.WHITESPACE:
+      case TokenType.NEW_LINE:
+        break;
+      case TokenType.COMMENT:
+        inComment = true;
+        break;
+      case TokenType.KW_EVALUATE:
+        evalString += parseEvaluate(lexer) + '\n';
+        continue;
+      case TokenType.KW_MODE:
+        var newMode = parseMode(lexer);
+        modes[newMode.name] = newMode;
+        continue;
+      case TokenType.KW_BEGIN:
+        var beginStatementStartIndex = lexer.index;
+        var initialModeName = parseBegin(lexer);
+        var initialMode;
+        if (modes.hasOwnProperty(initialModeName)) {
+          initialMode = modes[initialModeName];
+        } else if (initialModeName !== null) {
+          throw new UnknownModeError(lexer.string,
+                                     beginStatementStartIndex,
+                                     initialModeName);
+        }
+        return {
+          preludeEndIndex: lexer.index,
+          evalBlock: new EvalBlock(evalString),
+          modes: modes,
+          initialMode: initialMode
+        };
       }
     }
-
-  } else {
-    // No begin pattern found - assume there is no prelude.
-    return {
-      preludeEndIndex: 0,
-      evalBlock: null,
-      modes: {},
-      initialMode: null
-    };
+    lexer.next();
   }
-  return {
-    preludeEndIndex: beginMatch.index + beginMatch[0].length,
-    evalBlock: new EvalBlock(evalString),
-    modes: modes,
-    initialMode: initialMode
-  };
+  throw new BMLSyntaxError('could not find end of prelude.',
+                           lexer.string, lexer.index);
 }
 
 /**
@@ -424,6 +429,23 @@ function parseUse(string, openBraceIndex) {
     blockEndIndex: useRe.lastIndex,
     modeName: match[2]
   };
+}
+
+function parseBegin(lexer) {
+  if (lexer.peek().tokenType !== TokenType.KW_BEGIN) {
+    throw new BMLSyntaxError('begin statements must start with keyword "begin"',
+                             lexer.string, lexer.index);
+  }
+  var token = lexer.next();
+  var useRe = /\s+(use|using)\s+(\w[\w\d]*)/y;
+  useRe.lastIndex = lexer.index;
+  var match = useRe.exec(lexer.string);
+  if (match !== null) {
+    lexer.overrideIndex(lexer.index + match[0].length);
+    return match[2];
+  } else {
+    return match;
+  }
 }
 
 /**
@@ -553,7 +575,7 @@ function parseChoose(string, openBraceIndex, includeNoOp) {
 }
 
 
-exports.findCodeBlockEnd = findCodeBlockEnd;
+exports.parseEvaluate = parseEvaluate;
 exports.parseRule = parseRule;
 exports.parseMode = parseMode;
 exports.parsePrelude = parsePrelude;

@@ -12,7 +12,7 @@ const TokenType = Object.freeze({
   COMMA: Symbol('COMMA'),
   KW_AS: Symbol('KW_AS'),
   KW_CALL: Symbol('KW_CALL'),
-  KW_EVALULATE: Symbol('KW_EVALULATE'),
+  KW_EVALUATE: Symbol('KW_EVALUATE'),
   KW_MODE: Symbol('KW_MODE'),
   KW_BEGIN: Symbol('KW_BEGIN'),
   KW_USE: Symbol('KW_USE'),

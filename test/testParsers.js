@@ -16,7 +16,7 @@ var JavascriptSyntaxError = errors.JavascriptSyntaxError;
 var UnknownTransformError = errors.UnknownTransformError;
 var BMLSyntaxError = errors.BMLSyntaxError;
 
-var findCodeBlockEnd = parsers.findCodeBlockEnd;
+var parseEvaluate = parsers.parseEvaluate;
 var parseRule = parsers.parseRule;
 var parseMode = parsers.parseMode;
 var parsePrelude = parsers.parsePrelude;
@@ -30,52 +30,94 @@ var parseCall = parsers.parseCall;
 var parseReplacements = parsers.parseReplacements;
 
 
-describe('findCodeBlockEnd', function() {
+describe('parseEvaluate', function() {
+
+  it('can parse an empty block', function() {
+    var testString = 'evaluate {}';
+    var lexer = new Lexer(testString);
+    var block = parseEvaluate(lexer);
+    expect(block).to.equal('');
+    expect(lexer.index).to.equal(testString.length);
+  });
+
   it('should ignore braces in inline comments', function() {
-    var testString = '012{//}\n}end';
-    assert.equal(findCodeBlockEnd(testString, 3), testString.indexOf('end'));
+    var testString = 'evaluate {//}\n}';
+    var lexer = new Lexer(testString);
+    var block = parseEvaluate(lexer);
+    expect(block).to.equal('//}\n');
+    expect(lexer.index).to.equal(testString.length);
   });
+
   it('should ignore braces in block comments', function() {
-    var testString = '012{4/*\n}*/}end';
-    assert.equal(findCodeBlockEnd(testString, 3), testString.indexOf('end'));
+    var testString = 'evaluate {4/*\n}*/}';
+    var lexer = new Lexer(testString);
+    var block = parseEvaluate(lexer);
+    expect(block).to.equal('4/*\n}*/');
+    expect(lexer.index).to.equal(testString.length);
   });
+
   it('should ignore braces in single-quote string literals', function() {
-    var testString = "012{'}'}end";
-    assert.equal(findCodeBlockEnd(testString, 3), testString.indexOf('end'));
+    var testString = "evaluate {'}'}";
+    var lexer = new Lexer(testString);
+    var block = parseEvaluate(lexer);
+    expect(block).to.equal("'}'");
+    expect(lexer.index).to.equal(testString.length);
   });
-  it('should error on newline before matching single-quote', function() {
-    var testString = "012{'\n";
-    try {
-      findCodeBlockEnd(testString, 3);
-      assert(false, 'error expected');
-    } catch (e) {
-      assert(e instanceof JavascriptSyntaxError);
-    }
-  });
+
   it('should ignore braces in double-quote string literals', function() {
-    var testString = '012{"}"}end';
-    assert.equal(findCodeBlockEnd(testString, 3), testString.indexOf('end'));
+    var testString = 'evaluate {"}"}';
+    var lexer = new Lexer(testString);
+    var block = parseEvaluate(lexer);
+    expect(block).to.equal('"}"');
+    expect(lexer.index).to.equal(testString.length);
   });
-  it('should error on newline before matching double-quote', function() {
-    var testString = '012{"\n';
+
+  it('should error on newline before matching single-quote', function() {
+    var testString = "evaluate {'\n";
+    var lexer = new Lexer(testString);
     try {
-      findCodeBlockEnd(testString, 3);
+      var block = parseEvaluate(lexer);
       assert(false, 'error expected');
     } catch (e) {
-      assert(e instanceof JavascriptSyntaxError);
+      expect(e).to.be.an.instanceof(JavascriptSyntaxError);
     }
   });
+
+  it('should error on newline before matching double-quote', function() {
+    var testString = 'evaluate {"\n';
+    var lexer = new Lexer(testString);
+    try {
+      var block = parseEvaluate(lexer);
+      assert(false, 'error expected');
+    } catch (e) {
+      expect(e).to.be.an.instanceof(JavascriptSyntaxError);
+    }
+  });
+
   it('should ignore braces in backtick string literals', function() {
-    var testString = "012{`\n}`}end";
-    assert.equal(findCodeBlockEnd(testString, 3), testString.indexOf('end'));
+    var testString = "evaluate {`\n}`}";
+    var lexer = new Lexer(testString);
+    var block = parseEvaluate(lexer);
+    expect(block).to.equal('`\n}`');
+    expect(lexer.index).to.equal(testString.length);
   });
+
   it('should handle braces in javascript', function() {
-    var testString = '012{{{{}}}}end';
-    assert.equal(findCodeBlockEnd(testString, 3), testString.indexOf('end'));
+    var testString = 'evaluate {{{{}}}}';
+    var lexer = new Lexer(testString);
+    var block = parseEvaluate(lexer);
+    expect(block).to.equal('{{{}}}');
+    expect(lexer.index).to.equal(testString.length);
   });
+
   it('should be able to read itself (very meta)', function() {
-    var testString = '012{' + fs.readFileSync(require.resolve('../src/parsers.js')) + '}!!!!!!';
-    assert.equal(findCodeBlockEnd(testString, 3), testString.indexOf('!!!!!!'));
+    var parsersFileContents = '' + fs.readFileSync(
+      require.resolve('../src/parsers.js'));
+    var testString = 'evaluate {' + parsersFileContents + '}';
+    var lexer = new Lexer(testString);
+    var block = parseEvaluate(lexer);
+    expect(block).to.equal(parsersFileContents);
+    expect(lexer.index).to.equal(testString.length);
   });
 });
 
@@ -83,11 +125,25 @@ describe('findCodeBlockEnd', function() {
 describe('parseMode', function() {
 
   it('should allow empty modes', function() {
-    var testString = 'mode test {}end';
-    var result = parseMode(testString, 5);
-    assert.equal(result.modeEndIndex, testString.indexOf('end'));
-    assert(result.mode instanceof Mode);
-    assert.equal(result.mode.name, 'test');
+    var testString = 'mode test {}';
+    var lexer = new Lexer(testString);
+    var mode = parseMode(lexer);
+    expect(lexer.index).to.equal(testString.length);
+    expect(mode).to.be.an.instanceof(Mode);
+    expect(mode.name).to.equal('test');
+  });
+
+  it('allows comments within modes', function() {
+    var testString =
+        `mode test {
+             // test
+             // test
+         }`;
+    var lexer = new Lexer(testString);
+    var mode = parseMode(lexer);
+    expect(lexer.index).to.equal(testString.length);
+    expect(mode).to.be.an.instanceof(Mode);
+    expect(mode.name).to.equal('test');
   });
 
   it('recognizes rules and passes them off to parseRule', function() {
@@ -100,31 +156,16 @@ describe('parseMode', function() {
                  'js' 10
              // more comments
         }`;
-    var result = parseMode(testString, 5);
-    assert.equal(result.modeEndIndex, testString.length);
-    assert.equal(result.mode.name, 'test');
-    assert.equal(result.mode.rules.length, 2);
-    assert.equal(result.mode.rules[0].matchers.length, 1);
-    assert.deepEqual(result.mode.rules[0].matchers[0], createMatcher('bml'));
-    assert.equal(result.mode.rules[1].matchers.length, 1);
-    assert.deepEqual(result.mode.rules[1].matchers[0], createMatcher('javascript'));
+    var lexer = new Lexer(testString);
+    var mode = parseMode(lexer);
+    expect(lexer.index).to.equal(testString.length);
+    expect(mode).to.be.an.instanceof(Mode);
+    expect(mode.name).to.equal('test');
+    expect(mode.rules.length).to.equal(2);
   });
 });
 
 describe('parsePrelude', function() {
-
-  it('knows when there is no prelude', function() {
-    var testString = `as long as there is no 'begin' statement
-                      parsePrelude will assume there is no prelude at all.
-                      begin statements have the form 'begin [using someMode]'
-                      when no begin statement is found,
-                      index  0 is always returned.`;
-    var result = parsePrelude(testString);
-    assert.equal(result.preludeEndIndex, 0);
-    assert.equal(result.evalBlock, null);
-    assert.deepEqual(result.modes, {});
-    assert.equal(result.initialMode, null);
-  });
 
   it('finds and executes multiple evaluate blocks', function() {
     var testString = `evaluate {
@@ -138,7 +179,7 @@ describe('parsePrelude', function() {
 
                       some text`;
     var result = parsePrelude(testString);
-    assert.equal(result.preludeEndIndex, testString.indexOf('begin\n') + 'begin\n'.length);
+    assert.equal(result.preludeEndIndex, testString.indexOf('begin') + 'begin'.length);
     assert(result.evalBlock.string.indexOf('global.evalTest = 1;\n') !== -1);
     assert(result.evalBlock.string.indexOf('global.evalTest2 = 2;\n') !== -1);
     assert.deepEqual(result.modes, {});
@@ -157,7 +198,7 @@ describe('parsePrelude', function() {
 
                       some text`;
     var result = parsePrelude(testString);
-    assert.equal(result.preludeEndIndex, testString.indexOf('begin\n') + 'begin\n'.length);
+    assert.equal(result.preludeEndIndex, testString.indexOf('begin') + 'begin'.length);
     assert(result.modes.hasOwnProperty('firstMode'));
     assert(result.modes.hasOwnProperty('secondMode'));
   });
@@ -170,7 +211,7 @@ describe('parsePrelude', function() {
                      `;
     var result = parsePrelude(testString);
     assert.equal(result.preludeEndIndex,
-                 testString.indexOf('begin using test\n') + 'begin using test\n'.length);
+                 testString.indexOf('begin using test') + 'begin using test'.length);
     assert(result.modes.hasOwnProperty('test'));
     assert.equal(result.initialMode.name, 'test');
   });
@@ -183,7 +224,7 @@ describe('parsePrelude', function() {
                      `;
     var result = parsePrelude(testString);
     assert.equal(result.preludeEndIndex,
-                 testString.indexOf('begin use test\n') + 'begin use test\n'.length);
+                 testString.indexOf('begin use test') + 'begin use test'.length);
     assert(result.modes.hasOwnProperty('test'));
     assert.equal(result.initialMode.name, 'test');
   });

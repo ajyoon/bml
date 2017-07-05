@@ -1,4 +1,5 @@
 var assert = require('assert');
+var expect = require('chai').expect;
 
 var Lexer = require('../src/lexer.js').Lexer;
 var Token = require('../src/token.js').Token;
@@ -193,6 +194,25 @@ describe('Lexer', function() {
     assert.deepEqual(lexer.next(), new Token(TokenType.TEXT, 1, 'b'));
     assert.equal(lexer.peek(), null);
     assert.equal(lexer.next(), null);
+  });
+
+  it('can pass over whitespace and comments', function() {
+    var testString = `test
+
+        test2
+        // comment
+        test3`;
+    var lexer = new Lexer(testString);
+    lexer.skipWhitespaceAndComments();
+    expect(lexer.index).to.equal(0);
+
+    lexer.overrideIndex(testString.indexOf('test') + 'test'.length);
+    lexer.skipWhitespaceAndComments();
+    expect(lexer.index).to.equal(testString.indexOf('test2'));
+
+    lexer.overrideIndex(testString.indexOf('test2') + 'test2'.length);
+    lexer.skipWhitespaceAndComments();
+    expect(lexer.index).to.equal(testString.indexOf('test3'));
   });
 
 });

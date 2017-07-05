@@ -75,7 +75,6 @@ function renderText(string, startIndex, evalBlock, modes, activeMode) {
         replacement = parseChooseResult.replacer.call(
           [''], string, index);
         if (replacement instanceof EvalBlock) {
-            console.log(replacement);
           out += eval(replacement.string)([''], string, index);
         } else {
           out += replacement;

@@ -1,4 +1,5 @@
 
+
 ```
 evaluate {
     // arbitrary javascript
@@ -15,14 +16,14 @@ evaluate {
     }
 }
 mode initial {
-    'evalulate' as 'eval',
+    'evalulate' as 'eval'
 }
 mode literal {
     // No rules
 }
 begin using initial
 
-{{call copyPrelude}```
+```
 
 
 # bml
