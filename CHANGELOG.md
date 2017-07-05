@@ -1,9 +1,17 @@
-### 0.0.2
-* [[ Double square brackets ]] are now used for marking blocks of literal text
-  in order to prevent collisions with HTML in the previous << double angle bracket >>
-  marker
-* Fixed a bug with backslash escapes inside literal blocks so literal double square
-  brackets can be used [[ inside blocks like this \\]] ]]
+### 0.0.5
+* Fix silly bug causing no-op options to never occur
+
+### 0.0.4
+* Remove the explicit bml.renderBML function - to render a string of bml,
+  simply call the package as a function.
+* Implement automatic no-op options in choice rules.
+  Rules now have a default chance to not do anything.
+  A no-op option is automatically inserted for all choice rules
+  with a weight of `null`, to share an equal probability as all
+  other options without explicit weights.
+* Fix bug in renderer causing halt after first match found
+* Add settings.markdownSettings. Allows users to specify settings
+  to pass to marked.js at render time.
 
 ### 0.0.3
 * Add WeightedChoice class and use it in place of weight objects.
@@ -20,18 +28,9 @@
   the RegExp `/\.\*/y`.
 * Transform/replacer functions now take a RegExp match array.
 
-### 0.0.4
-* Remove the explicit bml.renderBML function - to render a string of bml,
-  simply call the package as a function.
-* Implement automatic no-op options in choice rules.
-  Rules now have a default chance to not do anything.
-  A no-op option is automatically inserted for all choice rules
-  with a weight of `null`, to share an equal probability as all
-  other options without explicit weights.
-* Fix bug in renderer causing halt after first match found
-* Add settings.markdownSettings. Allows users to specify settings
-  to pass to marked.js at render time.
-
-### 0.0.5
-* Fix silly bug causing no-op options to never occur
-
+### 0.0.2
+* [[ Double square brackets ]] are now used for marking blocks of literal text
+  in order to prevent collisions with HTML in the previous << double angle bracket >>
+  marker
+* Fixed a bug with backslash escapes inside literal blocks so literal double square
+  brackets can be used [[ inside blocks like this \\]] ]]
