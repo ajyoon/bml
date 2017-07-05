@@ -393,6 +393,8 @@ function parsePrelude(string) {
         var initialMode;
         if (modes.hasOwnProperty(initialModeName)) {
           initialMode = modes[initialModeName];
+        } else if (initialModeName === null) {
+          initialMode = null;
         } else if (initialModeName !== null) {
           throw new UnknownModeError(lexer.string,
                                      beginStatementStartIndex,
