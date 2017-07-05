@@ -22,13 +22,13 @@ var createWeightedOptionReplacer = _rand.createWeightedOptionReplacer;
 
 function parseEvaluate(lexer) {
   if (lexer.peek().tokenType !== TokenType.KW_EVALUATE) {
-    throw new BMLSyntaxError('evalulate blocks must start with keyword "evaluate"',
+    throw new BMLSyntaxError('evaluate blocks must start with keyword "evaluate"',
                              lexer.string, lexer.index);
   }
   lexer.next();  // consume KW_EVALUATE
   lexer.skipWhitespaceAndComments();
   if (lexer.peek().tokenType !== TokenType.OPEN_BRACE) {
-    throw new BMLSyntaxError('evalulate blocks must be opened with a curly brace ("{")',
+    throw new BMLSyntaxError('evaluate blocks must be opened with a curly brace ("{")',
                              lexer.string, lexer.index);
   }
   lexer.next();  // consume OPEN_BRACE
@@ -508,72 +508,15 @@ function extractNumberLiteral(string, numberIndex) {
   };
 }
 
-
-/**
- * Parse an option block.
- *
- * @returns {blockEndIndex, replacer}
- */
-function parseChoose(string, openBraceIndex, includeNoOp) {
-  var index = openBraceIndex + 2;
-  var numberRe = /(\d+(\.\d+)?)|(\.\d+)/y;
-  var callRe = /call (\w+[\w\d\.]*)/y;
-  var state = 'code';
-  var acceptChoice = true;;
-  var weightedChoices = [];
-  var currentChoice = null;
-  var currentWeight = null;
-  while (index < string.length) {
-    if (isWhitespace(string[index])) {
-      // Ignore
-    } else if (string.slice(index, index + 2) === '}}') {
-      if (currentChoice !== null) {
-        weightedChoices.push(new WeightedChoice(currentChoice, currentWeight));
-      }
-      return {
-        blockEndIndex: index + 1,
-        replacer: createWeightedOptionReplacer(weightedChoices, includeNoOp)
-      };
-    } else if (acceptChoice) {
-      callRe.lastIndex = index;
-      var callMatch = callRe.exec(string);
-      if (string[index] === '\'') {
-        acceptChoice = false;
-        var literalExtractionResult = parseStringLiteral(string, index);
-        currentChoice = literalExtractionResult.extractedString;
-        index = literalExtractionResult.closeQuoteIndex;
-      } else if (callMatch !== null) {
-        acceptChoice = false;
-        currentChoice = new EvalBlock(callMatch[1]);
-        index += callMatch[0].length - 1;
-      } else {
-        throw new BMLSyntaxError('Unexpected character at: ' + index);
-      }
-    } else {
-      numberRe.lastIndex = index;
-      var numberMatch = numberRe.exec(string);
-      if (string[index] === ',') {
-        acceptChoice = true;
-        weightedChoices.push(new WeightedChoice(currentChoice, currentWeight));
-        currentChoice = null;
-        currentWeight = null;
-      } else if (numberMatch !== null) {
-        if (currentChoice !== null) {
-          currentWeight = Number(numberMatch[0]);
-        } else {
-          throw new BMLSyntaxError(
-            'Cannot have a weight without an option. Index: ' + index);
-        }
-      } else {
-        throw new BMLSyntaxError('Invalid syntax at: ' + index);
-      }
-    }
-    index++;
-  }
-  throw new BMLSyntaxError('Could not find end of choice block at index: '
-                           + openBraceIndex);
+function parseInlineChoose(string, openBraceIndex) {
+  var lexer = new Lexer(string);
+  lexer.overrideIndex(openBraceIndex + 2);
+  var replacements = parseReplacements(lexer);
+  return {
+    blockEndIndex: lexer.index + 2,
+    replacer: createWeightedOptionReplacer(replacements, false)
+  };
 }
-
 
 exports.parseEvaluate = parseEvaluate;
 exports.parseRule = parseRule;
@@ -582,7 +525,7 @@ exports.parsePrelude = parsePrelude;
 exports.parseUse = parseUse;
 exports.parseStringLiteral = parseStringLiteral;
 exports.parseStringLiteralWithLexer = parseStringLiteralWithLexer;
-exports.parseChoose = parseChoose;
+exports.parseInlineChoose = parseInlineChoose;
 exports.createMatcher = createMatcher;
 exports.parseMatchers = parseMatchers;
 exports.parseCall = parseCall;
