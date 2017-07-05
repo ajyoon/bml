@@ -1,8 +1,8 @@
-var assert = require('assert');
-var fs = require('fs');
+let assert = require('assert');
+let fs = require('fs');
 
-var _stringUtils = require('../src/stringUtils.js');
-var lineAndColumnOf = _stringUtils.lineAndColumnOf;
+let _stringUtils = require('../src/stringUtils.js');
+let lineAndColumnOf = _stringUtils.lineAndColumnOf;
 
 
 describe('lineAndColumnOf', function() {

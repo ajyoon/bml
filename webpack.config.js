@@ -5,7 +5,7 @@ const config = {
   entry: './bml.js',
   output: {
     path: path.resolve(__dirname, 'dist'),
-    filename: 'bml.bundle.js'
+    filename: 'bml.bundle.js',
   },
   module: {
     rules: [
@@ -15,22 +15,22 @@ const config = {
         use: {
           loader: 'babel-loader',
           options: {
-            presets: ['env']
-          }
-        }
+            presets: ['env'],
+          },
+        },
       },
       {
         test: require.resolve('bml'),
         use: [{
           loader: 'expose-loader',
-          options: 'bml'
-        }]
-      }
-    ]
+          options: 'bml',
+        }],
+      },
+    ],
   },
   plugins: [
-    //new UglifyJSPlugin()
-  ]
+    // new UglifyJSPlugin()
+  ],
 };
 
 module.exports = config;

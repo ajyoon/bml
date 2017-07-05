@@ -2,10 +2,10 @@ function lineAndColumnOf(string, charIndex) {
   if (charIndex > string.length) {
     throw new Error('charIndex > string.length');
   }
-  var line = 1;
-  var column = -1;
-  var newLine = false;
-  for (var i = 0; i <= charIndex; i++) {
+  let line = 1;
+  let column = -1;
+  let newLine = false;
+  for (let i = 0; i <= charIndex; i++) {
     if (newLine) {
       line++;
       column = 0;
@@ -21,7 +21,7 @@ function lineAndColumnOf(string, charIndex) {
 }
 
 function lineColumnString(string, charIndex) {
-  var lineAndColumn = lineAndColumnOf(string, charIndex);
+  let lineAndColumn = lineAndColumnOf(string, charIndex);
   return 'line: ' + lineAndColumn.line + ', column: ' + lineAndColumn.column;
 }
 
@@ -30,8 +30,8 @@ function isWhitespace(string) {
 }
 
 /* Escape all regex-special characters in a string */
-function escapeRegExp(string){
-  return string.replace(/([.*+?^${}()|\[\]\/\\])/g, "\\$1");
+function escapeRegExp(string) {
+  return string.replace(/([.*+?^${}()|\[\]\/\\])/g, '\\$1');
 }
 
 exports.lineAndColumnOf = lineAndColumnOf;

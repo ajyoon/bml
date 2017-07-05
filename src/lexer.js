@@ -1,5 +1,5 @@
-var Token = require('./token.js').Token;
-var TokenType = require('./tokenType.js').TokenType;
+let Token = require('./token.js').Token;
+let TokenType = require('./tokenType.js').TokenType;
 
 class Lexer {
   constructor(string) {
@@ -26,15 +26,15 @@ class Lexer {
     if (this.index >= this.string.length) {
       return null;
     }
-    var tokenType;
-    var tokenIndex = this.index;
-    var tokenString;
+    let tokenType;
+    let tokenIndex = this.index;
+    let tokenString;
     this._newLineRe.lastIndex = this.index;
     this._whitespaceRe.lastIndex = this.index;
     this._numberRe.lastIndex = this.index;
-    var newLineMatch = this._newLineRe.exec(this.string);
-    var whitespaceMatch = this._whitespaceRe.exec(this.string);
-    var numberMatch = this._numberRe.exec(this.string);
+    let newLineMatch = this._newLineRe.exec(this.string);
+    let whitespaceMatch = this._whitespaceRe.exec(this.string);
+    let numberMatch = this._numberRe.exec(this.string);
     if (newLineMatch !== null) {
       tokenType = TokenType.NEW_LINE;
       tokenString = newLineMatch[0];
@@ -124,12 +124,12 @@ class Lexer {
         tokenString = this.string[this.index];
       }
     }
-    var token = new Token(tokenType, tokenIndex, tokenString);
+    let token = new Token(tokenType, tokenIndex, tokenString);
     return token;
   }
 
   next() {
-    var token;
+    let token;
     if (this._cachedNext != null) {
       token = this._cachedNext;
       this._cachedNext = null;
@@ -143,15 +143,15 @@ class Lexer {
   }
 
   peek() {
-    var token = this._determineNext();
+    let token = this._determineNext();
     this._cachedNext = token;
     return token;
   }
 
   skipWhitespaceAndComments() {
-    var whitespaceTokenTypes = [TokenType.WHITESPACE, TokenType.NEW_LINE];
-    var inComment = false;
-    var token;
+    let whitespaceTokenTypes = [TokenType.WHITESPACE, TokenType.NEW_LINE];
+    let inComment = false;
+    let token;
     while ((token = this.peek()) !== null) {
       if (inComment) {
         if (token.tokenType === TokenType.NEW_LINE) {

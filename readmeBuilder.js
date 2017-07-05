@@ -1,15 +1,15 @@
-"use strict";
+'use strict';
 
-var fs = require('fs');
-var bml = require('bml');
+let fs = require('fs');
+let bml = require('bml');
 
-var sampleText = '' + fs.readFileSync('sample.bml');
-var renderedText = bml(sampleText);
+let sampleText = '' + fs.readFileSync('sample.bml');
+let renderedText = bml(sampleText);
 
 
-fs.writeFile("README.md", renderedText, function(err) {
-  if(err) {
+fs.writeFile('README.md', renderedText, function(err) {
+  if (err) {
     return console.log(err);
   }
-  console.log("README file built successfully.");
+  console.log('README file built successfully.');
 });

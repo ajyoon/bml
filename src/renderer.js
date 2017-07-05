@@ -1,23 +1,22 @@
-var marked = require('marked');
+let marked = require('marked');
 
-var _parsers = require('./parsers.js');
-var _settings = require('./settings.js');
-var _errors = require('./errors.js');
+let _parsers = require('./parsers.js');
+let _settings = require('./settings.js');
+let _errors = require('./errors.js');
 
-var defaultSettings = _settings.defaultSettings;
-var mergeSettings = _settings.mergeSettings;
-var parsePrelude = _parsers.parsePrelude;
-var parseUse = _parsers.parseUse;
-var parseInlineChoose = _parsers.parseInlineChoose;
-var EvalBlock = require('./evalBlock.js').EvalBlock;
-var noOp = require('./noOp.js');
-var UnknownModeError = _errors.UnknownModeError;
+let defaultSettings = _settings.defaultSettings;
+let mergeSettings = _settings.mergeSettings;
+let parsePrelude = _parsers.parsePrelude;
+let parseUse = _parsers.parseUse;
+let parseInlineChoose = _parsers.parseInlineChoose;
+let EvalBlock = require('./evalBlock.js').EvalBlock;
+let noOp = require('./noOp.js');
+let UnknownModeError = _errors.UnknownModeError;
 
 /**
  * We import many functions which are not directly used in the module
  * so that embedded code in bml documents can access them.
  */
-
 
 
 /**
@@ -33,15 +32,15 @@ var UnknownModeError = _errors.UnknownModeError;
  * @returns {String} the rendered text.
  */
 function renderText(string, startIndex, evalBlock, modes, activeMode) {
-  var isEscaped = false;
-  var inLiteralBlock = false;
-  var out = '';
-  var index = startIndex;
-  var currentRule = null;
-  var foundMatch = false;
-  var replacement = null;
-  var chooseRe = /\s*('|call)/y;
-  var useRe = /\s*(use|using)/y;
+  let isEscaped = false;
+  let inLiteralBlock = false;
+  let out = '';
+  let index = startIndex;
+  let currentRule = null;
+  let foundMatch = false;
+  let replacement = null;
+  let chooseRe = /\s*('|call)/y;
+  let useRe = /\s*(use|using)/y;
 
   if (evalBlock) {
     eval(evalBlock.string);
@@ -71,7 +70,7 @@ function renderText(string, startIndex, evalBlock, modes, activeMode) {
       chooseRe.lastIndex = index + 2;
       useRe.lastIndex = index + 2;
       if (chooseRe.test(string)) {
-          var parseInlineChooseResult = parseInlineChoose(string, index, false);
+          let parseInlineChooseResult = parseInlineChoose(string, index, false);
         replacement = parseInlineChooseResult.replacer.call(
           [''], string, index);
         if (replacement instanceof EvalBlock) {
@@ -82,7 +81,7 @@ function renderText(string, startIndex, evalBlock, modes, activeMode) {
         index = parseInlineChooseResult.blockEndIndex;
         continue;
       } else if (useRe.test(string)) {
-        var parseUseResult = parseUse(string, index);
+        let parseUseResult = parseUse(string, index);
         index = parseUseResult.blockEndIndex;
         if (modes.hasOwnProperty(parseUseResult.modeName)) {
           activeMode = modes[parseUseResult.modeName];
@@ -99,11 +98,11 @@ function renderText(string, startIndex, evalBlock, modes, activeMode) {
       } else {
         if (activeMode !== null) {
           ruleLoop:
-          for (var r = 0; r < activeMode.rules.length; r++) {
+          for (let r = 0; r < activeMode.rules.length; r++) {
             currentRule = activeMode.rules[r];
-            for (var m = 0; m < currentRule.matchers.length; m++) {
+            for (let m = 0; m < currentRule.matchers.length; m++) {
               currentRule.matchers[m].lastIndex = index;
-              var currentMatch = currentRule.matchers[m].exec(string);
+              let currentMatch = currentRule.matchers[m].exec(string);
               if (currentMatch !== null) {
                 replacement = currentRule.replacer
                   .call(currentRule.matchers[m], string, index);
@@ -139,7 +138,7 @@ function renderText(string, startIndex, evalBlock, modes, activeMode) {
 }
 
 function render(string) {
-  var {preludeEndIndex, evalBlock, modes, initialMode} = parsePrelude(string);
+  let {preludeEndIndex, evalBlock, modes, initialMode} = parsePrelude(string);
   return renderText(string, preludeEndIndex, evalBlock, modes, initialMode);
 }
 

@@ -1,9 +1,9 @@
 /**
  * Default settings. These are passed in to the main bml rendering function.
  */
-var defaultSettings = {
+let defaultSettings = {
   renderMarkdown: false,
-  markdownSettings: {}
+  markdownSettings: {},
 };
 
 /**
@@ -11,7 +11,7 @@ var defaultSettings = {
  * defaulting to those in originalSettings where absent.
  */
 function mergeSettings(originalSettings, newSettings) {
-  var merged = JSON.parse(JSON.stringify(originalSettings));
+  let merged = JSON.parse(JSON.stringify(originalSettings));
   Object.keys(newSettings).forEach(function(key, index) {
     if (merged.hasOwnProperty(key)) {
       merged[key] = newSettings[key];

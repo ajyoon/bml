@@ -1,23 +1,23 @@
-var _rand = require('./rand.js');
-var _errors = require('./errors.js');
-var _stringUtils = require('./stringUtils.js');
-var _rule = require('./rule.js');
-var createRule = require('./rule.js').createRule;
-var EvalBlock = require('./evalBlock.js').EvalBlock;
-var Mode = require('./mode.js').Mode;
-var WeightedChoice = require('./weightedChoice.js').WeightedChoice;
-var Lexer = require('./lexer.js').Lexer;
-var TokenType = require('./tokenType.js').TokenType;
+let _rand = require('./rand.js');
+let _errors = require('./errors.js');
+let _stringUtils = require('./stringUtils.js');
+let _rule = require('./rule.js');
+let createRule = require('./rule.js').createRule;
+let EvalBlock = require('./evalBlock.js').EvalBlock;
+let Mode = require('./mode.js').Mode;
+let WeightedChoice = require('./weightedChoice.js').WeightedChoice;
+let Lexer = require('./lexer.js').Lexer;
+let TokenType = require('./tokenType.js').TokenType;
 
-var UnknownTransformError = _errors.UnknownTransformError;
-var UnknownModeError = _errors.UnknownModeError;
-var JavascriptSyntaxError = _errors.JavascriptSyntaxError;
-var BMLSyntaxError = _errors.BMLSyntaxError;
-var lineAndColumnOf = _stringUtils.lineAndColumnOf;
-var lineColumnString = _stringUtils.lineColumnString;
-var isWhitespace = _stringUtils.isWhitespace;
-var escapeRegExp = _stringUtils.escapeRegExp;
-var createWeightedOptionReplacer = _rand.createWeightedOptionReplacer;
+let UnknownTransformError = _errors.UnknownTransformError;
+let UnknownModeError = _errors.UnknownModeError;
+let JavascriptSyntaxError = _errors.JavascriptSyntaxError;
+let BMLSyntaxError = _errors.BMLSyntaxError;
+let lineAndColumnOf = _stringUtils.lineAndColumnOf;
+let lineColumnString = _stringUtils.lineColumnString;
+let isWhitespace = _stringUtils.isWhitespace;
+let escapeRegExp = _stringUtils.escapeRegExp;
+let createWeightedOptionReplacer = _rand.createWeightedOptionReplacer;
 
 
 function parseEvaluate(lexer) {
@@ -33,12 +33,12 @@ function parseEvaluate(lexer) {
   }
   lexer.next();  // consume OPEN_BRACE
 
-  var state = 'code';
-  var isEscaped = false;
-  var index = lexer.index;
-  var startIndex = index;
-  var openBraceCount = 1;
-  while(index < lexer.string.length) {
+  let state = 'code';
+  let isEscaped = false;
+  let index = lexer.index;
+  let startIndex = index;
+  let openBraceCount = 1;
+  while (index < lexer.string.length) {
     switch (state) {
     case 'block':
       if (lexer.string.slice(index, index + 2) === '*/') {
@@ -57,14 +57,14 @@ function parseEvaluate(lexer) {
       break;
     case 'single-quote string':
     if (lexer.string[index] === '\'' && !isEscaped) {
-        state = "code";
+        state = 'code';
       } else if (lexer.string[index] === '\n') {
         throw new JavascriptSyntaxError(lexer.string, index);
       }
       break;
     case 'double-quote string':
       if (lexer.string[index] === '"' && !isEscaped) {
-        state = "code";
+        state = 'code';
       } else if (lexer.string[index] === '\n') {
         throw new JavascriptSyntaxError(lexer.string, index);
       }
@@ -126,12 +126,12 @@ function createMatcher(string, isRegex) {
  * @returns {[RegExp]}
  */
 function parseMatchers(lexer) {
-  var startIndex = lexer.index;
-  var token;
-  var afterLetterR = false;
-  var acceptMatcher = true;
-  var inComment = false;
-  var matchers = [];
+  let startIndex = lexer.index;
+  let token;
+  let afterLetterR = false;
+  let acceptMatcher = true;
+  let inComment = false;
+  let matchers = [];
   while ((token = lexer.peek()) !== null) {
     if (inComment) {
       if (token.tokenType === TokenType.NEW_LINE) {
@@ -190,9 +190,9 @@ function parseMatchers(lexer) {
 }
 
 function parseCall(lexer) {
-  var callRe = /call\s+([_$a-zA-Z\xA0-\uFFFF][_$a-zA-Z0-9\xA0-\uFFFF]*)/y;
+  let callRe = /call\s+([_$a-zA-Z\xA0-\uFFFF][_$a-zA-Z0-9\xA0-\uFFFF]*)/y;
   callRe.lastIndex = lexer.index;
-  var callMatch = callRe.exec(lexer.string);
+  let callMatch = callRe.exec(lexer.string);
   if (callMatch === null) {
     throw new BMLSyntaxError('invalid call statement',
                              lexer.string, lexer.index);
@@ -202,14 +202,14 @@ function parseCall(lexer) {
 }
 
 function parseReplacements(lexer) {
-  var startIndex = lexer.index;
-  var token;
-  var inComment = false;
-  var choices = [];
-  var acceptReplacement = true;
-  var acceptWeight = false;
-  var acceptComma = false;
-  var acceptReplacerEnd = false;
+  let startIndex = lexer.index;
+  let token;
+  let inComment = false;
+  let choices = [];
+  let acceptReplacement = true;
+  let acceptWeight = false;
+  let acceptComma = false;
+  let acceptReplacerEnd = false;
 
   while ((token = lexer.peek()) !== null) {
     if (inComment) {
@@ -236,14 +236,14 @@ function parseReplacements(lexer) {
           // break out of loop since the string literal token
           // stream is consumed by parseStringLiteralWithLexer
           continue;
-        } else if (acceptReplacerEnd){
+        } else if (acceptReplacerEnd) {
           return choices;
         } else {
           throw new BMLSyntaxError('unexpected string literal',
                                    lexer.string, token.index);
         }
       case TokenType.CLOSE_BRACE:
-        if (acceptReplacerEnd){
+        if (acceptReplacerEnd) {
           return choices;
         } else {
           throw new BMLSyntaxError('unexpected closing brace',
@@ -297,27 +297,27 @@ function parseReplacements(lexer) {
 
 
 function parseRule(lexer) {
-  var matchers = parseMatchers(lexer);
+  let matchers = parseMatchers(lexer);
   if (lexer.peek().tokenType !== TokenType.KW_AS) {
     throw new BMLSyntaxError('matchers must be followed with keyword "as"',
                              lexer.string, lexer.index);
   }
   lexer.next();  // consume KW_AS
-  var replacements = parseReplacements(lexer);
+  let replacements = parseReplacements(lexer);
   return createRule(matchers, replacements);
 }
 
 function parseMode(lexer) {
-  var startIndex = lexer.index;
+  let startIndex = lexer.index;
   if (lexer.peek().tokenType !== TokenType.KW_MODE) {
     throw new BMLSyntaxError('modes must begin with keyword "mode"',
                              lexer.string, lexer.index);
   }
-  var token = lexer.next();  // consume KW_MODE
-  var modeNameRe = /(\s*(\w+)\s*)/y;
+  let token = lexer.next();  // consume KW_MODE
+  let modeNameRe = /(\s*(\w+)\s*)/y;
   modeNameRe.lastIndex = lexer.index;
-  var modeNameMatch = modeNameRe.exec(lexer.string);
-  var mode = new Mode(modeNameMatch[2]);
+  let modeNameMatch = modeNameRe.exec(lexer.string);
+  let mode = new Mode(modeNameMatch[2]);
   lexer.overrideIndex(lexer.index + modeNameMatch[1].length);
 
   if (lexer.peek().tokenType !== TokenType.OPEN_BRACE) {
@@ -326,7 +326,7 @@ function parseMode(lexer) {
   }
   lexer.next();  // consume open brace
 
-  var inComment = false;
+  let inComment = false;
   while ((token = lexer.peek()) !== null) {
     if (inComment) {
       if (token.tokenType === TokenType.NEW_LINE) {
@@ -362,11 +362,11 @@ function parseMode(lexer) {
 
 
 function parsePrelude(string) {
-  var lexer = new Lexer(string);
-  var inComment = false;
-  var evalString = '';
-  var modes = {};
-  var token;
+  let lexer = new Lexer(string);
+  let inComment = false;
+  let evalString = '';
+  let modes = {};
+  let token;
   while ((token = lexer.peek()) !== null) {
     if (inComment) {
       if (token.tokenType === TokenType.NEW_LINE) {
@@ -404,7 +404,7 @@ function parsePrelude(string) {
           preludeEndIndex: lexer.index,
           evalBlock: new EvalBlock(evalString),
           modes: modes,
-          initialMode: initialMode
+          initialMode: initialMode,
         };
       }
     }
@@ -421,15 +421,15 @@ function parsePrelude(string) {
  * after the closing brace.
  */
 function parseUse(string, openBraceIndex) {
-  var useRe = /{{(use|using)\s+(\w[\w\d]*)\s*}}/y;
+  let useRe = /{{(use|using)\s+(\w[\w\d]*)\s*}}/y;
   useRe.lastIndex = openBraceIndex;
-  var match = useRe.exec(string);
+  let match = useRe.exec(string);
   if (match === null) {
     throw new UnknownTransformError(string, openBraceIndex);
   }
   return {
     blockEndIndex: useRe.lastIndex,
-    modeName: match[2]
+    modeName: match[2],
   };
 }
 
@@ -438,10 +438,10 @@ function parseBegin(lexer) {
     throw new BMLSyntaxError('begin statements must start with keyword "begin"',
                              lexer.string, lexer.index);
   }
-  var token = lexer.next();
-  var useRe = /\s+(use|using)\s+(\w[\w\d]*)/y;
+  let token = lexer.next();
+  let useRe = /\s+(use|using)\s+(\w[\w\d]*)/y;
   useRe.lastIndex = lexer.index;
-  var match = useRe.exec(lexer.string);
+  let match = useRe.exec(lexer.string);
   if (match !== null) {
     lexer.overrideIndex(lexer.index + match[0].length);
     return match[2];
@@ -457,10 +457,10 @@ function parseBegin(lexer) {
  * @return {String} the parsed string literal.
  */
 function parseStringLiteralWithLexer(lexer) {
-  var startIndex = lexer.index;
-  var stringLiteral = '';
-  var token;
-  var openStringToken = lexer.next();
+  let startIndex = lexer.index;
+  let stringLiteral = '';
+  let token;
+  let openStringToken = lexer.next();
   while ((token = lexer.next()) !== null) {
     if (token.tokenType === openStringToken.tokenType) {
       return stringLiteral;
@@ -474,8 +474,8 @@ function parseStringLiteralWithLexer(lexer) {
 // TODO: use me in similar logic in other parsers
 // {closeQuoteIndex, extractedString}
 function parseStringLiteral(string, openQuoteIndex) {
-  var index = openQuoteIndex + 1;
-  var isEscaped = false;
+  let index = openQuoteIndex + 1;
+  let isEscaped = false;
   while (index < string.length) {
     if (isEscaped) {
       isEscaped = false;
@@ -485,7 +485,7 @@ function parseStringLiteral(string, openQuoteIndex) {
       } else if (string[index] === '\'') {
         return {
           closeQuoteIndex: index,
-          extractedString: string.slice(openQuoteIndex + 1, index)
+          extractedString: string.slice(openQuoteIndex + 1, index),
         };
       }
     }
@@ -498,25 +498,25 @@ function parseStringLiteral(string, openQuoteIndex) {
 
 // {lastDigitIndex, extractedNumber}
 function extractNumberLiteral(string, numberIndex) {
-  var numberRe = /(\d+(\.\d+)?)|(\.\d+)/y;
+  let numberRe = /(\d+(\.\d+)?)|(\.\d+)/y;
   numberRe.lastIndex = numberIndex;
-  var match = numberRe.exec(string);
+  let match = numberRe.exec(string);
   if (match === null) {
     return null;
   }
   return {
     lastDigitIndex: numberIndex + match[0].length,
-    extractedNumber: Number(match[0])
+    extractedNumber: Number(match[0]),
   };
 }
 
 function parseInlineChoose(string, openBraceIndex) {
-  var lexer = new Lexer(string);
+  let lexer = new Lexer(string);
   lexer.overrideIndex(openBraceIndex + 2);
-  var replacements = parseReplacements(lexer);
+  let replacements = parseReplacements(lexer);
   return {
     blockEndIndex: lexer.index + 2,
-    replacer: createWeightedOptionReplacer(replacements, false)
+    replacer: createWeightedOptionReplacer(replacements, false),
   };
 }
 

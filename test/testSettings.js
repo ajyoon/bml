@@ -1,20 +1,20 @@
-var assert = require('assert');
-var fs = require('fs');
+let assert = require('assert');
+let fs = require('fs');
 
-var mergeSettings = require('../src/settings.js').mergeSettings;
+let mergeSettings = require('../src/settings.js').mergeSettings;
 
 
 describe('mergeSettings', function() {
   it('should handle replacing all fields', function() {
-    var originalSettings = {
+    let originalSettings = {
       renderMarkdown: false,
-      contextSize: 5
+      contextSize: 5,
     };
-    var merged = mergeSettings(
+    let merged = mergeSettings(
       originalSettings,
       {
           renderMarkdown: true,
-          contextSize: 1000
+          contextSize: 1000,
       });
     assert.strictEqual(true, merged.renderMarkdown);
     assert.strictEqual(1000, merged.contextSize);

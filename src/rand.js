@@ -1,14 +1,14 @@
-var Replacer = require('./replacer.js').Replacer;
-var WeightedChoice = require('./weightedChoice.js').WeightedChoice;
-var noOp = require('./noOp.js');
+let Replacer = require('./replacer.js').Replacer;
+let WeightedChoice = require('./weightedChoice.js').WeightedChoice;
+let noOp = require('./noOp.js');
 
 
 function normalizeWeights(weightedChoices) {
-  var normalized = [];
-  var sum = 0;
-  var nullWeightCount = 0;
-  for (var w = 0; w < weightedChoices.length; w++) {
-    var weightedChoice = weightedChoices[w];
+  let normalized = [];
+  let sum = 0;
+  let nullWeightCount = 0;
+  for (let w = 0; w < weightedChoices.length; w++) {
+    let weightedChoice = weightedChoices[w];
     normalized.push(weightedChoice.clone());
     if (weightedChoice.weight === null) {
       nullWeightCount++;
@@ -16,8 +16,8 @@ function normalizeWeights(weightedChoices) {
       sum += weightedChoice.weight;
     }
   }
-  var nullWeight = (100 - sum) / nullWeightCount;
-  for (var n = 0; n < normalized.length; n++) {
+  let nullWeight = (100 - sum) / nullWeightCount;
+  for (let n = 0; n < normalized.length; n++) {
     if (normalized[n].weight === null) {
       normalized[n].weight = nullWeight;
     }
@@ -36,13 +36,13 @@ function randomInt(min, max) {
 }
 
 function weightedChoose(weights) {
-  var sum = 0;
-  for (var i = 0; i < weights.length; i++) {
+  let sum = 0;
+  for (let i = 0; i < weights.length; i++) {
     sum += weights[i].weight;
   }
-  var progress = 0;
-  var pickedValue = randomFloat(0, sum);
-  for (var w = 0; w < weights.length; w++) {
+  let progress = 0;
+  let pickedValue = randomFloat(0, sum);
+  for (let w = 0; w < weights.length; w++) {
     progress += weights[w].weight;
     if (progress >= pickedValue) {
       return weights[w].choice;
@@ -65,9 +65,9 @@ function weightedChoose(weights) {
  * to be normalized as described above.
  */
 function createWeightedOptionReplacer(choices, includeNoOp) {
-  var normalizedWeights;
+  let normalizedWeights;
   if (includeNoOp === true) {
-    var choicesWithNoOp = choices.slice();
+    let choicesWithNoOp = choices.slice();
     choicesWithNoOp.push(new WeightedChoice(noOp, null));
     normalizedWeights = normalizeWeights(choicesWithNoOp);
   } else {
