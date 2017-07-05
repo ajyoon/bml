@@ -243,11 +243,13 @@ function parseReplacements(lexer) {
                                    lexer.string, token.index);
         }
       case TokenType.CLOSE_BRACE:
+      case TokenType.LETTER_R:
         if (acceptReplacerEnd) {
           return choices;
         } else {
-          throw new BMLSyntaxError('unexpected closing brace',
-                                   lexer.string, token.index);
+          throw new BMLSyntaxError(
+            `unexpected end of replacer: ${token.tokenType}`,
+            lexer.string, token.index);
         }
       case TokenType.KW_CALL:
         if (acceptReplacement) {
@@ -342,6 +344,7 @@ function parseMode(lexer) {
         break;
       case TokenType.SINGLE_QUOTE:
       case TokenType.DOUBLE_QUOTE:
+      case TokenType.LETTER_R:
         mode.rules.push(parseRule(lexer));
         continue;
       case TokenType.CLOSE_BRACE:

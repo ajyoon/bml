@@ -150,7 +150,7 @@ describe('parseMode', function() {
              // some comments
              'bml' as 'BML'
              // more comments
-             'javascript' as 'Javascript' 30, 'JS' 10,
+             r'javascript' as 'Javascript' 30, 'JS' 10,
                  'js' 10
              // more comments
         }`;

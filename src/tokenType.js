@@ -17,6 +17,6 @@ const TokenType = Object.freeze({
   KW_BEGIN: Symbol('KW_BEGIN'),
   KW_USE: Symbol('KW_USE'),
   NUMBER: Symbol('NUMBER'),
-  TEXT: Symbol('TEXT'),
+  TEXT: Symbol('TEXT')
 });
 exports.TokenType = TokenType;
