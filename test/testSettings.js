@@ -16,7 +16,7 @@ describe('mergeSettings', function() {
           renderMarkdown: true,
           contextSize: 1000
       });
-    assert.equal(true, merged.renderMarkdown);
-    assert.equal(1000, merged.contextSize);
+    assert.strictEqual(true, merged.renderMarkdown);
+    assert.strictEqual(1000, merged.contextSize);
   });
 });

@@ -12,6 +12,6 @@ describe('normalizeWeights', function() {
       new WeightedChoice(1, 40),
       new WeightedChoice(1, 60)
     ];
-    assert.deepEqual(normalizeWeights(weights), weights);
+    assert.deepStrictEqual(normalizeWeights(weights), weights);
   });
 });

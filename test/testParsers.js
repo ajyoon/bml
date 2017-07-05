@@ -179,11 +179,11 @@ describe('parsePrelude', function() {
 
                       some text`;
     var result = parsePrelude(testString);
-    assert.equal(result.preludeEndIndex, testString.indexOf('begin') + 'begin'.length);
+    assert.strictEqual(result.preludeEndIndex, testString.indexOf('begin') + 'begin'.length);
     assert(result.evalBlock.string.indexOf('global.evalTest = 1;\n') !== -1);
     assert(result.evalBlock.string.indexOf('global.evalTest2 = 2;\n') !== -1);
-    assert.deepEqual(result.modes, {});
-    assert.equal(result.initialMode, null);
+    assert.deepStrictEqual(result.modes, {});
+    assert.strictEqual(result.initialMode, null);
   });
 
   it('recognizes mode blocks and passes them to parseMode', function() {
@@ -198,7 +198,7 @@ describe('parsePrelude', function() {
 
                       some text`;
     var result = parsePrelude(testString);
-    assert.equal(result.preludeEndIndex, testString.indexOf('begin') + 'begin'.length);
+    assert.strictEqual(result.preludeEndIndex, testString.indexOf('begin') + 'begin'.length);
     assert(result.modes.hasOwnProperty('firstMode'));
     assert(result.modes.hasOwnProperty('secondMode'));
   });
@@ -210,10 +210,10 @@ describe('parsePrelude', function() {
                       begin using test
                      `;
     var result = parsePrelude(testString);
-    assert.equal(result.preludeEndIndex,
+    assert.strictEqual(result.preludeEndIndex,
                  testString.indexOf('begin using test') + 'begin using test'.length);
     assert(result.modes.hasOwnProperty('test'));
-    assert.equal(result.initialMode.name, 'test');
+    assert.strictEqual(result.initialMode.name, 'test');
   });
 
   it('supports begin statements with "use" instead of "using"', function() {
@@ -223,10 +223,10 @@ describe('parsePrelude', function() {
                       begin use test
                      `;
     var result = parsePrelude(testString);
-    assert.equal(result.preludeEndIndex,
+    assert.strictEqual(result.preludeEndIndex,
                  testString.indexOf('begin use test') + 'begin use test'.length);
     assert(result.modes.hasOwnProperty('test'));
-    assert.equal(result.initialMode.name, 'test');
+    assert.strictEqual(result.initialMode.name, 'test');
   });
 });
 
@@ -235,12 +235,12 @@ describe('createMatcher', function() {
 
   it('Escapes strings for regex when asked to', function() {
     var result = createMatcher('.', false);
-    assert.deepEqual(result, /\./y);
+    assert.deepStrictEqual(result, /\./y);
   });
 
   it("Doesn't escape strings when asked not to", function() {
     var result = createMatcher('.', true);
-    assert.deepEqual(result, /./y);
+    assert.deepStrictEqual(result, /./y);
   });
 
 });
@@ -264,15 +264,15 @@ describe('parseUse', function() {
   it('Extracts the mode name with "use" syntax', function() {
     var testString = "{{use testMode}}";
     var result = parseUse(testString, 0);
-    assert.equal(result.blockEndIndex, testString.length);
-    assert.equal(result.modeName, 'testMode');
+    assert.strictEqual(result.blockEndIndex, testString.length);
+    assert.strictEqual(result.modeName, 'testMode');
   });
 
   it('Extracts the mode name with "using" syntax', function() {
     var testString = "{{using testMode}}";
     var result = parseUse(testString, 0);
-    assert.equal(result.blockEndIndex, testString.length);
-    assert.equal(result.modeName, 'testMode');
+    assert.strictEqual(result.blockEndIndex, testString.length);
+    assert.strictEqual(result.modeName, 'testMode');
   });
 
   it('Throws an UnknownTransformError when there is a syntax error.', function() {
@@ -292,15 +292,15 @@ describe('parseStringLiteral', function() {
   it('can parse normal strings', function() {
     var testString = "'testing testing'";
     var result = parseStringLiteral(testString, 0);
-    assert.equal(result.closeQuoteIndex, testString.length - 1);
-    assert.equal(result.extractedString, 'testing testing');
+    assert.strictEqual(result.closeQuoteIndex, testString.length - 1);
+    assert.strictEqual(result.extractedString, 'testing testing');
   });
 
   it('can parse strings with escaped quotes', function() {
     var testString = "'testing \\'testing'";
     var result = parseStringLiteral(testString, 0);
-    assert.equal(result.closeQuoteIndex, testString.length - 1);
-    assert.equal(result.extractedString, 'testing \\\'testing');
+    assert.strictEqual(result.closeQuoteIndex, testString.length - 1);
+    assert.strictEqual(result.extractedString, 'testing \\\'testing');
   });
 });
 
@@ -311,16 +311,16 @@ describe('parseStringLiteralWithLexer', function() {
     var testString = "'testing testing'";
     var lexer = new Lexer(testString);
     var result = parseStringLiteralWithLexer(lexer);
-    assert.equal(result, 'testing testing');
-    assert.equal(lexer.index, testString.length);
+    assert.strictEqual(result, 'testing testing');
+    assert.strictEqual(lexer.index, testString.length);
   });
 
   it('can parse strings with escaped quotes', function() {
     var testString = "'testing \\'testing'";
     var lexer = new Lexer(testString);
     var result = parseStringLiteralWithLexer(lexer);
-    assert.equal(result, 'testing \'testing');
-    assert.equal(lexer.index, testString.length);
+    assert.strictEqual(result, 'testing \'testing');
+    assert.strictEqual(lexer.index, testString.length);
   });
 });
 
@@ -330,35 +330,35 @@ describe('parseInlineChoose', function() {
   it('allows a single unweighted item', function() {
     var testString = "{{'test'}}";
     var result = parseInlineChoose(testString, 0);
-    assert.equal(result.blockEndIndex, testString.length);
+    assert.strictEqual(result.blockEndIndex, testString.length);
     assert(result.replacer instanceof Replacer);
   });
 
   it('allows a single weighted item', function() {
     var testString = "{{'test' 100}}";
     var result = parseInlineChoose(testString, 0);
-    assert.equal(result.blockEndIndex, testString.length);
+    assert.strictEqual(result.blockEndIndex, testString.length);
     assert(result.replacer instanceof Replacer);
   });
 
   it('allows a single unweighted call item', function() {
     var testString = "{{call someFunc}}";
     var result = parseInlineChoose(testString, 0);
-    assert.equal(result.blockEndIndex, testString.length);
+    assert.strictEqual(result.blockEndIndex, testString.length);
     assert(result.replacer instanceof Replacer);
   });
 
   it('allows a single weighted call item', function() {
     var testString = "{{call someFunc 100}}";
     var result = parseInlineChoose(testString, 0);
-    assert.equal(result.blockEndIndex, testString.length);
+    assert.strictEqual(result.blockEndIndex, testString.length);
     assert(result.replacer instanceof Replacer);
   });
 
   it('allows a comma separated mix of literals and calls', function() {
     var testString = "{{'test' 50, call someFunc 40}}";
     var result = parseInlineChoose(testString, 0);
-    assert.equal(result.blockEndIndex, testString.length);
+    assert.strictEqual(result.blockEndIndex, testString.length);
     assert(result.replacer instanceof Replacer);
   });
 
@@ -371,8 +371,8 @@ describe('parseMatchers', function() {
     var testString = "'test' as";
     var lexer = new Lexer(testString);
     var result = parseMatchers(lexer);
-    assert.deepEqual(result, [/test/y]);
-    assert.deepEqual(lexer.peek(), new Token(TokenType.KW_AS,
+    assert.deepStrictEqual(result, [/test/y]);
+    assert.deepStrictEqual(lexer.peek(), new Token(TokenType.KW_AS,
                                              testString.indexOf('as'),
                                              'as'));
   });
@@ -381,8 +381,8 @@ describe('parseMatchers', function() {
     var testString = "r'test' as";
     var lexer = new Lexer(testString);
     var result = parseMatchers(lexer);
-    assert.deepEqual(result, [/test/y]);
-    assert.deepEqual(lexer.peek(), new Token(TokenType.KW_AS,
+    assert.deepStrictEqual(result, [/test/y]);
+    assert.deepStrictEqual(lexer.peek(), new Token(TokenType.KW_AS,
                                              testString.indexOf('as'),
                                              'as'));
   });
@@ -391,8 +391,8 @@ describe('parseMatchers', function() {
     var testString = "r'\\stest' as";
     var lexer = new Lexer(testString);
     var result = parseMatchers(lexer);
-    assert.deepEqual(result, [/\stest/y]);
-    assert.deepEqual(lexer.peek(), new Token(TokenType.KW_AS,
+    assert.deepStrictEqual(result, [/\stest/y]);
+    assert.deepStrictEqual(lexer.peek(), new Token(TokenType.KW_AS,
                                              testString.indexOf('as'),
                                              'as'));
   });
@@ -401,8 +401,8 @@ describe('parseMatchers', function() {
     var testString = "'test', 'test2' as";
     var lexer = new Lexer(testString);
     var result = parseMatchers(lexer);
-    assert.deepEqual(result, [/test/y, /test2/y]);
-    assert.deepEqual(lexer.peek(), new Token(TokenType.KW_AS,
+    assert.deepStrictEqual(result, [/test/y, /test2/y]);
+    assert.deepStrictEqual(lexer.peek(), new Token(TokenType.KW_AS,
                                              testString.indexOf('as'),
                                              'as'));
   });
