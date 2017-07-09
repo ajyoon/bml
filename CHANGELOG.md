@@ -2,6 +2,10 @@
 
 ### 0.0.7
 * Fix regression breaking regex matchers
+* Add `settings.version`: an optional setting to specify a bml version
+  for a document. If the specified setting does not match the running
+  bml version, a warning is logged. If no version number is specified,
+  a warning is logged informing that unexpected behavior may occur.
 
 ### 0.0.6
 * Support double-quotes in addition to single quotes

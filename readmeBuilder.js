@@ -1,7 +1,7 @@
 'use strict';
 
 let fs = require('fs');
-let bml = require('bml');
+let bml = require('./bml.js');
 
 let sampleText = '' + fs.readFileSync('sample.bml');
 let renderedText = bml(sampleText);

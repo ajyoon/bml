@@ -4,11 +4,16 @@
 let defaultSettings = {
   renderMarkdown: false,
   markdownSettings: {},
+  version: null,
 };
 
 /**
  * Return a new settings object with all the properties defined in newSettings,
  * defaulting to those in originalSettings where absent.
+ *
+ * @param {Object} originalSettings
+ * @param {Object} newSettings
+ * @return {void}
  */
 function mergeSettings(originalSettings, newSettings) {
   let merged = JSON.parse(JSON.stringify(originalSettings));

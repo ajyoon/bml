@@ -12,12 +12,38 @@ let parseInlineChoose = _parsers.parseInlineChoose;
 let EvalBlock = require('./evalBlock.js').EvalBlock;
 let noOp = require('./noOp.js');
 let UnknownModeError = _errors.UnknownModeError;
+let BML_VERSION = require('../package.json')['version'];
+
+
+/**
+ * Check if the running version of bml aligns with a specified one.
+ *
+ * If the versions do not align, log a warning to the console.
+ *
+ * TODO: support semver comparisons?
+ *
+ * @returns {void}
+ */
+function checkVersion(bmlVersion, specifiedInSettings) {
+  if (specifiedInSettings !== null && specifiedInSettings !== bmlVersion) {
+    if (specifiedInSettings !== BML_VERSION) {
+      console.warn('BML VERSION MISMATCH.' +
+        ' bml source file specifies version ' + specifiedInSettings +
+        ' but running version is ' + BML_VERSION + '.' +
+        ' unexpected behavior may occur.');
+    }
+  } else {
+    console.warn(
+      'no bml version specified in settings, unexpected behavior may occur.');
+  }
+}
 
 /**
  * We import many functions which are not directly used in the module
  * so that embedded code in bml documents can access them.
+ *
+ * TODO: actually do this
  */
-
 
 /**
  * The main loop which processes the text component of a bml document.
@@ -41,16 +67,19 @@ function renderText(string, startIndex, evalBlock, modes, activeMode) {
   let replacement = null;
   let chooseRe = /\s*('|call)/y;
   let useRe = /\s*(use|using)/y;
+  let settings;
 
   if (evalBlock) {
     eval(evalBlock.string);
   }
 
-  if (typeof settings === 'undefined') {
-    var settings = defaultSettings;
+  if (settings === null) {
+    settings = defaultSettings;
   } else {
     settings = mergeSettings(defaultSettings, settings);
   }
+
+  checkVersion(BML_VERSION, settings.version);
 
   while (index < string.length) {
     if (isEscaped) {
@@ -137,9 +166,21 @@ function renderText(string, startIndex, evalBlock, modes, activeMode) {
   return out;
 }
 
-function render(string) {
-  let {preludeEndIndex, evalBlock, modes, initialMode} = parsePrelude(string);
-  return renderText(string, preludeEndIndex, evalBlock, modes, initialMode);
+/**
+ * render a bml document.
+ *
+ * @param {String} bmlDocumentString - the bml text to process.
+ * @return {String} the processed and rendered text.
+ */
+function render(bmlDocumentString) {
+  let {
+    preludeEndIndex,
+    evalBlock,
+    modes,
+    initialMode,
+  } = parsePrelude(bmlDocumentString);
+  return renderText(
+    bmlDocumentString, preludeEndIndex, evalBlock, modes, initialMode);
 }
 
 exports.renderText = renderText;
