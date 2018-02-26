@@ -1,7 +1,6 @@
 let _rand = require('./rand.js');
 let _errors = require('./errors.js');
 let _stringUtils = require('./stringUtils.js');
-let _rule = require('./rule.js');
 let createRule = require('./rule.js').createRule;
 let EvalBlock = require('./evalBlock.js').EvalBlock;
 let Mode = require('./mode.js').Mode;
@@ -13,101 +12,112 @@ let UnknownTransformError = _errors.UnknownTransformError;
 let UnknownModeError = _errors.UnknownModeError;
 let JavascriptSyntaxError = _errors.JavascriptSyntaxError;
 let BMLSyntaxError = _errors.BMLSyntaxError;
-let lineAndColumnOf = _stringUtils.lineAndColumnOf;
-let lineColumnString = _stringUtils.lineColumnString;
-let isWhitespace = _stringUtils.isWhitespace;
 let escapeRegExp = _stringUtils.escapeRegExp;
 let createWeightedOptionReplacer = _rand.createWeightedOptionReplacer;
 
 
+/**
+ * Parse an `evaluate` block
+ *
+ * @param {Lexer} lexer - A lexer whose next token is KW_EVALUATE. This will be
+ *     mutated in place such that when the method returns, the lexer's next
+ *     token will be after the closing brace of the block.
+ * @return {EvalBlock} An EvalBlock extracted from the block
+ * @throws {BMLSyntaxError} If the lexer is not at an eval block
+ * @throws {JavascriptSyntaxError} If the javascript snippet inside the eval
+ *     block contains a syntax error which makes parsing it impossible.
+ */
 function parseEvaluate(lexer) {
   if (lexer.peek().tokenType !== TokenType.KW_EVALUATE) {
-    throw new BMLSyntaxError('evaluate blocks must start with keyword "evaluate"',
-                             lexer.string, lexer.index);
+    throw new BMLSyntaxError(
+      'evaluate blocks must start with keyword "evaluate"',
+      lexer.string, lexer.index);
   }
-  lexer.next();  // consume KW_EVALUATE
+  lexer.next(); // consume KW_EVALUATE
   lexer.skipWhitespaceAndComments();
   if (lexer.peek().tokenType !== TokenType.OPEN_BRACE) {
-    throw new BMLSyntaxError('evaluate blocks must be opened with a curly brace ("{")',
-                             lexer.string, lexer.index);
+    throw new BMLSyntaxError(
+      'evaluate blocks must be opened with a curly brace ("{")',
+      lexer.string, lexer.index);
   }
-  lexer.next();  // consume OPEN_BRACE
+  lexer.next(); // consume OPEN_BRACE
 
   let state = 'code';
-  let isEscaped = false;
   let index = lexer.index;
   let startIndex = index;
   let openBraceCount = 1;
-  while (index < lexer.string.length) {
+  while ((token = lexer.next()) !== null) {
     switch (state) {
-    case 'block':
-      if (lexer.string.slice(index, index + 2) === '*/') {
+    case 'block comment':
+      if (token.tokenType === TokenType.CLOSE_BLOCK_COMMENT) {
         state = 'code';
       }
       break;
-    case 'inline':
-      if (lexer.string[index] === '\n') {
+    case 'inline comment':
+      if (token.tokenType === TokenType.NEW_LINE) {
         state = 'code';
       }
       break;
-    case 'backtick string':
-      if (lexer.string[index] === '`' && !isEscaped) {
+    case 'template literal':
+      if (token.tokenType === TokenType.BACKTICK) {
         state = 'code';
       }
       break;
     case 'single-quote string':
-    if (lexer.string[index] === '\'' && !isEscaped) {
+      if (token.tokenType === TokenType.SINGLE_QUOTE) {
         state = 'code';
-      } else if (lexer.string[index] === '\n') {
-        throw new JavascriptSyntaxError(lexer.string, index);
+      } else if (token.tokenType === TokenType.NEW_LINE) {
+        throw new JavascriptSyntaxError(lexer.string, lexer.index);
       }
       break;
     case 'double-quote string':
-      if (lexer.string[index] === '"' && !isEscaped) {
+      if (token.tokenType === TokenType.DOUBLE_QUOTE) {
         state = 'code';
-      } else if (lexer.string[index] === '\n') {
-        throw new JavascriptSyntaxError(lexer.string, index);
+      } else if (token.tokenType === TokenType.NEW_LINE) {
+        throw new JavascriptSyntaxError(lexer.string, lexer.index);
       }
       break;
-    case 'regex literal':
-      if (lexer.string[index] === '/' && !isEscaped) {
+    case 'regexp literal':
+      if (token.tokenType === TokenType.SLASH) {
         state = 'code';
       }
       break;
     case 'code':
-      if (lexer.string[index] === '{') {
+      switch (token.tokenType) {
+      case TokenType.OPEN_BRACE:
         openBraceCount++;
-      } else if (lexer.string[index] === '}') {
+        break;
+      case TokenType.CLOSE_BRACE:
         openBraceCount--;
         if (openBraceCount < 1) {
-          lexer.overrideIndex(index + 1);
-          return lexer.string.slice(startIndex, index);
+          return lexer.string.slice(startIndex, lexer.index - 1);
         }
-      } else if (lexer.string.slice(index, index + 2) === '//') {
-        state = 'inline';
-      } else if (lexer.string.slice(index, index + 2) === '/*') {
-        state = 'block';
-      } else if (lexer.string[index] === '`') {
-        state = 'backtick string';
-      } else if (lexer.string[index] === '\'') {
+        break;
+      case TokenType.COMMENT:
+        state = 'inline comment';
+        break;
+      case TokenType.OPEN_BLOCK_COMMENT:
+        state = 'block comment';
+        break;
+      case TokenType.BACKTICK:
+        state = 'template literal';
+        break;
+      case TokenType.SINGLE_QUOTE:
         state = 'single-quote string';
-      } else if (lexer.string[index] === '\"') {
+        break;
+      case TokenType.DOUBLE_QUOTE:
         state = 'double-quote string';
-      } else if (lexer.string[index] === '/' && lexer.string[index - 1] !== '*') {
-        state = 'regex literal';
+        break;
+      case TokenType.SLASH:
+        state = 'regexp literal';
+        break;
+      default:
+        // pass over..
       }
       break;
     default:
-      throw new Error('Invalid state: ' + state);
+      throw new Error(`Invalid state: ${state}`);
     }
-    if (lexer.string[index] === '\\') {
-      isEscaped = !isEscaped;
-    } else {
-      if (isEscaped) {
-        isEscaped = false;
-      }
-    }
-    index++;
   }
   throw new BMLSyntaxError('could not find end of `evaluate` block',
                            lexer.string, startIndex);
@@ -432,7 +442,7 @@ function parseUse(string, openBraceIndex) {
   }
   return {
     blockEndIndex: useRe.lastIndex,
-    modeName: match[2],
+    modeName: match[2]
   };
 }
 

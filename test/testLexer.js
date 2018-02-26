@@ -40,6 +40,30 @@ describe('Lexer', function() {
     assert.strictEqual(lexer.next(), null);
   });
 
+  it('tokenizes block comment openings', function() {
+    let lexer = new Lexer('/*');
+    assert.deepStrictEqual(lexer.next(), new Token(TokenType.OPEN_BLOCK_COMMENT, 0, '/*'));
+    assert.strictEqual(lexer.next(), null);
+  });
+
+  it('tokenizes block comment closings', function() {
+    let lexer = new Lexer('*/');
+    assert.deepStrictEqual(lexer.next(), new Token(TokenType.CLOSE_BLOCK_COMMENT, 0, '*/'));
+    assert.strictEqual(lexer.next(), null);
+  });
+
+  it('tokenizes slashes', function() {
+    let lexer = new Lexer('/');
+    assert.deepStrictEqual(lexer.next(), new Token(TokenType.SLASH, 0, '/'));
+    assert.strictEqual(lexer.next(), null);
+  });
+
+  it('tokenizes asterisks', function() {
+    let lexer = new Lexer('*');
+    assert.deepStrictEqual(lexer.next(), new Token(TokenType.ASTERISK, 0, '*'));
+    assert.strictEqual(lexer.next(), null);
+  });
+
   it('tokenizes single quotes', function() {
     let lexer = new Lexer('\'');
     assert.deepStrictEqual(lexer.next(), new Token(TokenType.SINGLE_QUOTE, 0, '\''));
@@ -49,6 +73,12 @@ describe('Lexer', function() {
   it('tokenizes double quotes', function() {
     let lexer = new Lexer('"');
     assert.deepStrictEqual(lexer.next(), new Token(TokenType.DOUBLE_QUOTE, 0, '"'));
+    assert.strictEqual(lexer.next(), null);
+  });
+
+  it('tokenizes backticks', function() {
+    let lexer = new Lexer('`');
+    assert.deepStrictEqual(lexer.next(), new Token(TokenType.BACKTICK, 0, '`'));
     assert.strictEqual(lexer.next(), null);
   });
 
@@ -156,6 +186,29 @@ describe('Lexer', function() {
     assert.strictEqual(lexer.next(), null);
   });
 
+  it('tokenizes escaped backslashes as text', function() {
+    let lexer = new Lexer('\\\\');
+    let token = lexer.next();
+    assert.deepStrictEqual(token, new Token(TokenType.TEXT, 0, '\\\\'));
+    assert.strictEqual(token.string.length, 2);
+    assert.strictEqual(lexer.next(), null);
+  });
+
+  it('tokenizes escaped backslashes surrounded by quotes', function() {
+    let lexer = new Lexer("'\\\\'");
+    assert.deepStrictEqual(lexer.next(), new Token(TokenType.SINGLE_QUOTE, 0, "\'"));
+    assert.deepStrictEqual(lexer.next(), new Token(TokenType.TEXT, 1, "\\\\"));
+    assert.deepStrictEqual(lexer.next(), new Token(TokenType.SINGLE_QUOTE, 3, "\'"));
+    assert.deepStrictEqual(lexer.next(), null);
+  });
+
+  it('tokenizes escape sequences without consuming the following character', function() {
+    let lexer = new Lexer('\\nP');
+    assert.deepStrictEqual(lexer.next(), new Token(TokenType.TEXT, 0, '\n'));
+    assert.deepStrictEqual(lexer.next(), new Token(TokenType.TEXT, 2, 'P'));
+    assert.strictEqual(lexer.next(), null);
+  });
+
   it('tokenizes known escape sequences', function() {
     let lexer = new Lexer('\\n');
     assert.deepStrictEqual(lexer.next(), new Token(TokenType.TEXT, 0, '\n'));
@@ -169,7 +222,7 @@ describe('Lexer', function() {
     assert.deepStrictEqual(lexer.next(), new Token(TokenType.TEXT, 0, '\r'));
     assert.strictEqual(lexer.next(), null);
 
-    lexer = new Lexer('\\\'');
+    lexer = new Lexer("\\'");
     assert.deepStrictEqual(lexer.next(), new Token(TokenType.TEXT, 0, '\''));
     assert.strictEqual(lexer.next(), null);
 

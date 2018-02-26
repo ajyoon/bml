@@ -110,8 +110,8 @@ describe('parseEvaluate', function() {
   });
 
   it('should be able to read itself (very meta)', function() {
-    let parsersFileContents = '' + fs.readFileSync(
-      require.resolve('../src/parsers.js'));
+    let parsersFilePath = require.resolve('../src/parsers.js');
+    let parsersFileContents = ('' + fs.readFileSync(parsersFilePath));
     let testString = 'evaluate {' + parsersFileContents + '}';
     let lexer = new Lexer(testString);
     let block = parseEvaluate(lexer);
@@ -119,7 +119,6 @@ describe('parseEvaluate', function() {
     expect(lexer.index).to.equal(testString.length);
   });
 });
-
 
 describe('parseMode', function() {
   it('should allow empty modes', function() {

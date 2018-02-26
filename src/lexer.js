@@ -47,12 +47,27 @@ class Lexer {
     } else if (this.string.slice(this.index, this.index + 2) === '//') {
       tokenType = TokenType.COMMENT;
       tokenString = '//';
+    } else if (this.string.slice(this.index, this.index + 2) === '/*') {
+      tokenType = TokenType.OPEN_BLOCK_COMMENT;
+      tokenString = '/*';
+    } else if (this.string.slice(this.index, this.index + 2) === '*/') {
+      tokenType = TokenType.CLOSE_BLOCK_COMMENT;
+      tokenString = '*/';
+    } else if (this.string[this.index] === '/') {
+      tokenType = TokenType.SLASH;
+      tokenString = '/';
+    } else if (this.string[this.index] === '*') {
+      tokenType = TokenType.ASTERISK;
+      tokenString = '*';
     } else if (this.string[this.index] === '\'') {
       tokenType = TokenType.SINGLE_QUOTE;
       tokenString = '\'';
     } else if (this.string[this.index] === '"') {
       tokenType = TokenType.DOUBLE_QUOTE;
       tokenString = '"';
+    } else if (this.string[this.index] === '`') {
+      tokenType = TokenType.BACKTICK;
+      tokenString = '`';
     } else if (this.string[this.index] === '(') {
       tokenType = TokenType.OPEN_PAREN;
       tokenString = '(';
@@ -97,6 +112,9 @@ class Lexer {
       tokenType = TokenType.TEXT;
       if (this.string[this.index] === '\\') {
         switch (this.string[this.index + 1]) {
+        case '\\':
+          tokenString = '\\\\';
+          break;
         case 'n':
           tokenString = '\n';
           this.index++;
