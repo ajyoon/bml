@@ -423,8 +423,13 @@ function parsePrelude(string) {
     }
     lexer.next();
   }
-  throw new BMLSyntaxError('could not find end of prelude.',
-                           lexer.string, lexer.index);
+  // Could not find end of prelude; assume that none exists
+  return {
+    preludeEndIndex: 0,
+    evalBlock: new EvalBlock(''),
+    modes: {},
+    initialMode: null,
+  };
 }
 
 /**

@@ -65,21 +65,21 @@ function renderText(string, startIndex, evalBlock, modes, activeMode) {
   let currentRule = null;
   let foundMatch = false;
   let replacement = null;
-  let chooseRe = /\s*('|call)/y;
+  let chooseRe = /\s*(['"]|call)/y;
   let useRe = /\s*(use|using)/y;
-  let settings;
 
   if (evalBlock) {
     eval(evalBlock.string);
   }
 
-  if (settings === null) {
-    settings = defaultSettings;
-  } else {
+  if (settings) {
     settings = mergeSettings(defaultSettings, settings);
+  } else {
+    var settings = defaultSettings;
   }
 
   checkVersion(BML_VERSION, settings.version);
+
 
   while (index < string.length) {
     if (isEscaped) {
@@ -99,7 +99,7 @@ function renderText(string, startIndex, evalBlock, modes, activeMode) {
       chooseRe.lastIndex = index + 2;
       useRe.lastIndex = index + 2;
       if (chooseRe.test(string)) {
-          let parseInlineChooseResult = parseInlineChoose(string, index, false);
+        let parseInlineChooseResult = parseInlineChoose(string, index, false);
         replacement = parseInlineChooseResult.replacer.call(
           [''], string, index);
         if (replacement instanceof EvalBlock) {
