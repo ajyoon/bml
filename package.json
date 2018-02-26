@@ -7,11 +7,18 @@
     "email": "andrewyoon2@gmail.com",
     "url": "http://andrewjyoon.com"
   },
+  "man": "./man/bml.1",
   "repository": {
     "type": "git",
     "url": "https://github.com/ajyoon/bml"
   },
+  "bugs": {
+    "url": "https://github.com/ajyoon/bml/issues"
+  },
   "main": "bml.js",
+  "bin": {
+    "bml": "./cli.js"
+  },
   "scripts": {
     "test": "mocha",
     "build": "webpack",

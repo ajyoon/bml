@@ -1,7 +1,8 @@
 # Changelog
 
 ### 0.0.9-dev
-* coming soon...
+* Added a command line interface and man page
+  (requires a global install with `npm install -g bml`)
 
 ### 0.0.8
 * Support double quotes in inline replacement options.
