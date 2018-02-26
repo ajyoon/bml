@@ -1,11 +1,20 @@
 # Changelog
 
-### 0.0.7
-* Fix regression breaking regex matchers
+### 0.0.8
+* Support double quotes in inline replacement options.
+  `hello {{"double" 60, 'single'}} quoted world!`
+* Support bml documents which do not have preludes.
+  Note that this changes the default behavior around malformed preludes;
+  while previously a missing prelude or a prelude whose ending cannot be
+  found would trigger a `BMLSyntaxError`, the behavior now is to consider
+  it to not be a prelude at all, but normal bml text.
 * Add `settings.version`: an optional setting to specify a bml version
   for a document. If the specified setting does not match the running
   bml version, a warning is logged. If no version number is specified,
   a warning is logged informing that unexpected behavior may occur.
+
+### 0.0.7
+* Fix regression breaking regex matchers
 
 ### 0.0.6
 * Support double-quotes in addition to single quotes
