@@ -6,7 +6,7 @@ class Token {
   }
 
   toString() {
-    return `Token{tokenType: ${this.tokenType.toString()}, index: ${this.index}, `
+    return `Token{tokenType: ${this.tokenType.toString().slice(7, -1)}, index: ${this.index}, `
       + `string: '${this.string}'}`;
   }
 }
