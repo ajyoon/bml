@@ -1,5 +1,8 @@
 # Changelog
 
+### 0.0.10
+* coming soon...
+
 ### 0.0.9
 * Added a command line interface and man page
   (requires a global install with `npm install -g bml`)
