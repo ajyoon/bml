@@ -26,9 +26,9 @@ begin using initial
 ```
 
 
-[![Build Status](https://travis-ci.org/ajyoon/bml.svg?branch=master)](https://travis-ci.org/ajyoon/bml)
-
 # bml
+
+[![Build Status](https://travis-ci.org/ajyoon/bml.svg?branch=master)](https://travis-ci.org/ajyoon/bml) [![Coverage Status](https://coveralls.io/repos/github/ajyoon/bml/badge.svg?branch=master)](https://coveralls.io/github/ajyoon/bml?branch=master) [![Built with Spacemacs](https://cdn.rawgit.com/syl20bnr/spacemacs/442d025779da2f62fc86c2082703697714db6514/assets/spacemacs-badge.svg)](http://spacemacs.org)
 
 BML is a superset of natural language which applies stochastic transformations
 on text. Words and strings can be used as triggers for weighted random
@@ -61,11 +61,11 @@ document.getElementById("someTargetId").innerHTML =
 </script>
 ```
 
-A prelude section is used to define maps and eval arbitrary
-javascript. An eval block provides a location to execute arbitrary code
+A prelude section is used to define maps and evaluate arbitrary
+javascript. An evaluate block provides a location to execute arbitrary code
 and define reusable functions. maps link words in the text to other words
 with weights controlling their relative likelihood and may also call functions
-either defined inline or in the evaluate block.
+either defined inline or in the eval block.
 
 Strings can be escaped with [[double square bracket delimiters.]] and backslashes \\.
 
