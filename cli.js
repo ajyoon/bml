@@ -43,8 +43,8 @@ function printHelp() {
 
     ${HELP_SWITCHES}          print this help
 
-  Source Code at ${packageJson.repository.url}
-  Report Bugs at ${packageJson.bugs.url}
+  Source Code at https://github.com/ajyoon/bml
+  Report Bugs at https://github.com/ajyoon/bml/issues
   Copyright (c) 2017 Andrew Yoon, under the BSD 3-Clause license
 `
   );
