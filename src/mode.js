@@ -1,3 +1,6 @@
+let prettyPrinting = require('./prettyPrinting.js');
+
+
 class Mode {
   constructor(name) {
     this.name = name;
@@ -5,7 +8,8 @@ class Mode {
   }
 
   toString() {
-    return `Mode{name: ${this.name}, rules: ${this.rules}}`;
+    return `Mode{name: '${this.name}', `
+      + `rules: ${prettyPrinting.prettyPrintArray(this.rules)}}`;
   }
 }
 
