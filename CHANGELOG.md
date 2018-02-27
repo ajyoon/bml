@@ -1,6 +1,6 @@
 # Changelog
 
-### 0.0.9-dev
+### 0.0.9
 * Added a command line interface and man page
   (requires a global install with `npm install -g bml`)
 
