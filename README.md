@@ -26,6 +26,8 @@ begin using initial
 ```
 
 
+[![Build Status](https://travis-ci.org/ajyoon/bml.svg?branch=master)](https://travis-ci.org/ajyoon/bml)
+
 # bml
 
 BML is a superset of natural language which applies stochastic transformations
@@ -60,10 +62,10 @@ document.getElementById("someTargetId").innerHTML =
 ```
 
 A prelude section is used to define maps and eval arbitrary
-javascript. An evaluate block provides a location to execute arbitrary code
+javascript. An eval block provides a location to execute arbitrary code
 and define reusable functions. maps link words in the text to other words
 with weights controlling their relative likelihood and may also call functions
-either defined inline or in the eval block.
+either defined inline or in the evaluate block.
 
 Strings can be escaped with [[double square bracket delimiters.]] and backslashes \\.
 

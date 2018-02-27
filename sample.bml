@@ -22,6 +22,8 @@ begin using initial
 
 {{call copyPrelude}}
 
+[![Build Status](https://travis-ci.org/ajyoon/bml.svg?branch=master)](https://travis-ci.org/ajyoon/bml)
+
 # bml
 
 BML is a superset of natural language which applies stochastic transformations
