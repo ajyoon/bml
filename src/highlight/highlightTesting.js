@@ -18,6 +18,22 @@ function splitBmlCode(source) {
   return [match[1], match[5]];
 }
 
+function multiLineApostropheStringMode(hljs) {
+  return {
+    className: 'string',
+    begin: '\'', end: '\'',
+    contains: [hljs.BACKSLASH_ESCAPE],
+  };
+}
+
+function multiLineQuoteStringMode(hljs) {
+  return {
+    className: 'string',
+    begin: '\"', end: '\"',
+    contains: [hljs.BACKSLASH_ESCAPE],
+  };
+}
+
 function bmlEvalMode(hljs) {
   return {
     beginKeywords: 'eval evaluate',
@@ -38,12 +54,12 @@ function bmlModeMode(hljs) {
     begin: '^mode',
     end: '^}$',
     contains: [
-      hljs.APOS_STRING_MODE,
-      hljs.QUOTE_STRING_MODE,
+      multiLineApostropheStringMode(hljs),
+      multiLineQuoteStringMode(hljs),
       hljs.NUMBER_MODE,
       hljs.C_LINE_COMMENT_MODE,
     ],
-  }
+  };
 }
 
 function bmlPreludeLanguage(hljs) {
@@ -63,18 +79,18 @@ function bmlLiteralMode(hljs) {
     className: 'string',
     begin: '\\[\\[',
     end: '\\]\\]',
-  }
+  };
 }
 
 function bmlTransformMode(hljs) {
   return {
-    className: 'bml-transform',
+    className: 'strong',
     keywords: 'as call',
     begin: '{{',
     end: '}}',
     contains: [
-      hljs.APOS_STRING_MODE,
-      hljs.QUOTE_STRING_MODE,
+      multiLineApostropheStringMode(hljs),
+      multiLineQuoteStringMode(hljs),
       hljs.NUMBER_MODE,
       hljs.C_LINE_COMMENT_MODE,
     ],
@@ -89,7 +105,7 @@ function bmlBodyLanguage(hljs) {
       bmlTransformMode(hljs),
       hljs.BACKSLASH_ESCAPE,
     ],
-    subLanguage: ['markdown'],
+    subLanguage: ['markdown', 'html'],
   };
 }
 
@@ -108,8 +124,6 @@ function highlightBml(source) {
 }
 
 
-
-//let bmlSrc = '' + fs.readFileSync('./highlight_sample.bml');
 let bmlSrc = '' + fs.readFileSync('./highlight_sample_2.bml');
 let css = '' + fs.readFileSync('./node_modules/highlight.js/styles/railscasts.css');
 
@@ -119,9 +133,6 @@ let highlighted = highlightBml(bmlSrc);
 let output = `
 <html>
 <style>
-.hljs-bml-transform {
-  text-decoration: underline;
-}
 ${css}
 </style>
 
