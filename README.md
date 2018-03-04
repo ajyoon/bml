@@ -1,5 +1,7 @@
+
+
 ```
-evaluate {
+eval {
     // arbitrary javascript
     // global bml interpreter settings
     settings = {
@@ -13,13 +15,10 @@ evaluate {
         return '```\n' + string.slice(0, matchIndex) + '```\n';
     }
 }
-mode initial {
-    'evaluate' as 'eval'
-}
 mode literal {
     // No rules
 }
-begin using initial
+begin using literal
 
 ```
 
@@ -60,7 +59,7 @@ document.getElementById("someTargetId").innerHTML =
 ```
 
 A prelude section is used to define maps and evaluate arbitrary
-javascript. An evaluate block provides a location to execute arbitrary code
+javascript. An eval block provides a location to execute arbitrary code
 and define reusable functions. maps link words in the text to other words
 with weights controlling their relative likelihood and may also call functions
 either defined inline or in the eval block.
