@@ -1,0 +1,40 @@
+<span class="hljs-keyword">eval</span><span class="javascript"> {
+    settings = {
+        <span class="hljs-attr">renderMarkdown</span>: <span class="hljs-literal">false</span>,
+    };
+
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">someFunc</span>(<span class="hljs-params">match, string, matchIndex</span>) </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-string">'some string'</span>;
+    }
+</span>}
+
+<span class="hljs-keyword">mode</span> <span class="hljs-title">someMode</span> {
+    <span class="hljs-string">'a'</span> <span class="hljs-keyword">as</span> <span class="hljs-string">'b'</span> <span class="hljs-number">50</span>, <span class="hljs-keyword">call</span> someFunc <span class="hljs-number">10</span>,
+    <span class="hljs-keyword">r</span><span class="hljs-string">'regex matcher'</span> <span class="hljs-keyword">as</span> <span class="hljs-string">'replacement'</span> <span class="hljs-number">5</span>, <span class="hljs-string">'another replacement'</span> <span class="hljs-number">10</span>
+    <span class="hljs-string">"double quotes"</span> <span class="hljs-keyword">as</span> <span class="hljs-string">"replacement"</span>
+}
+
+<span class="hljs-keyword">begin</span> <span class="hljs-keyword">using</span> someMode
+
+some text
+
+[[some literal text]]
+
+\[[some escaped literal text]]
+
+{{'an inline transform' 30, "w</span><span class="hljs-bml-body"><span class="markdown">ith mixed quotes" 10, call someFunc 10}}
+
+<span class="hljs-code">```
+a markdown code block
+```</span>
+
+<span class="hljs-bullet">* </span>a
+<span class="hljs-bullet">* </span>markdown
+<span class="hljs-bullet">* </span>list
+
+<span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span></span>
+<span class="hljs-code">    &lt;p&gt;</span>
+<span class="hljs-code">        some html as well</span>
+<span class="hljs-code">    &lt;/&gt;</span>
+<span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+</span>

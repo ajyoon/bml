@@ -2,6 +2,8 @@
 
 ### 0.0.10
 * Changed `evaluate` keyword to `eval`
+* Added experimental support for syntax highlighting in browsers
+  using a custom language definition in highlightjs
 
 ### 0.0.9
 * Added a command line interface and man page

@@ -1,0 +1,39 @@
+eval {
+    settings = {
+        renderMarkdown: false,
+    };
+
+    function someFunc(match, string, matchIndex) {
+        return 'some string';
+    }
+}
+
+mode someMode {
+    'a' as 'b' 50, call someFunc 10,
+    r'regex matcher' as 'replacement' 5, 'another replacement' 10
+    "double quotes" as "replacement"
+}
+
+begin using someMode
+
+some text
+
+[[some literal text]]
+
+\[[some escaped literal text]]
+
+{{'an inline transform' 30, "with mixed quotes" 10, call someFunc 10}}
+
+```
+a markdown code block
+```
+
+* a
+* markdown
+* list
+
+<div>
+    <p>
+        some html as well
+    </>
+</div>
