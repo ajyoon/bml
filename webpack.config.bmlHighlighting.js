@@ -25,7 +25,7 @@ const config = {
         test: require.resolve('./src/highlighting.js'),
         use: [{
           loader: 'expose-loader',
-          options: 'highlightBml',
+          options: 'bmlHighlighting',
         }],
       },
     ],
