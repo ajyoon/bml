@@ -59,7 +59,7 @@ function bmlBodyLanguage(hljs) {
 
 function bmlEvalMode(hljs) {
   return {
-    beginKeywords: 'eval evaluate',
+    beginKeywords: 'eval',
     starts: {
       end: '^}$',
       returnEnd: true,
@@ -92,7 +92,7 @@ function bmlBeginMode(hljs) {
 function bmlLanguage(hljs) {
   return {
     className: 'bml-prelude',
-    keywords: 'eval evaluate mode begin use using as call r',
+    keywords: 'eval mode begin use using as call r',
     end: '^begin (use|using) (\w+)$',
     contains: [
       hljs.C_LINE_COMMENT_MODE,

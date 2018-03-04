@@ -130,9 +130,9 @@ describe('Lexer', function() {
     assert.strictEqual(lexer.next(), null);
   });
 
-  it('tokenizes the keyword "evaluate"', function() {
-    let lexer = new Lexer('evaluate');
-    assert.deepStrictEqual(lexer.next(), new Token(TokenType.KW_EVALUATE, 0, 'evaluate'));
+  it('tokenizes the keyword "eval"', function() {
+    let lexer = new Lexer('eval');
+    assert.deepStrictEqual(lexer.next(), new Token(TokenType.KW_EVAL, 0, 'eval'));
     assert.strictEqual(lexer.next(), null);
   });
 

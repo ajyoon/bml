@@ -17,9 +17,9 @@ let createWeightedOptionReplacer = _rand.createWeightedOptionReplacer;
 
 
 /**
- * Parse an `evaluate` block
+ * Parse an `eval` block
  *
- * @param {Lexer} lexer - A lexer whose next token is KW_EVALUATE. This will be
+ * @param {Lexer} lexer - A lexer whose next token is KW_EVAL. This will be
  *     mutated in place such that when the method returns, the lexer's next
  *     token will be after the closing brace of the block.
  * @return {EvalBlock} An EvalBlock extracted from the block
@@ -27,17 +27,17 @@ let createWeightedOptionReplacer = _rand.createWeightedOptionReplacer;
  * @throws {JavascriptSyntaxError} If the javascript snippet inside the eval
  *     block contains a syntax error which makes parsing it impossible.
  */
-function parseEvaluate(lexer) {
-  if (lexer.peek().tokenType !== TokenType.KW_EVALUATE) {
+function parseEval(lexer) {
+  if (lexer.peek().tokenType !== TokenType.KW_EVAL) {
     throw new BMLSyntaxError(
-      'evaluate blocks must start with keyword "evaluate"',
+      'eval blocks must start with keyword "eval"',
       lexer.string, lexer.index);
   }
-  lexer.next(); // consume KW_EVALUATE
+  lexer.next(); // consume KW_EVAL
   lexer.skipWhitespaceAndComments();
   if (lexer.peek().tokenType !== TokenType.OPEN_BRACE) {
     throw new BMLSyntaxError(
-      'evaluate blocks must be opened with a curly brace ("{")',
+      'eval blocks must be opened with a curly brace ("{")',
       lexer.string, lexer.index);
   }
   lexer.next(); // consume OPEN_BRACE
@@ -119,7 +119,7 @@ function parseEvaluate(lexer) {
       throw new Error(`Invalid state: ${state}`);
     }
   }
-  throw new BMLSyntaxError('could not find end of `evaluate` block',
+  throw new BMLSyntaxError('could not find end of `eval` block',
                            lexer.string, startIndex);
 }
 
@@ -393,8 +393,8 @@ function parsePrelude(string) {
       case TokenType.COMMENT:
         inComment = true;
         break;
-      case TokenType.KW_EVALUATE:
-        evalString += parseEvaluate(lexer) + '\n';
+      case TokenType.KW_EVAL:
+        evalString += parseEval(lexer) + '\n';
         continue;
       case TokenType.KW_MODE:
         var newMode = parseMode(lexer);
@@ -538,7 +538,7 @@ function parseInlineChoose(string, openBraceIndex) {
   };
 }
 
-exports.parseEvaluate = parseEvaluate;
+exports.parseEval = parseEval;
 exports.parseRule = parseRule;
 exports.parseMode = parseMode;
 exports.parsePrelude = parsePrelude;

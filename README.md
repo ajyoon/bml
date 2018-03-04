@@ -1,5 +1,3 @@
-
-
 ```
 evaluate {
     // arbitrary javascript

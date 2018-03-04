@@ -16,7 +16,7 @@ let JavascriptSyntaxError = errors.JavascriptSyntaxError;
 let UnknownTransformError = errors.UnknownTransformError;
 let BMLSyntaxError = errors.BMLSyntaxError;
 
-let parseEvaluate = parsers.parseEvaluate;
+let parseEval = parsers.parseEval;
 let parseRule = parsers.parseRule;
 let parseMode = parsers.parseMode;
 let parsePrelude = parsers.parsePrelude;
@@ -30,52 +30,52 @@ let parseCall = parsers.parseCall;
 let parseReplacements = parsers.parseReplacements;
 
 
-describe('parseEvaluate', function() {
+describe('parseEval', function() {
   it('can parse an empty block', function() {
-    let testString = 'evaluate {}';
+    let testString = 'eval {}';
     let lexer = new Lexer(testString);
-    let block = parseEvaluate(lexer);
+    let block = parseEval(lexer);
     expect(block).to.equal('');
     expect(lexer.index).to.equal(testString.length);
   });
 
   it('should ignore braces in inline comments', function() {
-    let testString = 'evaluate {//}\n}';
+    let testString = 'eval {//}\n}';
     let lexer = new Lexer(testString);
-    let block = parseEvaluate(lexer);
+    let block = parseEval(lexer);
     expect(block).to.equal('//}\n');
     expect(lexer.index).to.equal(testString.length);
   });
 
   it('should ignore braces in block comments', function() {
-    let testString = 'evaluate {4/*\n}*/}';
+    let testString = 'eval {4/*\n}*/}';
     let lexer = new Lexer(testString);
-    let block = parseEvaluate(lexer);
+    let block = parseEval(lexer);
     expect(block).to.equal('4/*\n}*/');
     expect(lexer.index).to.equal(testString.length);
   });
 
   it('should ignore braces in single-quote string literals', function() {
-    let testString = 'evaluate {\'}\'}';
+    let testString = 'eval {\'}\'}';
     let lexer = new Lexer(testString);
-    let block = parseEvaluate(lexer);
+    let block = parseEval(lexer);
     expect(block).to.equal('\'}\'');
     expect(lexer.index).to.equal(testString.length);
   });
 
   it('should ignore braces in double-quote string literals', function() {
-    let testString = 'evaluate {"}"}';
+    let testString = 'eval {"}"}';
     let lexer = new Lexer(testString);
-    let block = parseEvaluate(lexer);
+    let block = parseEval(lexer);
     expect(block).to.equal('"}"');
     expect(lexer.index).to.equal(testString.length);
   });
 
   it('should error on newline before matching single-quote', function() {
-    let testString = 'evaluate {\'\n';
+    let testString = 'eval {\'\n';
     let lexer = new Lexer(testString);
     try {
-      let block = parseEvaluate(lexer);
+      let block = parseEval(lexer);
       assert(false, 'error expected');
     } catch (e) {
       expect(e).to.be.an.instanceof(JavascriptSyntaxError);
@@ -83,10 +83,10 @@ describe('parseEvaluate', function() {
   });
 
   it('should error on newline before matching double-quote', function() {
-    let testString = 'evaluate {"\n';
+    let testString = 'eval {"\n';
     let lexer = new Lexer(testString);
     try {
-      let block = parseEvaluate(lexer);
+      let block = parseEval(lexer);
       assert(false, 'error expected');
     } catch (e) {
       expect(e).to.be.an.instanceof(JavascriptSyntaxError);
@@ -94,17 +94,17 @@ describe('parseEvaluate', function() {
   });
 
   it('should ignore braces in backtick string literals', function() {
-    let testString = 'evaluate {`\n}`}';
+    let testString = 'eval {`\n}`}';
     let lexer = new Lexer(testString);
-    let block = parseEvaluate(lexer);
+    let block = parseEval(lexer);
     expect(block).to.equal('`\n}`');
     expect(lexer.index).to.equal(testString.length);
   });
 
   it('should handle braces in javascript', function() {
-    let testString = 'evaluate {{{{}}}}';
+    let testString = 'eval {{{{}}}}';
     let lexer = new Lexer(testString);
-    let block = parseEvaluate(lexer);
+    let block = parseEval(lexer);
     expect(block).to.equal('{{{}}}');
     expect(lexer.index).to.equal(testString.length);
   });
@@ -112,9 +112,9 @@ describe('parseEvaluate', function() {
   it('should be able to read itself (very meta)', function() {
     let parsersFilePath = require.resolve('../src/parsers.js');
     let parsersFileContents = ('' + fs.readFileSync(parsersFilePath));
-    let testString = 'evaluate {' + parsersFileContents + '}';
+    let testString = 'eval {' + parsersFileContents + '}';
     let lexer = new Lexer(testString);
-    let block = parseEvaluate(lexer);
+    let block = parseEval(lexer);
     expect(block).to.equal(parsersFileContents);
     expect(lexer.index).to.equal(testString.length);
   });
@@ -163,12 +163,12 @@ describe('parseMode', function() {
 });
 
 describe('parsePrelude', function() {
-  it('finds and executes multiple evaluate blocks', function() {
-    let testString = `evaluate {
+  it('finds and executes multiple eval blocks', function() {
+    let testString = `eval {
                           global.evalTest = 1;
                       }
                       // comment
-                      evaluate {
+                      eval {
                           global.evalTest2 = 2;
                       }
                       begin

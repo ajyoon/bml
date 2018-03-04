@@ -89,9 +89,9 @@ class Lexer {
     } else if (this.string.slice(this.index, this.index + 4) === 'call') {
       tokenType = TokenType.KW_CALL;
       tokenString = 'call';
-    } else if (this.string.slice(this.index, this.index + 8) === 'evaluate') {
-      tokenType = TokenType.KW_EVALUATE;
-      tokenString = 'evaluate';
+    } else if (this.string.slice(this.index, this.index + 4) === 'eval') {
+      tokenType = TokenType.KW_EVAL;
+      tokenString = 'eval';
     } else if (this.string.slice(this.index, this.index + 4) === 'mode') {
       tokenType = TokenType.KW_MODE;
       tokenString = 'mode';

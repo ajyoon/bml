@@ -1,7 +1,7 @@
 # Changelog
 
 ### 0.0.10
-* coming soon...
+* Changed `evaluate` keyword to `eval`
 
 ### 0.0.9
 * Added a command line interface and man page
