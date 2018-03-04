@@ -31,6 +31,8 @@ BML is a superset of natural language which applies stochastic transformations
 on text. Words and strings can be used as triggers for weighted random
 replacements and arbitrary transformations specified with javascript.
 
+## setup
+
 To install:
 ```
 npm install bml
@@ -39,13 +41,11 @@ npm install bml
 To run the test suite:
 ```
 npm test
-# If this doesn't work, install mocha globally with npm install -g mocha
 ```
 
 To bundle for the web:
 ```
-npm webpack
-# If this doesn't work, install webpack globally with npm install -g webpack
+npm run build
 ```
 
 To use in the web:
@@ -57,6 +57,8 @@ document.getElementById("someTargetId").innerHTML =
     bml("some bml loaded as a js string");
 </script>
 ```
+
+## the language
 
 A prelude section is used to define maps and evaluate arbitrary
 javascript. An eval block provides a location to execute arbitrary code
@@ -73,6 +75,22 @@ Available one-time transformations include:
 
 * choose: `{{'x' 20, 'y' 30, 'z' 50, call someFunc}}`
 * using: `{{using literal}}`
+
+## syntax highlighting
+
+Experimental syntax highlighting for the browser is supported.
+```
+npm run buildHighlighting
+```
+```html
+<script src="/path/to/bml_highlighting.bundle.js"></script>
+```
+
+Be warned, this currently pulls in _all_ of `highlight.js`, including a whole
+lot of languages irrelevant to bml. Pruning this to drastically reduce the
+bundle size is high on the list of upcoming improvements.
+
+---
 
 This is a very early, very unstable project. Lots of fixes and improvements coming soon!
 
