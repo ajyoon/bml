@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+<title>README.html</title>
+
+</head>
+
+<body>
+
+<p><code>
+eval {
+    // arbitrary javascript
+    // global bml interpreter settings
+    settings = {
+        renderMarkdown: false,  // Since md is the target
+    };
+    function someFunc(match, string, matchIndex) {
+        return 'some replacement string';
+    }
+    // Copy the prelude into literal text.
+    function copyPrelude(match, string, matchIndex) {
+        return '</code>\n' + string.slice(0, matchIndex) + '```\n';
+    }
+}
+mode literal {
+    // No rules
+}
+begin using literal</p>
+
+<p>```</p>
+
+<h1>bml</h1>
+
+<p><a href="https://travis-ci.org/ajyoon/bml"><img src="https://travis-ci.org/ajyoon/bml.svg?branch=master" alt="Build Status" title="" /></a> <a href="https://coveralls.io/github/ajyoon/bml?branch=master"><img src="https://coveralls.io/repos/github/ajyoon/bml/badge.svg?branch=master" alt="Coverage Status" title="" /></a> <a href="http://spacemacs.org"><img src="https://cdn.rawgit.com/syl20bnr/spacemacs/442d025779da2f62fc86c2082703697714db6514/assets/spacemacs-badge.svg" alt="Built with Spacemacs" title="" /></a></p>
+
+<p>BML is a superset of natural language which applies stochastic transformations
+on text. Words and strings can be used as triggers for weighted random
+replacements and arbitrary transformations specified with javascript.</p>
+
+<h2>setup</h2>
+
+<p>To install:
+<code>
+npm install bml
+</code></p>
+
+<p>To run the test suite:
+<code>
+npm test
+</code></p>
+
+<p>To bundle for the web:
+<code>
+npm run build
+</code></p>
+
+<p>To use in the web:
+```html</p>
+
+<script src="/path/to/bml.bundle.js"></script>
+...
+<script>
+document.getElementById("someTargetId").innerHTML =
+    bml("some bml loaded as a js string");
+</script>
+
+<p>```</p>
+
+<h2>the language</h2>
+
+<p>A prelude section is used to define maps and evaluate arbitrary
+javascript. An eval block provides a location to execute arbitrary code
+and define reusable functions. maps link words in the text to other words
+with weights controlling their relative likelihood and may also call functions
+either defined inline or in the eval block.</p>
+
+<p>Strings can be escaped with [[double square bracket delimiters.]] and backslashes \.</p>
+
+<p>The text body can also apply one-time transformations, the common marker
+for them being {{double curly braces}}.</p>
+
+<p>Available one-time transformations include:</p>
+
+<ul>
+<li>choose: <code>{{'x' 20, 'y' 30, 'z' 50, call someFunc}}</code></li>
+<li>using: <code>{{using literal}}</code></li>
+</ul>
+
+<h2>syntax highlighting</h2>
+
+<p>Experimental syntax highlighting for the browser is supported.
+<code>
+npm run buildHighlighting
+</code>
+```html</p>
+
+<script src="/path/to/bml_highlighting.bundle.js"></script>
+
+<p>```</p>
+
+<p>Be warned, this currently pulls in <em>all</em> of <code>highlight.js</code>, including a whole
+lot of languages irrelevant to bml. Pruning this to drastically reduce the
+bundle size is high on the list of upcoming improvements.</p>
+
+<hr />
+
+<p>This is a very early, very unstable project. Lots of fixes and improvements coming soon!</p>
+
+<p>By the way, as you may have guessed, this is a BML document. To generate this readme,
+run <code>node readmeBuilder.js</code>!</p>
+
+</body>
+</html>

@@ -1,5 +1,3 @@
-let fs = require('fs');
-
 let hljs = require('highlight.js');
 
 function multiLineApostropheStringMode(hljs) {

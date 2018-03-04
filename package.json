@@ -20,11 +20,13 @@
     "bml": "./cli.js"
   },
   "scripts": {
-    "test": "mocha",
-    "build": "webpack",
-    "lint": "eslint .",
-    "test-with-coverage": "nyc npm test",
-    "test-with-coverage-html": "nyc --reporter=html npm test"
+    "test": "./node_modules/.bin/mocha",
+    "build": "./node_modules/.bin/webpack --config ./webpack.config.bml.js",
+    "buildHighlighting":
+      "./node_modules/.bin/webpack --config ./webpack.config.bmlHighlighting.js",
+    "lint": "./node_modules/.bin/eslint .",
+    "test-with-coverage": "./node_modules/.bin/nyc npm test",
+    "test-with-coverage-html": "./node_modules/.bin/nyc --reporter=html npm test"
   },
   "devDependencies": {
     "babel-core": "^6.24.1",
@@ -34,11 +36,12 @@
     "chai": "^4.0.2",
     "eslint": "^3.19.0",
     "eslint-config-google": "^0.8.0",
-    "expose-loader": "^0.7.3",
+    "expose-loader": "^0.7.4",
     "mocha": "3.4.1",
-    "uglifyjs-webpack-plugin": "^0.4.3",
-    "webpack": "^2.6.1",
-    "nyc": "^11.4.1"
+    "nyc": "^11.4.1",
+    "uglifyjs-webpack-plugin": "^1.2.2",
+    "webpack": "4.0.1",
+    "webpack-cli": "^2.0.10"
   },
   "dependencies": {
     "highlight.js": "9.12.0",

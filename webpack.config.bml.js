@@ -2,7 +2,9 @@ const path = require('path');
 const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
 
 const config = {
-  entry: './bml.js',
+  entry: [
+    './bml.js',
+  ],
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: 'bml.bundle.js',
@@ -20,7 +22,7 @@ const config = {
         },
       },
       {
-        test: require.resolve('bml'),
+        test: require.resolve('./bml.js'),
         use: [{
           loader: 'expose-loader',
           options: 'bml',
