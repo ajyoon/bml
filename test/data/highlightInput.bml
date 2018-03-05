@@ -24,6 +24,8 @@ some text
 
 {{'an inline transform' 30, "with mixed quotes" 10, call someFunc 10}}
 
+{{use anotherMode}}
+
 ```
 a markdown code block
 ```

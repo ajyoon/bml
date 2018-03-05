@@ -30,7 +30,7 @@ function bmlLiteralMode(hljs) {
 function bmlTransformMode(hljs) {
   return {
     className: 'strong',
-    keywords: 'as call',
+    keywords: 'as call use',
     begin: '{{',
     end: '}}',
     relevance: 10,
