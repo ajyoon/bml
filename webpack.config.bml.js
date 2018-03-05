@@ -1,5 +1,5 @@
 const path = require('path');
-const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
+//const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
 
 const config = {
   entry: [
@@ -17,7 +17,7 @@ const config = {
         use: {
           loader: 'babel-loader',
           options: {
-            presets: ['env'],
+            blacklist: ['useStrict'],
           },
         },
       },

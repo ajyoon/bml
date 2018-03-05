@@ -80,7 +80,6 @@ function renderText(string, startIndex, evalBlock, modes, activeMode) {
 
   checkVersion(BML_VERSION, settings.version);
 
-
   while (index < string.length) {
     if (isEscaped) {
       isEscaped = false;

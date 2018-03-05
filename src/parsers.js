@@ -46,6 +46,7 @@ function parseEval(lexer) {
   let index = lexer.index;
   let startIndex = index;
   let openBraceCount = 1;
+  let token;
   while ((token = lexer.next()) !== null) {
     switch (state) {
     case 'block comment':
