@@ -4,3 +4,6 @@ dist/*
 npm-debug.log
 coverage/
 .nyc_output/
+
+**/.venv/
+**/build/
