@@ -1,5 +1,8 @@
 # Changelog
 
+### 0.0.11
+* coming soon...
+
 ### 0.0.10
 * Changed `evaluate` keyword to `eval`
 * Added experimental support for syntax highlighting in browsers
