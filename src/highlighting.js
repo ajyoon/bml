@@ -80,8 +80,8 @@ function bmlModeOpeningMode(hljs) {
 function bmlBeginMode(hljs) {
   return {
     keywords: 'begin use using',
-    begin: '^begin (use|using)',
-    end: '\w+',
+    begin: '^begin',
+    end: '\n',
     endsParent: true,
     relevance: 100,
   };
