@@ -24,9 +24,9 @@ package entrypoint function exported by the package.
 
 This function renders a given string of ``bml`` markup and returns its output.
 
-``bml`` is Free Software under the `BSD 3-Clause license
-<https://github.com/ajyoon/bml/blob/master/LICENSE>`_. All source code is
-available at `<https://github.com/ajyoon/bml>`_.
+``bml`` is `Free Software <https://www.gnu.org/philosophy/free-sw.html>`_ under
+the `BSD 3-Clause license <https://github.com/ajyoon/bml/blob/master/LICENSE>`_.
+All source code is available at `<https://github.com/ajyoon/bml>`_.
 
 .. toctree::
    :caption: Contents:
