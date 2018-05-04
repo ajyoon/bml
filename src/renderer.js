@@ -3,6 +3,7 @@ let marked = require('marked');
 let _parsers = require('./parsers.js');
 let _settings = require('./settings.js');
 let _errors = require('./errors.js');
+let _rand = require('./rand.js');
 
 let defaultSettings = _settings.defaultSettings;
 let mergeSettings = _settings.mergeSettings;
@@ -14,15 +15,18 @@ let noOp = require('./noOp.js');
 let UnknownModeError = _errors.UnknownModeError;
 let BML_VERSION = require('../package.json')['version'];
 
+// imports for exposure to eval blocks
+/* eslint-disable no-unused-vars */
+let WeightedChoice = require('./weightedChoice.js').WeightedChoice;
+let weightedChoose = _rand.weightedChoose;
+/* eslint-enable no-unused-vars */
 
 /**
  * Check if the running version of bml aligns with a specified one.
  *
  * If the versions do not align, log a warning to the console.
  *
- * TODO: support semver comparisons?
- *
- * @returns {void}
+ * @return {void}
  */
 function checkVersion(bmlVersion, specifiedInSettings) {
   if (specifiedInSettings !== null && specifiedInSettings !== bmlVersion) {
@@ -37,13 +41,6 @@ function checkVersion(bmlVersion, specifiedInSettings) {
       'no bml version specified in settings, unexpected behavior may occur.');
   }
 }
-
-/**
- * We import many functions which are not directly used in the module
- * so that embedded code in bml documents can access them.
- *
- * TODO: actually do this
- */
 
 /**
  * The main loop which processes the text component of a bml document.

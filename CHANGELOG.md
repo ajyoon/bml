@@ -1,7 +1,8 @@
 # Changelog
 
 ### 0.0.11
-* coming soon...
+* Added experimental support for built-in javascript utils,
+  starting with exposing `weightedChoose()` and `WeightedChoice`.
 
 ### 0.0.10
 * Changed `evaluate` keyword to `eval`

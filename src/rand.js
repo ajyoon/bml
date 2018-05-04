@@ -35,6 +35,13 @@ function randomInt(min, max) {
   return Math.floor(Math.random() * (max - min)) + min;
 }
 
+/**
+ * Randomly choose from an array of weighted choices.
+ *
+ * The probability of any given `WeightedChoice` being
+ * chosen is its weight divided by the sum of all given
+ * choices.
+ */
 function weightedChoose(weights) {
   let sum = 0;
   for (let i = 0; i < weights.length; i++) {
