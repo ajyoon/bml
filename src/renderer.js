@@ -29,8 +29,8 @@ let weightedChoose = _rand.weightedChoose;
  * @return {void}
  */
 function checkVersion(bmlVersion, specifiedInSettings) {
-  if (specifiedInSettings !== null && specifiedInSettings !== bmlVersion) {
-    if (specifiedInSettings !== BML_VERSION) {
+  if (specifiedInSettings !== null) {
+    if (specifiedInSettings !== bmlVersion) {
       console.warn('BML VERSION MISMATCH.' +
         ' bml source file specifies version ' + specifiedInSettings +
         ' but running version is ' + BML_VERSION + '.' +
