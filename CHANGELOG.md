@@ -1,8 +1,13 @@
 # Changelog
 
+### 0.0.12
+* TBD...
+
 ### 0.0.11
 * Added experimental support for built-in javascript utils,
   starting with exposing `weightedChoose()` and `WeightedChoice`.
+* Fixed a bug causing version checks to emit a warning when
+  a correct version was provided.
 
 ### 0.0.10
 * Changed `evaluate` keyword to `eval`
