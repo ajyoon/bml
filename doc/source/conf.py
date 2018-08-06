@@ -153,3 +153,7 @@ texinfo_documents = [
      author, 'bml', 'One line description of project.',
      'Miscellaneous'),
 ]
+
+
+def setup(app):
+    app.add_javascript('js/open_web_analytics.js')
