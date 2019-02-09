@@ -1,0 +1,31 @@
+eval {
+    settings = {
+        renderMarkdown: true,
+        version: '0.0.12-dev'
+    };
+
+    function someFunc(match, string, matchIndex) {
+        return 'some replacement string';
+    }
+
+    function replaceWithRandomNumber(match, string, matchIndex) {
+        //return '' + Math.random();
+        return '' + rand.randomFloat(0, 1000);
+    }
+}
+
+mode main {
+    'testslug' as call replaceWithRandomNumber 30, 'b' 20
+}
+
+mode literal {
+     // no rules!
+}
+
+begin using main
+
+# test
+
+[[some text for invoking the 'testslug' rule]]
+
+testslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslug

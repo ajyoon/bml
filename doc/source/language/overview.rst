@@ -1,9 +1,9 @@
 .. _marked docs: https://github.com/markedjs/marked/blob/master/USING_ADVANCED.md#options
 .. _regex match: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions
 
-
+========================
 the blur markup language
-************************
+========================
 
 The blur markup language (``bml``) is a hybrid language combining javascript,
 ``bml`` constructs, and whatever target format you use. Markdown and HTML are
@@ -58,8 +58,8 @@ a basic example::
 
 .. _eval:
 
-eval
-----
+the eval block
+==============
 
 The ``eval`` block allows you to evaluate arbitrary javascript prior to
 interpreting the document body. This is primarily useful for two purposes:
@@ -67,12 +67,13 @@ interpreting the document body. This is primarily useful for two purposes:
 * overriding default ``bml`` settings
 * defining :ref:`replacement functions <replacement-functions>`
 
-The entire
+The entire contents of the eval block will be passed directly to a javascript
+``eval()`` call.
 
 .. _bml-settings:
 
 bml settings
-^^^^^^^^^^^^
+------------
 
 The ``settings`` object is a javascript object of setting overrides that may be
 declared in the :ref:`eval` block::
@@ -135,10 +136,24 @@ Replacement functions have the following signature: ::
 The function should return a string which is to replace the text found at the
 point.
 
+.. warning::
+
+   Any replacement function which might use random elements should use the
+   :ref:`provided eval API <provided-eval-api>` for random operations.
+   Direct invokation of ``Math.random()`` will undermine bml's ability
+   to create reproducible document versions pinned to random seeds.
+
+provided eval api
+-----------------
+
+Some functions are automatically provided to the scope in which eval blocks
+are evaluated during bml rendering.
+See :ref:`its reference here <provided-eval-api>`
+
 .. _mode:
 
-mode
-----
+modes
+=====
 
 A mode has a name and consists of any number of :ref:`rules`. ::
 
@@ -150,7 +165,7 @@ A mode has a name and consists of any number of :ref:`rules`. ::
 .. _rules:
 
 rules
-^^^^^
+=====
 
 Each rule consists of a list of matchers and a list of replacements.
 During rendering, all matchers for the active rule are tested across
@@ -237,8 +252,8 @@ matched text will never be chosen.
 
 .. _begin:
 
-begin
------
+the *begin* directive
+=====================
 
 The ``begin`` statement marks the end of the prelude section of a ``bml``
 document. If a prelude is given, it *must* be provided to indicate the end of

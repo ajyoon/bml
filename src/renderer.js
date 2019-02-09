@@ -3,7 +3,7 @@ let marked = require('marked');
 let _parsers = require('./parsers.js');
 let _settings = require('./settings.js');
 let _errors = require('./errors.js');
-let _rand = require('./rand.js');
+let rand = require('./rand.js');
 
 let defaultSettings = _settings.defaultSettings;
 let mergeSettings = _settings.mergeSettings;
@@ -18,7 +18,7 @@ let BML_VERSION = require('../package.json')['version'];
 // imports for exposure to eval blocks
 /* eslint-disable no-unused-vars */
 let WeightedChoice = require('./weightedChoice.js').WeightedChoice;
-let weightedChoose = _rand.weightedChoose;
+let weightedChoose = rand.weightedChoose;
 /* eslint-enable no-unused-vars */
 
 /**
@@ -166,9 +166,22 @@ function renderText(string, startIndex, evalBlock, modes, activeMode) {
  * render a bml document.
  *
  * @param {String} bmlDocumentString - the bml text to process.
+ * @param {Object} settings - optional settings for this render, unrelated
+ *     to the settings encoded in the bml document itself, which apply to
+ *     every run of the document
+ * @param {Object} settings.randomSeed - the random seed to use for this
+ *     render. Can be any type, as this is fed directly to the `seedrandom`
+ *     library, which converts the object to a string and uses that as the
+ *     actual seed
+ *
  * @return {String} the processed and rendered text.
  */
-function render(bmlDocumentString) {
+function render(bmlDocumentString, settings) {
+  if (settings) {
+    if (settings.hasOwnProperty('randomSeed')) {
+      rand.setRandomSeed(settings.randomSeed);
+    }
+  }
   let {
     preludeEndIndex,
     evalBlock,

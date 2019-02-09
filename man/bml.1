@@ -1,10 +1,10 @@
-.TH bml 1 "2018" "bml"
+.TH bml 1 "2019" "bml"
 
 .SH NAME
 bml \-\- blur markup language command line utility
 
 .SH SYNOPSIS
-bml [path]
+bml [options] [path]
 
 .SH DESCRIPTION
 Render a bml document read from stdin or a file, if given.
@@ -22,6 +22,9 @@ Print help and quit
 .BR \-v ", " \-\-version
 Print version information and quit
 
+.TP
+.BR \-\-seed " VALUE"
+Set the random seed to be used for the render run
 
 .SH BUG REPORTS
 Please report bugs at https://github.com/ajyoon/bml/issues

@@ -9,19 +9,28 @@ let bml = require('./bml.js');
 
 const HELP_SWITCHES = ['-h', '--h', '-help', '--help'];
 const VERSION_SWITCHES = ['-v', '--version'];
+const SEED_SWITCHES = ['--seed']
 
 
-function readFromStdin() {
-  return fs.readFileSync(0, 'utf8'); // STDIN_FILENO = 0
+function readFromStdin(seed) {
+  let settings = seed ? { randomSeed: seed } : {};
+  return {
+    bmlSource: fs.readFileSync(0, 'utf8'), // STDIN_FILENO = 0
+    settings
+  };
 }
 
 
-function readFromPath(path) {
+function readFromPath(path, seed) {
   if (!fs.existsSync(path)) {
     handleNonexistingPath(path);
     process.exit(1);
   }
-  return '' + fs.readFileSync(path);
+  let settings = seed ? { randomSeed: seed } : {};
+  return {
+    bmlSource: '' + fs.readFileSync(path),
+    settings
+  }
 }
 
 
@@ -34,14 +43,21 @@ function handleNonexistingPath(path) {
 function printHelp() {
   console.log(
     `
-  Usage: bml [path]
+  Usage: bml [options] [path]
 
   Render a bml document read from stdin or a file, if given.
   Prints result to STDOUT.
 
   Options:
 
-    ${HELP_SWITCHES}          print this help
+    Options which, if present, should be the only options given:
+
+    ${HELP_SWITCHES}    print this help and quit
+    ${VERSION_SWITCHES}           print the bml version number and quiet
+
+    Other options:
+
+    ${SEED_SWITCHES} VALUE           set the random seed for the bml render
 
   Source Code at https://github.com/ajyoon/bml
   Report Bugs at https://github.com/ajyoon/bml/issues
@@ -64,6 +80,11 @@ function printVersionInfo() {
  * @return {Object} of the form {function: Function, args: ...Any}
  */
 function determineAction(args) {
+  let defaultAction = {
+    function: printHelp,
+    args: [],
+  };
+
   switch (args.length) {
   case 0:
     return {
@@ -88,12 +109,28 @@ function determineAction(args) {
         args: [args[0]],
       };
     }
-
+  case 2:
+    // Only really handle the case where a seed is given and bml
+    // is taken from stdin
+    if (SEED_SWITCHES.indexOf(args[0]) !== -1) {
+      return {
+        function: readFromStdin,
+        args: [args[1]]
+      }
+    }
+    return defaultAction;
+  case 3:
+    // Only really handle the case where a seed and path are given
+    // e.g. `bml --seed 1234 ./someFile.bml`
+    if (SEED_SWITCHES.indexOf(args[0]) !== -1) {
+      return {
+        function: readFromPath,
+        args: [args[2], args[1]]
+      }
+    }
+    return defaultAction;
   default:
-    return {
-      function: printHelp,
-      args: [],
-    };
+    return defaultAction;
   }
 }
 
@@ -104,9 +141,9 @@ function stripArgs(argv) {
 }
 
 
-function runBmlWithErrorCheck(bmlSource) {
+function runBmlWithErrorCheck(bmlSource, settings) {
   try {
-    return bml(bmlSource);
+    return bml(bmlSource, settings);
   } catch (e) {
     console.error('Uh-oh! Something bad happened while rendering bml text.\n'
                   + 'If you think this is a bug, please file one at '
@@ -128,8 +165,8 @@ function main() {
     printVersionInfo();
     process.exit(0);
   } else {
-    let bmlSource = action.function(...action.args);
-    let renderedContent = runBmlWithErrorCheck(bmlSource);
+    let { bmlSource, settings } = action.function(...action.args);
+    let renderedContent = runBmlWithErrorCheck(bmlSource, settings);
     process.stdout.write(renderedContent);
   }
 }

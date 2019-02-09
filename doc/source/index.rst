@@ -1,3 +1,4 @@
+========================
 the blur markup language
 ========================
 
@@ -5,7 +6,7 @@ the blur markup language
 text with ease.
 
 getting started
----------------
+===============
 
 ``bml`` can be installed and pulled into your projects using ``npm``. Installing
 is as simple as: ::
@@ -34,3 +35,4 @@ All source code is available at `<https://github.com/ajyoon/bml>`_.
    language/overview
    building_for_the_web
    the_command_line_interface
+   api_reference

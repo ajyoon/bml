@@ -1,4 +1,5 @@
 let assert = require('assert');
+let expect = require('chai').expect;
 let fs = require('fs');
 
 let bml = require('../bml.js');
@@ -20,5 +21,13 @@ describe('bml', function() {
     if (possibleOutcomes.indexOf(result) === -1) {
       assert.fail(`Unexpected output: ${result}`);
     }
+  });
+
+  it('produces the exact same document when using a fixed random seed', function() {
+    let testString = '' + fs.readFileSync(require.resolve('./randomSmokeTest.bml'));
+    let firstResult = bml(testString, { randomSeed: 1234 });
+    let secondResult = bml(testString, { randomSeed: 1234 });
+    console.log(firstResult);
+    expect(firstResult).to.equal(secondResult);
   });
 });

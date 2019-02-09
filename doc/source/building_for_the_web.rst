@@ -1,3 +1,4 @@
+====================
 building for the web
 ====================
 
@@ -33,7 +34,7 @@ markup and returns a rendered output string.
   </script>
 
 syntax highlighting
--------------------
+===================
 
 .. _highlightjs: https://highlightjs.org/
 .. _highlightjs stylesheet: https://github.com/isagalaev/highlight.js/tree/master/src/styles

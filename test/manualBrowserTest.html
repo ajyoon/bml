@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <!-- Requires a simple http server running at the project root dir -->
+
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Test</title>
+        <script src="/dist/bml.bundle.js"></script>
+    </head>
+
+    <div id="bml-target"></div>
+
+    <body>
+        <script>
+         var HttpClient = function() {
+           this.get = function(aUrl, aCallback) {
+             var anHttpRequest = new XMLHttpRequest();
+             anHttpRequest.onreadystatechange = function() {
+               if (anHttpRequest.readyState == 4 && anHttpRequest.status == 200)
+                 aCallback(anHttpRequest.responseText);
+             }
+
+             anHttpRequest.open( "GET", aUrl, true );
+             anHttpRequest.send( null );
+           }
+         }
+         var client = new HttpClient();
+         client.get('/test/randomSmokeTest.bml',
+                    function(response) {
+                      renderedContent = bml(response, { randomSeed: 1234 });
+                      document.getElementById("bml-target").innerHTML = renderedContent;
+                    });
+
+        </script>
+    </body>
+</html>
