@@ -1,7 +1,15 @@
 let Replacer = require('./replacer.js').Replacer;
 let WeightedChoice = require('./weightedChoice.js').WeightedChoice;
 let noOp = require('./noOp.js');
+let seedrandom = require('seedrandom');
 
+// A module-local seedable random number generator
+// The selected seed will be random unless `setRandomSeed()` is called.
+let rng = seedrandom();
+
+function setRandomSeed(seed) {
+  rng = seedrandom(seed);
+}
 
 function normalizeWeights(weightedChoices) {
   let normalized = [];
@@ -26,13 +34,13 @@ function normalizeWeights(weightedChoices) {
 }
 
 function randomFloat(min, max) {
-  return Math.floor(Math.random() * (max - min)) + min;
+  return (rng() * (max - min)) + min;
 }
 
 function randomInt(min, max) {
   min = Math.ceil(min);
   max = Math.floor(max);
-  return Math.floor(Math.random() * (max - min)) + min;
+  return Math.floor(rng() * (max - min)) + min;
 }
 
 /**
@@ -86,6 +94,9 @@ function createWeightedOptionReplacer(choices, includeNoOp) {
   return new Replacer(replacerFunction);
 }
 
+exports.setRandomSeed = setRandomSeed;
+exports.randomFloat = randomFloat;
+exports.randomInt = randomInt;
 exports.normalizeWeights = normalizeWeights;
 exports.weightedChoose = weightedChoose;
 exports.createWeightedOptionReplacer = createWeightedOptionReplacer;
