@@ -156,4 +156,4 @@ texinfo_documents = [
 
 
 def setup(app):
-    app.add_javascript('js/open_web_analytics.js')
+    app.add_javascript('js/matomo.js')
