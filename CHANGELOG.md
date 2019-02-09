@@ -1,5 +1,8 @@
 # Changelog
 
+### 0.0.13
+* TBD...
+
 ### 0.0.12
 * Fix bug where random float generation was rounding results to integers,
   causing incorrect behavior when using floating-point or small values
