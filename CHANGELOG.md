@@ -4,7 +4,9 @@
 * Fix bug where random float generation was rounding results to integers,
   causing incorrect behavior when using floating-point or small values
   in replacement choice weights.
-* TBD...
+* Add full support for random seed pinning for fully reproducible bml
+  render artifacts
+* Document some of the API provided to `eval` blocks
 
 ### 0.0.11
 * Added experimental support for built-in javascript utils,
