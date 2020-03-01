@@ -19,6 +19,8 @@ let BML_VERSION = require('../package.json')['version'];
 /* eslint-disable no-unused-vars */
 let WeightedChoice = require('./weightedChoice.js').WeightedChoice;
 let weightedChoose = rand.weightedChoose;
+let randomInt = rand.randomInt;
+let randomFloat = rand.randomFloat;
 /* eslint-enable no-unused-vars */
 
 /**

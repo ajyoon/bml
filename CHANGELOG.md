@@ -1,7 +1,7 @@
 # Changelog
 
 ### 0.0.13
-* TBD...
+* Expose `randomInt` and `randomFloat` to eval blocks.
 
 ### 0.0.12
 * Fix bug where random float generation was rounding results to integers,
