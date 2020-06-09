@@ -31,8 +31,8 @@ function bmlTransformMode(hljs) {
   return {
     className: 'strong',
     keywords: 'as call use',
-    begin: '{{',
-    end: '}}',
+    begin: '{',
+    end: '}',
     relevance: 10,
     contains: [
       multiLineApostropheStringMode(hljs),

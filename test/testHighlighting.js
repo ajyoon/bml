@@ -20,7 +20,7 @@ describe('highlighting', function() {
     // uncomment this line to regenerate the expected output,
     // and comment it again
 
-    // generateExpectedOutput();
+    //generateExpectedOutput();
 
     const sampleInput = '' + fs.readFileSync(INPUT_PATH);
     const highlighted = highlighting.highlightBml(sampleInput);

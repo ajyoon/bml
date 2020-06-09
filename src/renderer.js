@@ -93,9 +93,9 @@ function renderText(string, startIndex, evalBlock, modes, activeMode) {
       } else {
         out += string[index];
       }
-    } else if (string.slice(index, index + 2) === '{{') {
-      chooseRe.lastIndex = index + 2;
-      useRe.lastIndex = index + 2;
+    } else if (string.slice(index, index + 1) === '{') {
+      chooseRe.lastIndex = index + 1;
+      useRe.lastIndex = index + 1;
       if (chooseRe.test(string)) {
         let parseInlineChooseResult = parseInlineChoose(string, index, false);
         replacement = parseInlineChooseResult.replacer.call(

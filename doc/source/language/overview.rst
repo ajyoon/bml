@@ -309,7 +309,7 @@ The active mode can be changed at any time using a ``use`` command: ::
 
   this text will be processed using \`oneMode`
 
-  {{use aDifferentMode}}
+  {use aDifferentMode}
 
   this text will be processed using \`aDifferentMode`
 
@@ -321,7 +321,7 @@ is equivalent to ::
 
   begin
 
-  {{use someMode}}
+  {use someMode}
 
 
 .. _choose-commands:
@@ -332,7 +332,7 @@ choose commands
 A weighted choice may be declared inline using the same syntax for the
 replacement component of :ref:`rules <rules>`: ::
 
-  this is {{'some text' 30, 'an example'}}
+  this is {'some text' 30, 'an example'}
 
 30% of the time, this will be rendered as *"this is some text"*, and 60% of the
 time as *"this is an example"*.

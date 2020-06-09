@@ -69,12 +69,12 @@ either defined inline or in the eval block.
 Strings can be escaped with [[double square bracket delimiters.]] and backslashes \\.
 
 The text body can also apply one-time transformations, the common marker
-for them being {{double curly braces}}.
+for them being {double curly braces}.
 
 Available one-time transformations include:
 
-* choose: `{{'x' 20, 'y' 30, 'z' 50, call someFunc}}`
-* using: `{{using literal}}`
+* choose: `{'x' 20, 'y' 30, 'z' 50, call someFunc}`
+* using: `{using literal}`
 
 ## syntax highlighting
 

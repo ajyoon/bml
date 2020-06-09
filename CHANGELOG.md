@@ -1,7 +1,11 @@
 # Changelog
 
 ### 0.0.14-dev
-* TBD...
+* **MAJOR BREAKING CHANGE** Replaces double-brace syntax with single braces. This affects inline choice blocks and mode switch blocks:
+  | before                | after               |
+  |-----------------------|---------------------|
+  | `{{'a', 'b'}}`        | `{'a', 'b'}`        |
+  | `{{use anotherMode}}` | `{use anotherMode}` |
 
 ### 0.0.13
 * Expose `randomInt` and `randomFloat` to eval blocks.

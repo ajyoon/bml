@@ -22,9 +22,9 @@ some text
 
 \[[some escaped literal text]]
 
-{{'an inline transform' 30, "with mixed quotes" 10, call someFunc 10}}
+{'an inline transform' 30, "with mixed quotes" 10, call someFunc 10}
 
-{{use anotherMode}}
+{use anotherMode}
 
 ```
 a markdown code block

@@ -434,13 +434,13 @@ function parsePrelude(string) {
 }
 
 /**
- * Parse a `use` block of the form `{{use|using modeName}}`
+ * Parse a `use` block of the form `{use|using modeName}`
  *
  * @returns {blockEndIndex, modeName} The returned index is the index immediately
  * after the closing brace.
  */
 function parseUse(string, openBraceIndex) {
-  let useRe = /{{(use|using)\s+(\w[\w\d]*)\s*}}/y;
+  let useRe = /{(use|using)\s+(\w[\w\d]*)\s*}/y;
   useRe.lastIndex = openBraceIndex;
   let match = useRe.exec(string);
   if (match === null) {
@@ -531,10 +531,10 @@ function extractNumberLiteral(string, numberIndex) {
 
 function parseInlineChoose(string, openBraceIndex) {
   let lexer = new Lexer(string);
-  lexer.overrideIndex(openBraceIndex + 2);
+  lexer.overrideIndex(openBraceIndex + 1);
   let replacements = parseReplacements(lexer);
   return {
-    blockEndIndex: lexer.index + 2,
+    blockEndIndex: lexer.index + 1,
     replacer: createWeightedOptionReplacer(replacements, false),
   };
 }

@@ -253,21 +253,21 @@ describe('parseRule', function() {
 
 describe('parseUse', function() {
   it('Extracts the mode name with "use" syntax', function() {
-    let testString = '{{use testMode}}';
+    let testString = '{use testMode}';
     let result = parseUse(testString, 0);
     assert.strictEqual(result.blockEndIndex, testString.length);
     assert.strictEqual(result.modeName, 'testMode');
   });
 
   it('Extracts the mode name with "using" syntax', function() {
-    let testString = '{{using testMode}}';
+    let testString = '{using testMode}';
     let result = parseUse(testString, 0);
     assert.strictEqual(result.blockEndIndex, testString.length);
     assert.strictEqual(result.modeName, 'testMode');
   });
 
   it('Throws an UnknownTransformError when there is a syntax error.', function() {
-    let testString = '{{using ????}}';
+    let testString = '{using ????}';
     try {
       parseUse(testString, 0);
       assert(false, 'error expected');
@@ -316,35 +316,35 @@ describe('parseStringLiteralWithLexer', function() {
 
 describe('parseInlineChoose', function() {
   it('allows a single unweighted item', function() {
-    let testString = '{{\'test\'}}';
+    let testString = '{\'test\'}';
     let result = parseInlineChoose(testString, 0);
     assert.strictEqual(result.blockEndIndex, testString.length);
     assert(result.replacer instanceof Replacer);
   });
 
   it('allows a single weighted item', function() {
-    let testString = '{{\'test\' 100}}';
+    let testString = '{\'test\' 100}';
     let result = parseInlineChoose(testString, 0);
     assert.strictEqual(result.blockEndIndex, testString.length);
     assert(result.replacer instanceof Replacer);
   });
 
   it('allows a single unweighted call item', function() {
-    let testString = '{{call someFunc}}';
+    let testString = '{call someFunc}';
     let result = parseInlineChoose(testString, 0);
     assert.strictEqual(result.blockEndIndex, testString.length);
     assert(result.replacer instanceof Replacer);
   });
 
   it('allows a single weighted call item', function() {
-    let testString = '{{call someFunc 100}}';
+    let testString = '{call someFunc 100}';
     let result = parseInlineChoose(testString, 0);
     assert.strictEqual(result.blockEndIndex, testString.length);
     assert(result.replacer instanceof Replacer);
   });
 
   it('allows a comma separated mix of literals and calls', function() {
-    let testString = '{{\'test\' 50, call someFunc 40}}';
+    let testString = '{\'test\' 50, call someFunc 40}';
     let result = parseInlineChoose(testString, 0);
     assert.strictEqual(result.blockEndIndex, testString.length);
     assert(result.replacer instanceof Replacer);
