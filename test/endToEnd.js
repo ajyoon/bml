@@ -12,7 +12,7 @@ describe('bml', function() {
   });
 
   it('can process a document without a prelude', function() {
-    let testString = 'hello {"beautiful" 60, "wonderful"} world!';
+    let testString = 'hello {{beautiful} 60, {wonderful}} world!';
     let result = bml(testString);
     let possibleOutcomes = [
       'hello beautiful world!',

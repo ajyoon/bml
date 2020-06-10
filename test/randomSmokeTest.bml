@@ -15,7 +15,7 @@ eval {
 }
 
 mode main {
-    'testslug' as call replaceWithRandomNumber 30, 'b' 20
+    {testslug} as call replaceWithRandomNumber 30, {b} 20
 }
 
 mode literal {

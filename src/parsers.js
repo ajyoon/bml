@@ -148,8 +148,7 @@ function parseMatchers(lexer) {
       if (token.tokenType === TokenType.NEW_LINE) {
         inComment = false;
       }
-    } else if (afterLetterR && !(token.tokenType === TokenType.SINGLE_QUOTE ||
-                            token.tokenType === TokenType.DOUBLE_QUOTE)) {
+    } else if (afterLetterR && token.tokenType !== TokenType.OPEN_BRACE) {
       throw new BMLSyntaxError('regex matcher signifier (\'r\') not '
                                + 'immediately preceding string literal',
                                lexer.string, startIndex);
@@ -163,10 +162,9 @@ function parseMatchers(lexer) {
         break;
       case TokenType.KW_AS:
         return matchers;
-      case TokenType.SINGLE_QUOTE:
-      case TokenType.DOUBLE_QUOTE:
+      case TokenType.OPEN_BRACE:
         if (acceptMatcher) {
-          matchers.push(createMatcher(parseStringLiteralWithLexer(lexer),
+          matchers.push(createMatcher(parseReplacementWithLexer(lexer),
                                       afterLetterR));
           afterLetterR = false;
           acceptMatcher = false;
@@ -221,7 +219,6 @@ function parseReplacements(lexer) {
   let acceptWeight = false;
   let acceptComma = false;
   let acceptReplacerEnd = false;
-
   while ((token = lexer.peek()) !== null) {
     if (inComment) {
       if (token.tokenType === TokenType.NEW_LINE) {
@@ -235,24 +232,22 @@ function parseReplacements(lexer) {
       case TokenType.COMMENT:
         inComment = true;
         break;
-      case TokenType.SINGLE_QUOTE:
-      case TokenType.DOUBLE_QUOTE:
+      case TokenType.OPEN_BRACE:
         if (acceptReplacement) {
           acceptReplacement = false;
           acceptWeight = true;
           acceptComma = true;
           acceptReplacerEnd = true;
           choices.push(new WeightedChoice(
-            parseStringLiteralWithLexer(lexer), null));
-          // break out of loop since the string literal token
-          // stream is consumed by parseStringLiteralWithLexer
+            parseReplacementWithLexer(lexer), null));
           continue;
         } else if (acceptReplacerEnd) {
           return choices;
         } else {
-          throw new BMLSyntaxError('unexpected string literal',
+          throw new BMLSyntaxError('unexpected open brace',
                                    lexer.string, token.index);
         }
+        break;
       case TokenType.CLOSE_BRACE:
       case TokenType.LETTER_R:
         if (acceptReplacerEnd) {
@@ -353,8 +348,7 @@ function parseMode(lexer) {
       case TokenType.COMMENT:
         inComment = true;
         break;
-      case TokenType.SINGLE_QUOTE:
-      case TokenType.DOUBLE_QUOTE:
+      case TokenType.OPEN_BRACE:
       case TokenType.LETTER_R:
         mode.rules.push(parseRule(lexer));
         continue;
@@ -467,6 +461,35 @@ function parseBegin(lexer) {
   } else {
     return match;
   }
+}
+
+/**
+ * @param lexer {Lexer} a lexer whose next token is either TokenType.OPEN_BRACE
+ *
+ * @return {String} the parsed string literal replacement body
+ */
+function parseReplacementWithLexer(lexer) {
+  lexer.next();
+  let startIndex = lexer.index;
+  let stringLiteral = '';
+  let token;
+  let openBraceCount = 1;
+  while ((token = lexer.next()) !== null) {
+    switch (token.tokenType) {
+    case TokenType.OPEN_BRACE:
+      openBraceCount++;
+      break;
+    case TokenType.CLOSE_BRACE:
+      openBraceCount--;
+      if (openBraceCount < 1) {
+        return stringLiteral;
+      }
+      break;
+    }
+    stringLiteral += token.string;
+  }
+  throw new BMLSyntaxError('Could not find end of replacement.',
+                           lexer.string, startIndex);
 }
 
 /**
