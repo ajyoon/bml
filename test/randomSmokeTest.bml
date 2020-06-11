@@ -33,6 +33,12 @@ testslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslug
 
 a simple {{choice}, {inline choose block}}
 
-{{a nonrecursive branch}, {a recursive {{path, branch}}}}
+{
+    {a nonrecursive branch},
+    {a recursive {
+        {path},
+        {branch}
+    }}
+}
 
 recurse!
