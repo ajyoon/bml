@@ -2,6 +2,7 @@ let assert = require('assert');
 let fs = require('fs');
 var decache = require('decache');
 let expect = require('chai').expect;
+let sha = require('sha.js');
 
 let rand = require('../src/rand.js');
 let WeightedChoice = require('../src/weightedChoice.js').WeightedChoice;
@@ -98,5 +99,15 @@ describe('setRandomSeed', function() {
     let firstResult = rand.randomFloat(0, 1);
     reloadRandModule();
     expect(rand.randomFloat(0, 1)).to.not.be.closeTo(firstResult, 0.0001);
+  });
+  
+  it('produces stable results forever', function() {
+    rand.setRandomSeed(1234);
+    let results = [];
+    for (let i = 0; i < 100000; i++) {
+      results.push(rand.randomInt());
+    }
+    let hash = sha('sha256').update(results).digest('hex');
+    expect(hash).to.be.equal('9192c25b734fcbadbe32dadc28089c60db0e39f90cc20ce2e5733f57261acc0c');
   });
 });
