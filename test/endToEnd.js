@@ -28,7 +28,7 @@ describe('bml', function() {
         `mode test {
             {recurse!} as {just kidding} 50, {outer {{inner 1}, {inner 2}}} 50
         }
-        begin using test
+        {use test}
         recurse!
         `;
     let result = bml(testString).trim();

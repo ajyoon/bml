@@ -95,16 +95,9 @@ class Lexer {
     } else if (this.string.slice(this.index, this.index + 4) === 'mode') {
       tokenType = TokenType.KW_MODE;
       tokenString = 'mode';
-    } else if (this.string.slice(this.index, this.index + 5) === 'begin') {
-      tokenType = TokenType.KW_BEGIN;
-      tokenString = 'begin';
     } else if (this.string.slice(this.index, this.index + 3) === 'use') {
       tokenType = TokenType.KW_USE;
       tokenString = 'use';
-    } else if (this.string.slice(this.index, this.index + 5) === 'using') {
-      // synonym for 'use'
-      tokenType = TokenType.KW_USE;
-      tokenString = 'using';
     } else if (this.string[this.index] === 'r') {
       tokenType = TokenType.LETTER_R;
       tokenString = 'r';

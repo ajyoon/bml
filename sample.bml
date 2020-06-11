@@ -15,8 +15,7 @@ eval {
 mode literal {
     // No rules
 }
-begin using literal
-
+{use literal}
 {call copyPrelude}
 
 # bml

@@ -43,18 +43,6 @@ function bmlTransformMode(hljs) {
   };
 }
 
-function bmlBodyLanguage(hljs) {
-  return {
-    className: 'bml-body',
-    contains: [
-      bmlLiteralMode(hljs),
-      bmlTransformMode(hljs),
-      hljs.BACKSLASH_ESCAPE,
-    ],
-    subLanguage: ['markdown', 'html'],
-  };
-}
-
 function bmlEvalMode(hljs) {
   return {
     beginKeywords: 'eval',
@@ -77,21 +65,23 @@ function bmlModeOpeningMode(hljs) {
   };
 }
 
-function bmlBeginMode(hljs) {
+function bmlBodyLanguage(hljs) {
   return {
-    keywords: 'begin use using',
-    begin: '^begin',
-    end: '\n',
-    endsParent: true,
-    relevance: 100,
+    className: 'bml-body',
+    contains: [
+      bmlLiteralMode(hljs),
+      bmlTransformMode(hljs),
+      hljs.BACKSLASH_ESCAPE,
+    ],
+    subLanguage: ['markdown', 'html'],
   };
 }
 
 function bmlLanguage(hljs) {
   return {
     className: 'bml-prelude',
-    keywords: 'eval mode begin use using as call r',
-    end: '^begin (use|using) (\w+)$',
+    keywords: 'eval mode use as call r',
+    end: '^{use (\w+)}$',
     contains: [
       hljs.C_LINE_COMMENT_MODE,
       bmlEvalMode(hljs),
@@ -100,7 +90,6 @@ function bmlLanguage(hljs) {
       hljs.NUMBER_MODE,
       hljs.C_LINE_COMMENT_MODE,
       bmlModeOpeningMode(hljs),
-      bmlBeginMode(hljs),
     ],
     starts: bmlBodyLanguage(hljs),
   };

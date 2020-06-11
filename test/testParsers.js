@@ -171,15 +171,12 @@ describe('parsePrelude', function() {
                       eval {
                           global.evalTest2 = 2;
                       }
-                      begin
-
                       some text`;
     let result = parsePrelude(testString);
-    assert.strictEqual(result.preludeEndIndex, testString.indexOf('begin') + 'begin'.length);
+    assert.strictEqual(result.preludeEndIndex, testString.indexOf('some text'));
     assert(result.evalBlock.string.indexOf('global.evalTest = 1;\n') !== -1);
     assert(result.evalBlock.string.indexOf('global.evalTest2 = 2;\n') !== -1);
     assert.deepStrictEqual(result.modes, {});
-    assert.strictEqual(result.initialMode, null);
   });
 
   it('recognizes mode blocks and passes them to parseMode', function() {
@@ -190,39 +187,11 @@ describe('parsePrelude', function() {
                       mode secondMode {
                           // do something
                       }
-                      begin
-
                       some text`;
     let result = parsePrelude(testString);
-    assert.strictEqual(result.preludeEndIndex, testString.indexOf('begin') + 'begin'.length);
+    assert.strictEqual(result.preludeEndIndex, testString.indexOf('some text'));
     assert(result.modes.hasOwnProperty('firstMode'));
     assert(result.modes.hasOwnProperty('secondMode'));
-  });
-
-  it('extracts the beginning mode name and sets the initial mode', function() {
-    let testString = `mode test {
-                          // do something
-                      }
-                      begin using test
-                     `;
-    let result = parsePrelude(testString);
-    assert.strictEqual(result.preludeEndIndex,
-                 testString.indexOf('begin using test') + 'begin using test'.length);
-    assert(result.modes.hasOwnProperty('test'));
-    assert.strictEqual(result.initialMode.name, 'test');
-  });
-
-  it('supports begin statements with "use" instead of "using"', function() {
-    let testString = `mode test {
-                          // do something
-                      }
-                      begin use test
-                     `;
-    let result = parsePrelude(testString);
-    assert.strictEqual(result.preludeEndIndex,
-                 testString.indexOf('begin use test') + 'begin use test'.length);
-    assert(result.modes.hasOwnProperty('test'));
-    assert.strictEqual(result.initialMode.name, 'test');
   });
 });
 

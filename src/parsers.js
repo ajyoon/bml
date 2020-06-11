@@ -395,35 +395,21 @@ function parsePrelude(string) {
         var newMode = parseMode(lexer);
         modes[newMode.name] = newMode;
         continue;
-      case TokenType.KW_BEGIN:
-        var beginStatementStartIndex = lexer.index;
-        var initialModeName = parseBegin(lexer);
-        var initialMode;
-        if (modes.hasOwnProperty(initialModeName)) {
-          initialMode = modes[initialModeName];
-        } else if (initialModeName === null) {
-          initialMode = null;
-        } else if (initialModeName !== null) {
-          throw new UnknownModeError(lexer.string,
-                                     beginStatementStartIndex,
-                                     initialModeName);
-        }
+      default:
         return {
           preludeEndIndex: lexer.index,
           evalBlock: new EvalBlock(evalString),
           modes: modes,
-          initialMode: initialMode,
         };
       }
     }
     lexer.next();
   }
-  // Could not find end of prelude; assume that none exists
+  // The prelude never ended in the document
   return {
-    preludeEndIndex: 0,
-    evalBlock: new EvalBlock(''),
-    modes: {},
-    initialMode: null,
+    preludeEndIndex: lexer.index,
+    evalBlock: new EvalBlock(evalString),
+    modes: modes,
   };
 }
 
@@ -444,23 +430,6 @@ function parseUse(string, openBraceIndex) {
     blockEndIndex: useRe.lastIndex,
     modeName: match[2]
   };
-}
-
-function parseBegin(lexer) {
-  if (lexer.peek().tokenType !== TokenType.KW_BEGIN) {
-    throw new BMLSyntaxError('begin statements must start with keyword "begin"',
-                             lexer.string, lexer.index);
-  }
-  let token = lexer.next();
-  let useRe = /\s+(use|using)\s+(\w[\w\d]*)/y;
-  useRe.lastIndex = lexer.index;
-  let match = useRe.exec(lexer.string);
-  if (match !== null) {
-    lexer.overrideIndex(lexer.index + match[0].length);
-    return match[2];
-  } else {
-    return match;
-  }
 }
 
 /**

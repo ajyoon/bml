@@ -56,7 +56,8 @@ function checkVersion(bmlVersion, specifiedInSettings) {
  *
  * @returns {String} the rendered text.
  */
-function renderText(string, startIndex, evalBlock, modes, activeMode) {
+function renderText(string, startIndex, evalBlock, modes) {
+  let activeMode = null;
   let isEscaped = false;
   let inLiteralBlock = false;
   let out = '';
@@ -194,10 +195,9 @@ function render(bmlDocumentString, settings) {
     preludeEndIndex,
     evalBlock,
     modes,
-    initialMode,
   } = parsePrelude(bmlDocumentString);
   return renderText(
-    bmlDocumentString, preludeEndIndex, evalBlock, modes, initialMode);
+    bmlDocumentString, preludeEndIndex, evalBlock, modes);
 }
 
 exports.renderText = renderText;

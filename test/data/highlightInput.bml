@@ -14,7 +14,7 @@ mode someMode {
     "double quotes" as "replacement"
 }
 
-begin using someMode
+{use someMode}
 
 some text
 

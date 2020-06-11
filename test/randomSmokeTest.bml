@@ -22,8 +22,7 @@ mode main {
 mode literal {
      // no rules!
 }
-
-begin using main
+{use main}
 
 # test
 

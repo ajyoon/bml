@@ -1,5 +1,3 @@
-
-
 ```
 eval {
     // arbitrary javascript
@@ -18,8 +16,7 @@ eval {
 mode literal {
     // No rules
 }
-begin using literal
-
+{use literal}
 ```
 
 

@@ -1,21 +1,21 @@
-<span class="hljs-keyword">eval</span><span class="javascript"> {
+<span class="undefined">eval </span><span class="hljs-strong">{
     settings = {
-        <span class="hljs-attr">renderMarkdown</span>: <span class="hljs-literal">false</span>,
-    };
+        renderMarkdown: false,
+    }</span><span class="undefined">;
 
-    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">someFunc</span>(<span class="hljs-params">match, string, matchIndex</span>) </span>{
-        <span class="hljs-keyword">return</span> <span class="hljs-string">'some string'</span>;
-    }
-</span>}
-
-<span class="hljs-keyword">mode</span> <span class="hljs-title">someMode</span> {
-    <span class="hljs-string">'a'</span> <span class="hljs-keyword">as</span> <span class="hljs-string">'b'</span> <span class="hljs-number">50</span>, <span class="hljs-keyword">call</span> someFunc <span class="hljs-number">10</span>,
-    <span class="hljs-keyword">r</span><span class="hljs-string">'regex matcher'</span> <span class="hljs-keyword">as</span> <span class="hljs-string">'replacement'</span> <span class="hljs-number">5</span>, <span class="hljs-string">'another replacement'</span> <span class="hljs-number">10</span>
-    <span class="hljs-string">"double quotes"</span> <span class="hljs-keyword">as</span> <span class="hljs-string">"replacement"</span>
+    function someFunc(match, string, matchIndex) </span><span class="hljs-strong">{
+        return <span class="hljs-string">'some string'</span>;
+    }</span><span class="undefined">
 }
 
-<span class="hljs-keyword">begin</span> <span class="hljs-keyword">using</span> someMode
-</span><span class="hljs-bml-body"><span class="undefined">
+mode someMode </span><span class="hljs-strong">{
+    <span class="hljs-string">'a'</span> <span class="hljs-keyword">as</span> <span class="hljs-string">'b'</span> <span class="hljs-number">50</span>, <span class="hljs-keyword">call</span> someFunc <span class="hljs-number">10</span>,
+    r<span class="hljs-string">'regex matcher'</span> <span class="hljs-keyword">as</span> <span class="hljs-string">'replacement'</span> <span class="hljs-number">5</span>, <span class="hljs-string">'another replacement'</span> <span class="hljs-number">10</span>
+    <span class="hljs-string">"double quotes"</span> <span class="hljs-keyword">as</span> <span class="hljs-string">"replacement"</span>
+}</span><span class="undefined">
+
+</span><span class="hljs-strong">{<span class="hljs-keyword">use</span> someMode}</span><span class="undefined">
+
 some text
 
 [[</span><span class="hljs-string">some literal text</span><span class="undefined">]]

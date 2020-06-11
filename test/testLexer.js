@@ -142,21 +142,9 @@ describe('Lexer', function() {
     assert.strictEqual(lexer.next(), null);
   });
 
-  it('tokenizes the keyword "begin"', function() {
-    let lexer = new Lexer('begin');
-    assert.deepStrictEqual(lexer.next(), new Token(TokenType.KW_BEGIN, 0, 'begin'));
-    assert.strictEqual(lexer.next(), null);
-  });
-
   it('tokenizes the keyword "use"', function() {
     let lexer = new Lexer('use');
     assert.deepStrictEqual(lexer.next(), new Token(TokenType.KW_USE, 0, 'use'));
-    assert.strictEqual(lexer.next(), null);
-  });
-
-  it('tokenizes the "using" as a synonym for the keyword "use"', function() {
-    let lexer = new Lexer('using');
-    assert.deepStrictEqual(lexer.next(), new Token(TokenType.KW_USE, 0, 'using'));
     assert.strictEqual(lexer.next(), null);
   });
 
