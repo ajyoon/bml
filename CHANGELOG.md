@@ -7,6 +7,16 @@
   | `{{'a' 10, 'b'}}`            | `{{a} 10, {b}}`              |
   | `{{use anotherMode}}`        | `{use anotherMode}`          |
   | `'foo' as 'bar' 5, call foo` | `{foo} as {bar} 5, call foo` |
+* Support recursive rendering within replacements, both in inline choices and in rule replacements. For instance:
+  ```bml
+  mode main {
+      {recurse!} as {just kidding}, {outer {{inner 1}, {inner 2}}}
+  }
+  begin using main
+
+  recurse!
+  a {{simple inline}, {{{complex}, {fancy}} recursive}} inline choice
+  ```
 
 ### 0.0.13
 * Expose `randomInt` and `randomFloat` to eval blocks.

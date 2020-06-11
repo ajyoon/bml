@@ -16,6 +16,7 @@ eval {
 
 mode main {
     {testslug} as call replaceWithRandomNumber 30, {b} 20
+    {recurse!} as {just kidding}, {outer {{inner 1}, {inner 2}}}
 }
 
 mode literal {
@@ -29,3 +30,9 @@ begin using main
 [[some text for invoking the 'testslug' rule]]
 
 testslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslug
+
+a simple {{choice}, {inline choose block}}
+
+{{a nonrecursive branch}, {a recursive {{path, branch}}}}
+
+recurse!

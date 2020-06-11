@@ -103,7 +103,10 @@ function renderText(string, startIndex, evalBlock, modes, activeMode) {
         if (replacement instanceof EvalBlock) {
           out += eval(replacement.string)([''], string, index);
         } else {
-          out += replacement;
+          // To handle nested choices and to run rules over chosen text,
+          // we recursively render the chosen text.
+          let renderedReplacement = renderText(replacement, 0, null, modes, activeMode);
+          out += renderedReplacement;
         }
         index = parseInlineChooseResult.blockEndIndex;
         continue;
@@ -138,7 +141,10 @@ function renderText(string, startIndex, evalBlock, modes, activeMode) {
                 } else if (replacement === noOp) {
                   out += currentMatch[0];
                 } else {
-                  out += replacement;
+                  // To handle nested choices and to run rules over replaced text,
+                  // we recursively render the chosen text.
+                  let renderedReplacement = renderText(replacement, 0, null, modes, activeMode);
+                  out += renderedReplacement;
                 }
                 index += currentMatch[0].length;
                 foundMatch = true;

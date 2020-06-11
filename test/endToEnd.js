@@ -22,12 +22,43 @@ describe('bml', function() {
       assert.fail(`Unexpected output: ${result}`);
     }
   });
+  
+  it('can process recursive rule choices', function() {
+    let testString =
+        `mode test {
+            {recurse!} as {just kidding} 50, {outer {{inner 1}, {inner 2}}} 50
+        }
+        begin using test
+        recurse!
+        `;
+    let result = bml(testString).trim();
+    let possibleOutcomes = [
+      'just kidding',
+      'outer inner 1',
+      'outer inner 2',
+    ];
+    if (possibleOutcomes.indexOf(result) === -1) {
+      assert.fail(`Unexpected output: ${result}`);
+    }
+  });
+  
+  it('can process recursive inline choices', function() {
+    let testString = 'hello {{simple}, {{{very }, {}}recursive}} world!';
+    let result = bml(testString);
+    let possibleOutcomes = [
+      'hello simple world!',
+      'hello recursive world!',
+      'hello very recursive world!',
+    ];
+    if (possibleOutcomes.indexOf(result) === -1) {
+      assert.fail(`Unexpected output: ${result}`);
+    }
+  });
 
   it('produces the exact same document when using a fixed random seed', function() {
     let testString = '' + fs.readFileSync(require.resolve('./randomSmokeTest.bml'));
     let firstResult = bml(testString, { randomSeed: 1234 });
     let secondResult = bml(testString, { randomSeed: 1234 });
-    console.log(firstResult);
     expect(firstResult).to.equal(secondResult);
   });
 });
