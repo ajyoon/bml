@@ -16,13 +16,10 @@ document structure
 ==================
 
 A ``bml`` document consists of two sections: an optional
-:ref:`prelude<the-prelude>` and a body. If a prelude is given, it must always
-end with a :ref:`begin` statement. If no :ref:`begin` statement is found, the
-document is interpreted as having only a :ref:`body <the-body>`::
+:ref:`prelude<the-prelude>` and a body. The prelude is considered finished
+at the first non-prelude-looking text.::
 
   [prelude]
-
-  [begin statement]
 
   [body]
 
@@ -36,7 +33,6 @@ A ``bml`` prelude consists of:
 
 * any number of :ref:`eval` blocks
 * any number of :ref:`modes <mode>`
-* a :ref:`begin` statement
 
 a basic example::
 
@@ -52,9 +48,6 @@ a basic example::
   mode someMode {
       {x} as {y}
   }
-
-  begin using someMode
-
 
 .. _eval:
 
@@ -249,33 +242,12 @@ matched text will never be chosen.
    that their sum is 100. For example, ``{foo} as {bar} 100, {baz} 900`` is
    equivalent to ``{foo} as {bar} 10, {baz} 90``
 
-
-.. _begin:
-
-the *begin* directive
-=====================
-
-The ``begin`` statement marks the end of the prelude section of a ``bml``
-document. If a prelude is given, it *must* be provided to indicate the end of
-the prelude (otherwise ``bml`` will just assume there is no prelude and treat
-the entire document as a body).
-
-The ``begin`` statement has the form: ::
-
-  begin [using someModeName]
-
-Note that a mode name may be provided after a ``using`` keyword to start the
-body immediately in a given mode.
-
-If no initial mode is provided, the body will not begin with a mode.
-
 .. _the-body:
 
 the body
 ========
 
-The body of a ``bml`` document is just normal text, aside from :ref:`commands <commands>` and literal blocks.
-
+The body of a ``bml`` document is just normal text, aside from :ref:`commands <commands>` and literal blocks. ``bml`` considers the body to have begun at its first encounter of non-prelude-like text.
 
 .. _literal-blocks:
 
@@ -294,7 +266,7 @@ commands
 --------
 
 Commands tell ``bml`` to do something during body processing. They are notated
-with double curly braces.
+with curly braces.
 
 .. _mode-changes:
 
@@ -305,24 +277,11 @@ The active mode can be changed at any time using a ``use`` command: ::
 
   // prelude...
 
-  begin using oneMode
-
-  this text will be processed using \`oneMode`
-
-  {use aDifferentMode}
-
-  this text will be processed using \`aDifferentMode`
-
-This means that ::
-
-  begin using someMode
-
-is equivalent to ::
-
-  begin
+  text immediately following the prelude will not have an active mode.
 
   {use someMode}
 
+  this text will be processed using `someMode`
 
 .. _choose-commands:
 
@@ -332,11 +291,60 @@ choose commands
 A weighted choice may be declared inline using the same syntax for the
 replacement component of :ref:`rules <rules>`: ::
 
-  this is {{some text} 30, {an example}}
+  this is {{some text} 30, {an example}, call someFunc}
 
-30% of the time, this will be rendered as *"this is some text"*, and 60% of the
-time as *"this is an example"*.
+30% of the time, this will be rendered as *"this is some text"*, 35% of the
+time as *"this is an example"*, and 35% of the time ``someFunc`` will be called.
 
 This is interpreted exactly as if it were a one-off rule which applies at the
 point of the command. The only difference is that invoked replacement functions
 will be passed the ``match`` argument of ``['']``.
+
+This can also be useful for unconditionally calling functions with a single-choice block: ::
+
+  {call someFunc}
+
+.. _nested-replacements:
+
+nested evaluation
+-----------------
+
+Text replacements inserted by both :ref:`choose commands <_choose-commands>` and :ref:`rules <rules>` are themselves treated as body bml, so they can contain everything from choose commands to call commands to mode switches. Modes and rules are evaluated on them as well.
+
+For instance, we could set up nested choices like so: ::
+  
+  outer with {{inner 1}, {inner 2 with {{nested 1!}, {nested 2!}}}}
+  
+In effect, this results in a choice tree with the following possible paths:
+
+* outer with inner 1
+* outer with inner 2 with nested 1!
+* outer with inner 2 with nested 2!
+
+As you can imagine, these braces can become messy quickly in nested branches, so it's best practice to incorporate line breaks: ::
+
+  outer with {
+    {inner 1},
+    {inner 2 with {
+      {nested 1!}, {nested 2!}}}}
+
+But be sure to include those line breaks in the outer braces (relative to whatever depth level) and not in the inner replacement text, since those will be interpreted as part of the replacement text.
+
+Rules are also evaluated on chosen text, for instance: ::
+
+  mode exampleMode {
+    {foo} as {bar} 50, {baz} 25
+  }
+  
+  some outer text with {
+    {inner without magic word},
+    {inner with magic word foo}}
+
+Which can be rendered as:
+
+* some outer text with inner without magic word
+* some outer text with inner with magic word bar
+* some outer text with inner with magic word baz
+* some outer text with inner with magic word foo [no-op rule branch taking the unclaimed probability of 25% in the rule]
+
+Note that nested evaluation *does not* occur on text inserted by function calls or by text left untouched by "no-op" rule branches.

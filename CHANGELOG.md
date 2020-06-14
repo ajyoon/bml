@@ -1,7 +1,7 @@
 # Changelog
 
-### 0.0.14-dev
-* **MAJOR BREAKING CHANGE** Replaces double-brace syntax with single braces. This affects inline choice blocks and mode switch blocks. Also replaces single/double quoted string syntax with braces so that all string literals outside `eval` blocks are now simply surrounded with braces. This helps simplify natural language (where quotation marks are commonly used) and allows the syntax for nested replacements to be much more elegant.
+### 0.0.14-dev: MAJOR BREAKING CHANGES
+* Replaces double-brace syntax with single braces. This affects inline choice blocks and mode switch blocks. Also replaces single/double quoted string syntax with braces so that all string literals outside `eval` blocks are now simply surrounded with braces. This helps simplify natural language (where quotation marks are commonly used) and allows the syntax for nested replacements to be much more elegant.
   | before                       | after                        |
   |------------------------------|------------------------------|
   | `{{'a' 10, 'b'}}`            | `{{a} 10, {b}}`              |
