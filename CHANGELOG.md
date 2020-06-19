@@ -7,6 +7,12 @@
   | `{{'a' 10, 'b'}}`            | `{{a} 10, {b}}`              |
   | `{{use anotherMode}}`        | `{use anotherMode}`          |
   | `'foo' as 'bar' 5, call foo` | `{foo} as {bar} 5, call foo` |
+
+  For migrating existing BML text, the following emacs regexps (in this order) have proven helpful:
+  1. `{{ -> {`
+  2. `}} -> }`
+  3. `'\([^{"\\]*?\)' -> {\1}`
+  4. `"\([^{\\]*?\)" -> {\1}`
 * Remove the `begin` statement; instead the first non-prelude-y text will cause the prelude to end. To start with an active mode, simply call the `{use someMode}` command.
 * Remove the `using` variant of the `use` keyword
 * Support recursive rendering within replacements, both in inline choices and in rule replacements. For instance:
