@@ -1,105 +1,11 @@
-let hljs = require('highlight.js');
-
-function multiLineApostropheStringMode(hljs) {
-  return {
-    className: 'string',
-    begin: '\'', end: '\'',
-    contains: [hljs.BACKSLASH_ESCAPE],
-  };
-}
-
-function multiLineQuoteStringMode(hljs) {
-  return {
-    className: 'string',
-    begin: '\"', end: '\"',
-    contains: [hljs.BACKSLASH_ESCAPE],
-  };
-}
-
-
-function bmlLiteralMode(hljs) {
-  return {
-    className: 'string',
-    begin: '\\[\\[',
-    end: '\\]\\]',
-    excludeBegin: true,
-    excludeEnd: true,
-  };
-}
-
-function bmlTransformMode(hljs) {
-  return {
-    className: 'strong',
-    keywords: 'as call use',
-    begin: '{',
-    end: '}',
-    relevance: 10,
-    contains: [
-      multiLineApostropheStringMode(hljs),
-      multiLineQuoteStringMode(hljs),
-      hljs.NUMBER_MODE,
-      hljs.C_LINE_COMMENT_MODE,
-    ],
-  };
-}
-
-function bmlEvalMode(hljs) {
-  return {
-    beginKeywords: 'eval',
-    starts: {
-      end: '^}$',
-      returnEnd: true,
-      subLanguage: ['javascript'],
-    },
-  };
-}
-
-function bmlModeOpeningMode(hljs) {
-  return {
-    keywords: 'mode',
-    begin: '^mode',
-    end: '{',
-    contains: [
-      hljs.inherit(hljs.TITLE_MODE, {begin: hljs.IDENT_RE}),
-    ],
-  };
-}
-
-function bmlBodyLanguage(hljs) {
-  return {
-    className: 'bml-body',
-    contains: [
-      bmlLiteralMode(hljs),
-      bmlTransformMode(hljs),
-      hljs.BACKSLASH_ESCAPE,
-    ],
-    subLanguage: ['markdown', 'html'],
-  };
-}
-
-function bmlLanguage(hljs) {
-  return {
-    className: 'bml-prelude',
-    keywords: 'eval mode use as call r',
-    end: '^{use (\w+)}$',
-    contains: [
-      hljs.C_LINE_COMMENT_MODE,
-      bmlEvalMode(hljs),
-      multiLineApostropheStringMode(hljs),
-      multiLineQuoteStringMode(hljs),
-      hljs.NUMBER_MODE,
-      hljs.C_LINE_COMMENT_MODE,
-      bmlModeOpeningMode(hljs),
-    ],
-    starts: bmlBodyLanguage(hljs),
-  };
-}
-
-hljs.registerLanguage('bml', bmlLanguage);
-hljs.registerLanguage('bml_body_only', bmlBodyLanguage);
+const Prism = require('prismjs');
+// The docs at https://prismjs.com say to use a babel plugin to load languages,
+// but for the life of me I can't get it to work. this approach seems to work
+// without importing all the other languages and bloating the bundle size.
+require('prismjs/components/prism-markdown');
 
 function highlightBml(source) {
-  return hljs.highlightAuto(source, ['bml', 'bml_body_only']).value;
+  return Prism.highlight(source, Prism.languages.markdown, 'markdown');
 }
 
 exports.highlightBml = highlightBml;
