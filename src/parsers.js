@@ -148,7 +148,7 @@ function parseMatchers(lexer) {
       if (token.tokenType === TokenType.NEW_LINE) {
         inComment = false;
       }
-    } else if (afterLetterR && token.tokenType !== TokenType.OPEN_BRACE) {
+    } else if (afterLetterR && token.tokenType !== TokenType.OPEN_PAREN) {
       throw new BMLSyntaxError('regex matcher signifier (\'r\') not '
                                + 'immediately preceding string literal',
                                lexer.string, startIndex);
@@ -162,7 +162,7 @@ function parseMatchers(lexer) {
         break;
       case TokenType.KW_AS:
         return matchers;
-      case TokenType.OPEN_BRACE:
+      case TokenType.OPEN_PAREN:
         if (acceptMatcher) {
           matchers.push(createMatcher(parseReplacementWithLexer(lexer),
                                       afterLetterR));
@@ -232,7 +232,7 @@ function parseReplacements(lexer) {
       case TokenType.COMMENT:
         inComment = true;
         break;
-      case TokenType.OPEN_BRACE:
+      case TokenType.OPEN_PAREN:
         if (acceptReplacement) {
           acceptReplacement = false;
           acceptWeight = true;
@@ -244,7 +244,7 @@ function parseReplacements(lexer) {
         } else if (acceptReplacerEnd) {
           return choices;
         } else {
-          throw new BMLSyntaxError('unexpected open brace',
+          throw new BMLSyntaxError('unexpected open paren',
                                    lexer.string, token.index);
         }
         break;
@@ -348,7 +348,7 @@ function parseMode(lexer) {
       case TokenType.COMMENT:
         inComment = true;
         break;
-      case TokenType.OPEN_BRACE:
+      case TokenType.OPEN_PAREN:
       case TokenType.LETTER_R:
         mode.rules.push(parseRule(lexer));
         continue;
@@ -433,7 +433,7 @@ function parseUse(string, openBraceIndex) {
 }
 
 /**
- * @param lexer {Lexer} a lexer whose next token is either TokenType.OPEN_BRACE
+ * @param lexer {Lexer} a lexer whose next token is TokenType.OPEN_PAREN
  *
  * @return {String} the parsed string literal replacement body
  */
@@ -442,15 +442,15 @@ function parseReplacementWithLexer(lexer) {
   let startIndex = lexer.index;
   let stringLiteral = '';
   let token;
-  let openBraceCount = 1;
+  let openParenCount = 1;
   while ((token = lexer.next()) !== null) {
     switch (token.tokenType) {
-    case TokenType.OPEN_BRACE:
-      openBraceCount++;
+    case TokenType.OPEN_PAREN:
+      openParenCount++;
       break;
-    case TokenType.CLOSE_BRACE:
-      openBraceCount--;
-      if (openBraceCount < 1) {
+    case TokenType.CLOSE_PAREN:
+      openParenCount--;
+      if (openParenCount < 1) {
         return stringLiteral;
       }
       break;
@@ -459,51 +459,6 @@ function parseReplacementWithLexer(lexer) {
   }
   throw new BMLSyntaxError('Could not find end of replacement.',
                            lexer.string, startIndex);
-}
-
-/**
- * @param lexer {Lexer} a lexer whose next token is either TokenType.SINGLE_QUOTE
- * or TokenType.DOUBLE_QUOTE.
- *
- * @return {String} the parsed string literal.
- */
-function parseStringLiteralWithLexer(lexer) {
-  let startIndex = lexer.index;
-  let stringLiteral = '';
-  let token;
-  let openStringToken = lexer.next();
-  while ((token = lexer.next()) !== null) {
-    if (token.tokenType === openStringToken.tokenType) {
-      return stringLiteral;
-    }
-    stringLiteral += token.string;
-  }
-  throw new BMLSyntaxError('Could not find end of string.',
-                           lexer.string, startIndex);
-}
-
-// TODO: use me in similar logic in other parsers
-// {closeQuoteIndex, extractedString}
-function parseStringLiteral(string, openQuoteIndex) {
-  let index = openQuoteIndex + 1;
-  let isEscaped = false;
-  while (index < string.length) {
-    if (isEscaped) {
-      isEscaped = false;
-    } else {
-      if (string[index] === '\\') {
-        isEscaped = true;
-      } else if (string[index] === '\'') {
-        return {
-          closeQuoteIndex: index,
-          extractedString: string.slice(openQuoteIndex + 1, index),
-        };
-      }
-    }
-    index++;
-  }
-  throw new BMLSyntaxError('could not find end of string at index: '
-                           + openQuoteIndex);
 }
 
 
@@ -536,8 +491,6 @@ exports.parseRule = parseRule;
 exports.parseMode = parseMode;
 exports.parsePrelude = parsePrelude;
 exports.parseUse = parseUse;
-exports.parseStringLiteral = parseStringLiteral;
-exports.parseStringLiteralWithLexer = parseStringLiteralWithLexer;
 exports.parseInlineChoose = parseInlineChoose;
 exports.createMatcher = createMatcher;
 exports.parseMatchers = parseMatchers;

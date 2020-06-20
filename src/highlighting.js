@@ -4,8 +4,21 @@ const Prism = require('prismjs');
 // without importing all the other languages and bloating the bundle size.
 require('prismjs/components/prism-markdown');
 
+(function (Prism) {
+  Prism.languages.bml = Prism.languages.extend('markdown', {
+    'brace': {
+      pattern: /{|}/,
+      alias: 'important'
+    },
+    'paren': {
+      pattern: /\(|\)/,
+      alias: 'string'
+    }
+  });
+})(Prism);
+
 function highlightBml(source) {
-  return Prism.highlight(source, Prism.languages.markdown, 'markdown');
+  return Prism.highlight(source, Prism.languages.bml, 'bml');
 }
 
 exports.highlightBml = highlightBml;

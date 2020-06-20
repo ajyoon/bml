@@ -65,7 +65,7 @@ function renderText(string, startIndex, evalBlock, modes) {
   let currentRule = null;
   let foundMatch = false;
   let replacement = null;
-  let chooseRe = /\s*({|call)/y;
+  let chooseRe = /\s*(\(|call)/y;
   let useRe = /\s*(use|using)/y;
 
   if (evalBlock) {

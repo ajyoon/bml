@@ -46,7 +46,7 @@ a basic example::
   }
 
   mode someMode {
-      {x} as {y}
+      (x) as (y)
   }
 
 .. _eval:
@@ -165,19 +165,19 @@ During rendering, all matchers for the active rule are tested across
 the ``bml`` :ref:`body <the-body>`, and when matches are found they
 are replaced using the replacer defined in the corresponding rule.
 
-A matcher can be a simple string (any text enclosed in curly braces)
+A matcher can be a simple string (any text enclosed in parentheses)
 or, when prefixed by the character ``r``, a regular expression. ::
 
   mode someModeName {
-      {a matcher} as {foo}
-      r{a regex matcher} as {foo}
+      (a matcher) as (foo)
+      r(a regex matcher) as (foo)
   }
 
 Multiple matchers can apply to a single rule, making the previous example
 equivalent to: ::
 
   mode someModeName {
-      {a matcher}, r{a regex matcher} as {foo}
+      (a matcher), r(a regex matcher) as (foo)
   }
 
 Replacements can be literal strings or references to replacement
@@ -194,41 +194,41 @@ uses a replacement function to capitalize the word. ::
   }
 
   mode capitalizingWordsStartingWithA {
-      r{\s[aA](\w?)} as call capitalize
+      r(\s[aA](\w?)) as call capitalize
   }
 
 Multiple possible replacements can be specified. The unmodified matched text is
 always included as a possible replacement. ::
 
-  {foo} as {bar}, call baz
+  (foo) as (bar), call baz
 
 A weighted random choice is taken between all replacement options. By default,
 all options are equally likely to be chosen, but this can be overridden by
 providing numerical weights to replacements. ::
 
-  {foo} as {bar} 40
+  (foo) as (bar) 40
 
 The weights given are considered to be percentages of all possible outcomes. All remaining probability is distributed equally among all options which have no explicit value (always including the unmodified matched text as an option).
 
 +----------------------------------------+-------------------------------------+
 |rule                                    |meaning                              |
 +----------------------------------------+-------------------------------------+
-|``{foo} as {bar}``                      |{foo} 50% of the time, {bar} 50% of  |
+|``(foo) as (bar)``                      |"foo" 50% of the time, "bar" 50% of  |
 |                                        |the time.                            |
 +----------------------------------------+-------------------------------------+
-|``{foo} as {bar} 60``                   |{foo} 40% of the time, {bar} 60% of  |
+|``(foo) as (bar) 60``                   |"foo" 40% of the time, "bar" 60% of  |
 |                                        |the time                             |
 +----------------------------------------+-------------------------------------+
-|``{foo} as {bar} 50, {baz}``            |{foo} 25% of the time, {bar} 50% of  |
-|                                        |the time, {baz} 25% of the time.     |
+|``(foo) as (bar) 50, (baz)``            |"foo" 25% of the time, "bar" 50% of  |
+|                                        |the time, "baz" 25% of the time.     |
 |                                        |Notice how the remaining unclaimed   |
 |                                        |50% of probability is distributed    |
 |                                        |evenly among all other options.      |
 +----------------------------------------+-------------------------------------+
-|``{foo} as {bar} 40, call someFunc 60`` |{bar} 40% of the time, call          |
+|``(foo) as (bar) 40, call someFunc 60`` |"bar" 40% of the time, call          |
 |                                        |``someFunc`` 60% of the time. Note   |
 |                                        |that, because 100% of probability has|
-|                                        |been claimed, {foo} will never be    |
+|                                        |been claimed, "foo" will never be    |
 |                                        |chosen.                              |
 +----------------------------------------+-------------------------------------+
 
@@ -239,8 +239,8 @@ matched text will never be chosen.
 .. note::
 
    If the sum of all weights exceeds 100, the values will be normalized such
-   that their sum is 100. For example, ``{foo} as {bar} 100, {baz} 900`` is
-   equivalent to ``{foo} as {bar} 10, {baz} 90``
+   that their sum is 100. For example, ``(foo) as (bar) 100, (baz) 900`` is
+   equivalent to ``(foo) as (bar) 10, (baz) 90``
 
 .. _the-body:
 
@@ -291,7 +291,7 @@ choose commands
 A weighted choice may be declared inline using the same syntax for the
 replacement component of :ref:`rules <rules>`: ::
 
-  this is {{some text} 30, {an example}, call someFunc}
+  this is {(some text) 30, (an example), call someFunc}
 
 30% of the time, this will be rendered as *"this is some text"*, 35% of the
 time as *"this is an example"*, and 35% of the time ``someFunc`` will be called.
@@ -313,7 +313,7 @@ Text replacements inserted by both :ref:`choose commands <_choose-commands>` and
 
 For instance, we could set up nested choices like so: ::
   
-  outer with {{inner 1}, {inner 2 with {{nested 1!}, {nested 2!}}}}
+  outer with {(inner 1), (inner 2 with {(nested 1!), (nested 2!)})}
   
 In effect, this results in a choice tree with the following possible paths:
 
@@ -321,24 +321,24 @@ In effect, this results in a choice tree with the following possible paths:
 * outer with inner 2 with nested 1!
 * outer with inner 2 with nested 2!
 
-As you can imagine, these braces can become messy quickly in nested branches, so it's best practice to incorporate line breaks: ::
+As you can imagine, these can become messy quickly in nested branches, so it's best practice to incorporate line breaks: ::
 
   outer with {
-    {inner 1},
-    {inner 2 with {
-      {nested 1!}, {nested 2!}}}}
+    (inner 1),
+    (inner 2 with {
+      (nested 1!), (nested 2!)})}
 
-But be sure to include those line breaks in the outer braces (relative to whatever depth level) and not in the inner replacement text, since those will be interpreted as part of the replacement text.
+But be sure to include those line breaks in the braces part of the declaration, not the inner text in parentheses, since those will be interpreted as part of the replacement text.
 
 Rules are also evaluated on chosen text, for instance: ::
 
   mode exampleMode {
-    {foo} as {bar} 50, {baz} 25
+    (foo) as (bar) 50, (baz) 25
   }
   
   some outer text with {
-    {inner without magic word},
-    {inner with magic word foo}}
+    (inner without magic word),
+    (inner with magic word foo)}
 
 Which can be rendered as:
 

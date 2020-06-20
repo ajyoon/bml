@@ -12,7 +12,7 @@ describe('bml', function() {
   });
 
   it('can process a document without a prelude', function() {
-    let testString = 'hello {{beautiful} 60, {wonderful}} world!';
+    let testString = 'hello {(beautiful) 60, (wonderful)} world!';
     let result = bml(testString);
     let possibleOutcomes = [
       'hello beautiful world!',
@@ -26,7 +26,7 @@ describe('bml', function() {
   it('can process recursive rule choices', function() {
     let testString =
         `mode test {
-            {recurse!} as {just kidding} 50, {outer {{inner 1}, {inner 2}}} 50
+            (recurse!) as (just kidding) 50, (outer {(inner 1), (inner 2)}) 50
         }
         {use test}
         recurse!
@@ -43,7 +43,7 @@ describe('bml', function() {
   });
   
   it('can process recursive inline choices', function() {
-    let testString = 'hello {{simple}, {{{very }, {}}recursive}} world!';
+    let testString = 'hello {(simple), ({(very ), ()}recursive)} world!';
     let result = bml(testString);
     let possibleOutcomes = [
       'hello simple world!',

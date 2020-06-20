@@ -21,8 +21,6 @@ let parseRule = parsers.parseRule;
 let parseMode = parsers.parseMode;
 let parsePrelude = parsers.parsePrelude;
 let parseUse = parsers.parseUse;
-let parseStringLiteral = parsers.parseStringLiteral;
-let parseStringLiteralWithLexer = parsers.parseStringLiteralWithLexer;
 let parseInlineChoose = parsers.parseInlineChoose;
 let createMatcher = parsers.createMatcher;
 let parseMatchers = parsers.parseMatchers;
@@ -147,10 +145,10 @@ describe('parseMode', function() {
     let testString =
         `mode test {
              // some comments
-             {bml} as {BML}
+             (bml) as (BML)
              // more comments
-             r{javascript} as {Javascript} 30, {JS} 10,
-                 {js} 10
+             r(javascript) as (Javascript) 30, (JS) 10,
+                 (js) 10
              // more comments
         }`;
     let lexer = new Lexer(testString);
@@ -211,7 +209,7 @@ describe('createMatcher', function() {
 
 describe('parseRule', function() {
   it('can parse a one-to-one rule', function() {
-    let testString = '{x} as {y}\n}';
+    let testString = '(x) as (y)\n}';
     let lexer = new Lexer(testString);
     let rule = parseRule(lexer);
     expect(lexer.index).to.equal(testString.length - 1);
@@ -247,52 +245,16 @@ describe('parseUse', function() {
 });
 
 
-describe('parseStringLiteral', function() {
-  it('can parse normal strings', function() {
-    let testString = '\'testing testing\'';
-    let result = parseStringLiteral(testString, 0);
-    assert.strictEqual(result.closeQuoteIndex, testString.length - 1);
-    assert.strictEqual(result.extractedString, 'testing testing');
-  });
-
-  it('can parse strings with escaped quotes', function() {
-    let testString = '\'testing \\\'testing\'';
-    let result = parseStringLiteral(testString, 0);
-    assert.strictEqual(result.closeQuoteIndex, testString.length - 1);
-    assert.strictEqual(result.extractedString, 'testing \\\'testing');
-  });
-});
-
-
-describe('parseStringLiteralWithLexer', function() {
-  it('can parse strings wrapped in single quotes', function() {
-    let testString = '\'testing testing\'';
-    let lexer = new Lexer(testString);
-    let result = parseStringLiteralWithLexer(lexer);
-    assert.strictEqual(result, 'testing testing');
-    assert.strictEqual(lexer.index, testString.length);
-  });
-
-  it('can parse strings with escaped quotes', function() {
-    let testString = '\'testing \\\'testing\'';
-    let lexer = new Lexer(testString);
-    let result = parseStringLiteralWithLexer(lexer);
-    assert.strictEqual(result, 'testing \'testing');
-    assert.strictEqual(lexer.index, testString.length);
-  });
-});
-
-
 describe('parseInlineChoose', function() {
   it('allows a single unweighted item', function() {
-    let testString = '{{test}}';
+    let testString = '{(test)}';
     let result = parseInlineChoose(testString, 0);
     assert.strictEqual(result.blockEndIndex, testString.length);
     assert(result.replacer instanceof Replacer);
   });
 
   it('allows a single weighted item', function() {
-    let testString = '{{test} 100}';
+    let testString = '{(test) 100}';
     let result = parseInlineChoose(testString, 0);
     assert.strictEqual(result.blockEndIndex, testString.length);
     assert(result.replacer instanceof Replacer);
@@ -313,7 +275,7 @@ describe('parseInlineChoose', function() {
   });
 
   it('allows a comma separated mix of literals and calls', function() {
-    let testString = '{{test} 50, call someFunc 40}';
+    let testString = '{(test) 50, call someFunc 40}';
     let result = parseInlineChoose(testString, 0);
     assert.strictEqual(result.blockEndIndex, testString.length);
     assert(result.replacer instanceof Replacer);
@@ -323,7 +285,7 @@ describe('parseInlineChoose', function() {
 
 describe('parseMatchers', function() {
   it('parsers a single matcher', function() {
-    let testString = '{test} as';
+    let testString = '(test) as';
     let lexer = new Lexer(testString);
     let result = parseMatchers(lexer);
     assert.deepStrictEqual(result, [/test/y]);
@@ -333,7 +295,7 @@ describe('parseMatchers', function() {
   });
 
   it('parses a single simple regex matcher', function() {
-    let testString = 'r{test} as';
+    let testString = 'r(test) as';
     let lexer = new Lexer(testString);
     let result = parseMatchers(lexer);
     assert.deepStrictEqual(result, [/test/y]);
@@ -343,7 +305,7 @@ describe('parseMatchers', function() {
   });
 
   it('parses a regex matcher with escaped chars', function() {
-    let testString = 'r{\\stest} as';
+    let testString = 'r(\\stest) as';
     let lexer = new Lexer(testString);
     let result = parseMatchers(lexer);
     assert.deepStrictEqual(result, [/\stest/y]);
@@ -353,7 +315,7 @@ describe('parseMatchers', function() {
   });
 
   it('parses multiple matchers', function() {
-    let testString = '{test}, {test2} as';
+    let testString = '(test), (test2) as';
     let lexer = new Lexer(testString);
     let result = parseMatchers(lexer);
     assert.deepStrictEqual(result, [/test/y, /test2/y]);
@@ -400,7 +362,7 @@ describe('parseCall', function() {
 
 describe('parseReplacements', function() {
   it('parses a string literal replacer with braces', function() {
-    let testString = '{test}}';
+    let testString = '(test)}';
     let lexer = new Lexer(testString);
     let result = parseReplacements(lexer);
     expect(result.length).to.equal(1);
@@ -423,7 +385,7 @@ describe('parseReplacements', function() {
   });
 
   it('parses strings with weights', function() {
-    let testString = '{test} 5}';
+    let testString = '(test) 5}';
     let lexer = new Lexer(testString);
     let result = parseReplacements(lexer);
     expect(result.length).to.equal(1);
@@ -446,7 +408,7 @@ describe('parseReplacements', function() {
   });
 
   it('parses many replacers with and without weights', function() {
-    let testString = 'call test 5, {test2}, {test3} 3}';
+    let testString = 'call test 5, (test2), (test3) 3}';
     let lexer = new Lexer(testString);
     let result = parseReplacements(lexer);
     expect(result.length).to.equal(3);
@@ -468,13 +430,13 @@ describe('parseReplacements', function() {
   });
   
   it('treats a new replacement not after a comma as the end of the replacer', function() {
-    let testString = '{test} {part of next rule}';
+    let testString = '(test) (part of next rule)';
     let lexer = new Lexer(testString);
     let result = parseReplacements(lexer);
     expect(result.length).to.equal(1);
     expect(result[0]).to.be.an.instanceof(WeightedChoice);
     expect(result[0].choice).to.equal('test');
     expect(result[0].weight).to.equal(null);
-    expect(lexer.index).to.equal(testString.indexOf('{part'));
+    expect(lexer.index).to.equal(testString.indexOf('(part'));
   });
 });

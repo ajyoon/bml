@@ -15,8 +15,8 @@ eval {
 }
 
 mode main {
-    {testslug} as call replaceWithRandomNumber 30, {b} 20
-    {recurse!} as {just kidding}, {outer {{inner 1}, {inner 2}}}
+    (testslug) as call replaceWithRandomNumber 30, (b) 20
+    (recurse!) as (just kidding), (outer {(inner 1), (inner 2)})
 }
 
 mode literal {
@@ -30,14 +30,14 @@ mode literal {
 
 testslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslugtestslug
 
-a simple {{choice}, {inline choose block}}
+a simple {(choice), (inline choose block)}
 
 {
-    {a nonrecursive branch},
-    {a recursive {
-        {path},
-        {branch}
-    }}
+    (a nonrecursive branch),
+    (a recursive {
+        (path),
+        (branch)
+    })
 }
 
 recurse!
