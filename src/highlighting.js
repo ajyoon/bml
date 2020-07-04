@@ -6,14 +6,26 @@ require('prismjs/components/prism-markdown');
 
 (function (Prism) {
   Prism.languages.bml = Prism.languages.extend('markdown', {
-    'brace': {
-      pattern: /{|}/,
-      alias: 'important'
+    'escape': {
+      pattern: new RegExp(/\[\[(.*?)\]\]/, 's'),
+      alias: 'comment'
     },
-    'paren': {
-      pattern: /\(|\)/,
-      alias: 'string'
-    }
+    'commandBlock': {
+      pattern: new RegExp(/{((?:\\}|(?!}))?.*?)}/, 's'),
+      alias: 'important',
+      inside: {
+        'keyword': {
+          pattern: /\b(use|call)\b/
+        },
+        'number': {
+          pattern: /\d+/
+        },
+        'paren': {
+          pattern: new RegExp(/\(((?:\\\+|(?!\)))?.*?)\)/, 's'),
+          alias: 'string'
+        }
+      }
+    },
   });
 })(Prism);
 

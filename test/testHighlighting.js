@@ -14,7 +14,7 @@ function generateExpectedOutput() { // eslint-disable-line
 }
 
 describe('highlighting', function() {
-  it.skip('highlights a bml sample correctly', function() {
+  it('highlights a bml sample correctly', function() {
     // When changing the behavior of syntax highlighting,
     // confirm with a browser that the new behavior is correct,
     // uncomment this line to regenerate the expected output,

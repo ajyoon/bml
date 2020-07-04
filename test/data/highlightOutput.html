@@ -1,42 +1,41 @@
-<span class="undefined">eval </span><span class="hljs-strong">{
+eval <span class="token commandBlock important">{
     settings = {
         renderMarkdown: false,
-    }</span><span class="undefined">;
+    }</span>;
 
-    function someFunc(match, string, matchIndex) </span><span class="hljs-strong">{
-        return <span class="hljs-string">'some string'</span>;
-    }</span><span class="undefined">
+<span class="token code keyword">    function someFunc(match, string, matchIndex) {
+        return 'some string';
+    }</span>
 }
 
-mode someMode </span><span class="hljs-strong">{
-    <span class="hljs-string">'a'</span> <span class="hljs-keyword">as</span> <span class="hljs-string">'b'</span> <span class="hljs-number">50</span>, <span class="hljs-keyword">call</span> someFunc <span class="hljs-number">10</span>,
-    r<span class="hljs-string">'regex matcher'</span> <span class="hljs-keyword">as</span> <span class="hljs-string">'replacement'</span> <span class="hljs-number">5</span>, <span class="hljs-string">'another replacement'</span> <span class="hljs-number">10</span>
-    <span class="hljs-string">"double quotes"</span> <span class="hljs-keyword">as</span> <span class="hljs-string">"replacement"</span>
-}</span><span class="undefined">
+mode someMode <span class="token commandBlock important">{
+    'a' as 'b' <span class="token number">50</span>, <span class="token keyword">call</span> someFunc <span class="token number">10</span>,
+    r'regex matcher' as 'replacement' <span class="token number">5</span>, 'another replacement' <span class="token number">10</span>
+    "double quotes" as "replacement"
+}</span>
 
-</span><span class="hljs-strong">{<span class="hljs-keyword">use</span> someMode}</span><span class="undefined">
+<span class="token commandBlock important">{<span class="token keyword">use</span> someMode}</span>
 
 some text
 
-[[</span><span class="hljs-string">some literal text</span><span class="undefined">]]
+<span class="token escape comment">[[some literal text]]</span>
 
-</span>\[<span class="undefined">[some escaped literal text]]
+\<span class="token escape comment">[[some escaped literal text]]</span>
 
-</span><span class="hljs-strong">{<span class="hljs-string">'an inline transform'</span> <span class="hljs-number">30</span>, <span class="hljs-string">"with mixed quotes"</span> <span class="hljs-number">10</span>, <span class="hljs-keyword">call</span> someFunc <span class="hljs-number">10</span>}</span><span class="undefined">
+<span class="token commandBlock important">{'an inline transform' <span class="token number">30</span>, "with mixed quotes" <span class="token number">10</span>, <span class="token keyword">call</span> someFunc <span class="token number">10</span>}</span>
 
-</span><span class="hljs-strong">{<span class="hljs-keyword">use</span> anotherMode}</span><span class="markdown">
+<span class="token commandBlock important">{<span class="token keyword">use</span> anotherMode}</span>
 
-<span class="hljs-code">```
-a markdown code block
-```</span>
+<span class="token code"><span class="token punctuation">```</span>
+<span class="token code-block">a markdown code block</span>
+<span class="token punctuation">```</span></span>
 
-<span class="hljs-bullet">* </span>a
-<span class="hljs-bullet">* </span>markdown
-<span class="hljs-bullet">* </span>list
+<span class="token list punctuation">*</span> a
+<span class="token list punctuation">*</span> markdown
+<span class="token list punctuation">*</span> list
 
-<span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span></span>
-<span class="hljs-code">    &lt;p&gt;</span>
-<span class="hljs-code">        some html as well</span>
-<span class="hljs-code">    &lt;/&gt;</span>
-<span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
-</span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>div</span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>p</span><span class="token punctuation">></span></span>
+        some html as well
+    &lt;/>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>div</span><span class="token punctuation">></span></span>
