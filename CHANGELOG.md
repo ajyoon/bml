@@ -1,6 +1,6 @@
 # Changelog
 
-### 0.0.14-dev: MAJOR BREAKING CHANGES
+### 0.0.14: MAJOR BREAKING CHANGES
 * Replaces double-brace syntax with single braces. This affects inline
   choice blocks and mode switch blocks. Also replaces single/double
   quoted string syntax with parentheses so that all string literals
