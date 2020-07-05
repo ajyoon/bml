@@ -57,7 +57,7 @@ function checkVersion(bmlVersion, specifiedInSettings) {
  * @returns {String} the rendered text.
  */
 function renderText(string, startIndex, evalBlock,
-                    modes, renderDefaultSettings) {
+                    modes, renderDefaultSettings, isTopLevel) {
   let activeMode = null;
   let isEscaped = false;
   let inLiteralBlock = false;
@@ -69,20 +69,23 @@ function renderText(string, startIndex, evalBlock,
   let chooseRe = /\s*(\(|call)/y;
   let useRe = /\s*(use|using)/y;
 
-  if (evalBlock) {
-    eval(evalBlock.string);
-  }
+  if (isTopLevel) {
+    if (evalBlock) {
+      eval(evalBlock.string);
+    }
 
-  let baseSettings = renderDefaultSettings ?
-      mergeSettings(defaultSettings, renderDefaultSettings) : defaultSettings;
+    let baseSettings = renderDefaultSettings ?
+        mergeSettings(defaultSettings, renderDefaultSettings) : defaultSettings;
 
-  if (settings) {
-    settings = mergeSettings(baseSettings, settings);
+    if (settings) {
+      settings = mergeSettings(baseSettings, settings);
+    } else {
+      var settings = baseSettings;
+    }
+    checkVersion(BML_VERSION, settings.version);
   } else {
-    var settings = baseSettings;
+    var settings = renderDefaultSettings;
   }
-
-  checkVersion(BML_VERSION, settings.version);
 
   while (index < string.length) {
     if (isEscaped) {
@@ -110,7 +113,8 @@ function renderText(string, startIndex, evalBlock,
         } else {
           // To handle nested choices and to run rules over chosen text,
           // we recursively render the chosen text.
-          let renderedReplacement = renderText(replacement, 0, null, modes, activeMode);
+          let renderedReplacement = renderText(
+            replacement, 0, null, modes, activeMode, settings, false);
           out += renderedReplacement;
         }
         index = parseInlineChooseResult.blockEndIndex;
@@ -148,7 +152,8 @@ function renderText(string, startIndex, evalBlock,
                 } else {
                   // To handle nested choices and to run rules over replaced text,
                   // we recursively render the chosen text.
-                  let renderedReplacement = renderText(replacement, 0, null, modes, activeMode);
+                  let renderedReplacement = renderText(
+                    replacement, 0, null, modes, activeMode, settings, false);
                   out += renderedReplacement;
                 }
                 index += currentMatch[0].length;
@@ -212,7 +217,7 @@ function render(bmlDocumentString, renderSettings, defaultDocumentSettings) {
     evalBlock = null;
   }
   return renderText(
-    bmlDocumentString, preludeEndIndex, evalBlock, modes, defaultDocumentSettings);
+    bmlDocumentString, preludeEndIndex, evalBlock, modes, defaultDocumentSettings, true);
 }
 
 exports.renderText = renderText;
