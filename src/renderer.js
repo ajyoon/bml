@@ -56,7 +56,8 @@ function checkVersion(bmlVersion, specifiedInSettings) {
  *
  * @returns {String} the rendered text.
  */
-function renderText(string, startIndex, evalBlock, modes) {
+function renderText(string, startIndex, evalBlock,
+                    modes, renderDefaultSettings) {
   let activeMode = null;
   let isEscaped = false;
   let inLiteralBlock = false;
@@ -72,10 +73,13 @@ function renderText(string, startIndex, evalBlock, modes) {
     eval(evalBlock.string);
   }
 
+  let baseSettings = renderDefaultSettings ?
+      mergeSettings(defaultSettings, renderDefaultSettings) : defaultSettings;
+
   if (settings) {
-    settings = mergeSettings(defaultSettings, settings);
+    settings = mergeSettings(baseSettings, settings);
   } else {
-    var settings = defaultSettings;
+    var settings = baseSettings;
   }
 
   checkVersion(BML_VERSION, settings.version);
@@ -175,20 +179,28 @@ function renderText(string, startIndex, evalBlock, modes) {
  * render a bml document.
  *
  * @param {String} bmlDocumentString - the bml text to process.
- * @param {Object} settings - optional settings for this render, unrelated
- *     to the settings encoded in the bml document itself, which apply to
- *     every run of the document
- * @param {Object} settings.randomSeed - the random seed to use for this
- *     render. Can be any type, as this is fed directly to the `seedrandom`
+ * @param {Object} renderSettings - optional settings for this render,
+ *     unrelated to the settings encoded in the bml document itself,
+ *     which apply to every run of the document
+ * @param {Object} renderSettings.randomSeed - the random seed to use for
+ *     this render. Can be any type, as this is fed directly to the `seedrandom`
  *     library, which converts the object to a string and uses that as the
  *     actual seed
+ * @param {Boolean} renderSettings.allowEval - Set to `false` to ignore `eval`
+ *     blocks in the document. This can be useful for security purposes.
+ * @param {Object} defaultDocumentSettings - Optional default *document* settings
+ *     which override the global defaults.
  *
  * @return {String} the processed and rendered text.
  */
-function render(bmlDocumentString, settings) {
-  if (settings) {
-    if (settings.hasOwnProperty('randomSeed')) {
-      rand.setRandomSeed(settings.randomSeed);
+function render(bmlDocumentString, renderSettings, defaultDocumentSettings) {
+  let allowEval = true;
+  if (renderSettings) {
+    if (renderSettings.hasOwnProperty('randomSeed')) {
+      rand.setRandomSeed(renderSettings.randomSeed);
+    }
+    if (renderSettings.hasOwnProperty('allowEval')) {
+      allowEval = renderSettings.allowEval;
     }
   }
   let {
@@ -196,8 +208,11 @@ function render(bmlDocumentString, settings) {
     evalBlock,
     modes,
   } = parsePrelude(bmlDocumentString);
+  if (!allowEval) {
+    evalBlock = null;
+  }
   return renderText(
-    bmlDocumentString, preludeEndIndex, evalBlock, modes);
+    bmlDocumentString, preludeEndIndex, evalBlock, modes, defaultDocumentSettings);
 }
 
 exports.renderText = renderText;

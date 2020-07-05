@@ -1,21 +1,30 @@
 # Changelog
 
 ### 0.0.14-dev: MAJOR BREAKING CHANGES
-* Replaces double-brace syntax with single braces. This affects inline choice blocks and mode switch blocks. Also replaces single/double quoted string syntax with parentheses so that all string literals outside `eval` blocks are now simply surrounded with parentheses. This helps simplify natural language (where quotation marks are commonly used) and allows the syntax for nested replacements to be much more elegant.
-  | before                       | after                        |
-  |------------------------------|------------------------------|
-  | `{{'a' 10, 'b'}}`            | `{(a) 10, (b)}`              |
-  | `{{use anotherMode}}`        | `{use anotherMode}`          |
-  | `'foo' as 'bar' 5, call foo` | `(foo) as (bar) 5, call foo` |
+* Replaces double-brace syntax with single braces. This affects inline
+  choice blocks and mode switch blocks. Also replaces single/double
+  quoted string syntax with parentheses so that all string literals
+  outside `eval` blocks are now simply surrounded with
+  parentheses. This helps simplify natural language (where quotation
+  marks are commonly used) and allows the syntax for nested
+  replacements to be much more elegant.  | before | after |
+  |------------------------------|------------------------------| |
+  `{{'a' 10, 'b'}}` | `{(a) 10, (b)}` | | `{{use anotherMode}}` |
+  `{use anotherMode}` | | `'foo' as 'bar' 5, call foo` | `(foo) as
+  (bar) 5, call foo` |
 
-  For migrating existing BML text, the following emacs regexps (in this order) have proven helpful:
+  For migrating existing BML text, the following emacs regexps (in
+  this order) have proven helpful:
   1. `{{ -> {`
   2. `}} -> }`
   3. `'\([^{"\\]*?\)' -> (\1)`
   4. `"\([^{\\]*?\)" -> (\1)`
-* Remove the `begin` statement; instead the first non-prelude-y text will cause the prelude to end. To start with an active mode, simply call the `{use someMode}` command.
+* Remove the `begin` statement; instead the first non-prelude-y text
+  will cause the prelude to end. To start with an active mode, simply
+  call the `{use someMode}` command.
 * Remove the `using` variant of the `use` keyword
-* Support recursive rendering within replacements, both in inline choices and in rule replacements. For instance:
+* Support recursive rendering within replacements, both in inline
+  choices and in rule replacements. For instance:
   ```bml
   mode main {
       (recurse!) as (just kidding), (outer {(inner 1), (inner 2)})
@@ -24,6 +33,12 @@
   recurse!
   a {(simple inline), ({(complex), (fancy)} recursive)} inline choice
   ```
+* Add new render setting (passed in `bml()` call) for `allowEval`
+  which defualts to `true` and allows ignoring `eval` blocks, mostly
+  for security purposes.
+* Add new `defaultDocumentSettings` argument to main `bml()` function
+  which overrides the global default document settings before applying
+  any settings defined in the document itself.
 
 ### 0.0.13
 * Expose `randomInt` and `randomFloat` to eval blocks.

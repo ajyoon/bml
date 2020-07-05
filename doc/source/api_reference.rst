@@ -8,10 +8,10 @@ The bml library is exposed by a single function:
 
 .. code:: javascript
 
-   bml(sourceString, settings)
+   bml(sourceString, renderSettings, defaultDocumentSettings)
 
 where ``sourceString`` is a single string holding the contents of a complete bml
-document, and ``settings`` is an optional ``Object`` with the following
+document, and ``renderSettings`` is an optional ``Object`` with the following
 properties:
 
 +---------------+------------------------------------------------+
@@ -25,6 +25,23 @@ properties:
 |               |deterministic or uses the provided ``rand``     |
 |               |module functions for random components          |
 +---------------+------------------------------------------------+
+|``allowEval``  |A boolean flag controlling whether ``eval``     |
+|               |blocks should be executed in this render. This  |
+|               |is primarily useful for security purposes and   |
+|               |defaults to ``true``.                           |
+|               |                                                |
+|               |                                                |
+|               |                                                |
++---------------+------------------------------------------------+
+
+``defaultDocumentSettings`` is an optional ``Object`` containing
+:ref:`document settings <bml-settings>` overriding the global defaults
+*before* settings from the document are applied. When provided, the
+setting resolution order is:
+
+1. Global :ref:`document settings <bml-settings>`
+2. ``defaultDocumentSettings`` from render call here
+3. Settings defined in document's ``eval`` block.
 
 .. _provided-eval-api:
 
