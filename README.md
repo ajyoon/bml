@@ -29,6 +29,8 @@ BML is a superset of natural language which applies stochastic transformations
 on text. Words and strings can be used as triggers for weighted random
 replacements and arbitrary transformations specified with javascript.
 
+[Try it online!])(https://sandbox.bml-lang.org)
+
 ## setup
 
 To install:
@@ -67,11 +69,11 @@ either defined inline or in the eval block.
 Strings can be escaped with [[double square bracket delimiters.]] and backslashes \\.
 
 The text body can also apply one-time transformations, the common marker
-for them being {double curly braces}.
+for them being {curly braces}.
 
 Available one-time transformations include:
 
-* choose: `{{x} 20, {y} 30, {z} 50, call someFunc}`
+* choose: `{(x) 20, (y) 30, (z) 50, call someFunc}`
 * using: `{using literal}`
 
 ## syntax highlighting

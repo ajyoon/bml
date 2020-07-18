@@ -5,6 +5,8 @@ the blur markup language
 ``bml`` is a stochastic markup language that lets you write chance-determined
 text with ease.
 
+`Try it online! <https://sandbox.bml-lang.org>`_
+
 getting started
 ===============
 
