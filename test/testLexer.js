@@ -118,6 +118,30 @@ describe('Lexer', function() {
     assert.strictEqual(lexer.next(), null);
   });
 
+  it('tokenizes colons', function() {
+    let lexer = new Lexer(':');
+    assert.deepStrictEqual(lexer.next(), new Token(TokenType.COLON, 0, ':'));
+    assert.strictEqual(lexer.next(), null);
+  });
+
+  it('tokenizes at', function() {
+    let lexer = new Lexer('@');
+    assert.deepStrictEqual(lexer.next(), new Token(TokenType.AT, 0, '@'));
+    assert.strictEqual(lexer.next(), null);
+  });
+
+  it('tokenizes pipe', function() {
+    let lexer = new Lexer('|');
+    assert.deepStrictEqual(lexer.next(), new Token(TokenType.PIPE, 0, '|'));
+    assert.strictEqual(lexer.next(), null);
+  });
+
+  it('tokenizes arrow', function() {
+    let lexer = new Lexer('->');
+    assert.deepStrictEqual(lexer.next(), new Token(TokenType.ARROW, 0, '->'));
+    assert.strictEqual(lexer.next(), null);
+  });
+
   it('tokenizes the keyword "as"', function() {
     let lexer = new Lexer('as');
     assert.deepStrictEqual(lexer.next(), new Token(TokenType.KW_AS, 0, 'as'));

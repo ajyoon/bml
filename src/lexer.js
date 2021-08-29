@@ -83,6 +83,18 @@ class Lexer {
     } else if (this.string[this.index] === ',') {
       tokenType = TokenType.COMMA;
       tokenString = ',';
+    } else if (this.string[this.index] === ':') {
+      tokenType = TokenType.COLON;
+      tokenString = ':';
+    } else if (this.string[this.index] === '@') {
+      tokenType = TokenType.AT;
+      tokenString = '@';
+    } else if (this.string[this.index] === '|') {
+      tokenType = TokenType.PIPE;
+      tokenString = '|';
+    } else if (this.string.slice(this.index, this.index + 2) === '->') {
+      tokenType = TokenType.ARROW;
+      tokenString = '->';
     } else if (this.string.slice(this.index, this.index + 2) === 'as') {
       tokenType = TokenType.KW_AS;
       tokenString = 'as';
