@@ -29,7 +29,7 @@ BML is a superset of natural language which applies stochastic transformations
 on text. Words and strings can be used as triggers for weighted random
 replacements and arbitrary transformations specified with javascript.
 
-[Try it online!])(https://sandbox.bml-lang.org)
+[Try it online!](https://sandbox.bml-lang.org)
 
 ## setup
 
