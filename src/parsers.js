@@ -1,19 +1,19 @@
 let _rand = require('./rand.js');
 let _errors = require('./errors.js');
 let _stringUtils = require('./stringUtils.js');
-let createRule = require('./rule.js').createRule;
 let EvalBlock = require('./evalBlock.js').EvalBlock;
 let Mode = require('./mode.js').Mode;
 let WeightedChoice = require('./weightedChoice.js').WeightedChoice;
 let Lexer = require('./lexer.js').Lexer;
 let TokenType = require('./tokenType.js').TokenType;
+let Rule = require('./rule.js').Rule;
+let Replacer = require('./replacer').Replacer;
 
 let UnknownTransformError = _errors.UnknownTransformError;
 let UnknownModeError = _errors.UnknownModeError;
 let JavascriptSyntaxError = _errors.JavascriptSyntaxError;
 let BMLSyntaxError = _errors.BMLSyntaxError;
 let escapeRegExp = _stringUtils.escapeRegExp;
-let createWeightedOptionReplacer = _rand.createWeightedOptionReplacer;
 
 
 /**
@@ -210,7 +210,7 @@ function parseCall(lexer) {
   return new EvalBlock(callMatch[1]);
 }
 
-function parseReplacements(lexer) {
+function parseReplacements(lexer, forRule) {
   let startIndex = lexer.index;
   let token;
   let inComment = false;
@@ -219,6 +219,20 @@ function parseReplacements(lexer) {
   let acceptWeight = false;
   let acceptComma = false;
   let acceptReplacerEnd = false;
+  
+  let identifier = null;
+  let identifierRe = /\s*(\w+):/y;
+  identifierRe.lastIndex = lexer.index;
+  let identifierMatch = identifierRe.exec(lexer.string);
+  if (identifierMatch) {
+    if (forRule) {
+      throw new BMLSyntaxError('Choice identifiers are not allowed in rules',
+                               lexer.string, lexer.index);
+    }
+    identifier = identifierMatch[1];
+    lexer.overrideIndex(lexer.index + identifierMatch[0].length);
+  }
+
   while ((token = lexer.peek()) !== null) {
     if (inComment) {
       if (token.tokenType === TokenType.NEW_LINE) {
@@ -242,7 +256,7 @@ function parseReplacements(lexer) {
             parseReplacementWithLexer(lexer), null));
           continue;
         } else if (acceptReplacerEnd) {
-          return choices;
+          return new Replacer(choices, forRule, identifier);
         } else {
           throw new BMLSyntaxError('unexpected open paren',
                                    lexer.string, token.index);
@@ -251,7 +265,7 @@ function parseReplacements(lexer) {
       case TokenType.CLOSE_BRACE:
       case TokenType.LETTER_R:
         if (acceptReplacerEnd) {
-          return choices;
+          return new Replacer(choices, forRule, identifier);
         } else {
           throw new BMLSyntaxError(
             `unexpected end of replacer: ${token.tokenType}`,
@@ -311,8 +325,8 @@ function parseRule(lexer) {
                              lexer.string, lexer.index);
   }
   lexer.next();  // consume KW_AS
-  let replacements = parseReplacements(lexer);
-  return createRule(matchers, replacements);
+  let replacements = parseReplacements(lexer, true);
+  return new Rule(matchers, replacements);
 }
 
 function parseMode(lexer) {
@@ -479,10 +493,10 @@ function extractNumberLiteral(string, numberIndex) {
 function parseInlineChoose(string, openBraceIndex) {
   let lexer = new Lexer(string);
   lexer.overrideIndex(openBraceIndex + 1);
-  let replacements = parseReplacements(lexer);
+  let replacements = parseReplacements(lexer, false);
   return {
     blockEndIndex: lexer.index + 1,
-    replacer: createWeightedOptionReplacer(replacements, false),
+    replacer: replacements,
   };
 }
 

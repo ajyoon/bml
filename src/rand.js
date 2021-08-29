@@ -1,6 +1,4 @@
-let Replacer = require('./replacer.js').Replacer;
 let WeightedChoice = require('./weightedChoice.js').WeightedChoice;
-let noOp = require('./noOp.js');
 let seedrandom = require('seedrandom');
 
 // A module-local seedable random number generator
@@ -65,33 +63,8 @@ function weightedChoose(weights) {
   }
   // If we're still here, something went wrong.
   // Log a warning but try to return a random value anyways.
-  console.log('Unable to pick weighted choice for weights: ' + weights);
+  console.warn('Unable to pick weighted choice for weights: ' + weights);
   return weights[randomInt(0, weights.length)].choice;
-}
-
-/**
- * Create a Replacer which selects from an array of `WeightedChoice`s
- *
- * The sum of the probabilities in `choices` should be less than 100.
- * All `WeightedChoice`s with a weight of `null` share an equal probability
- * within whatever probability remains in the input choices.
- *
- * If includeNoOp is `true`, a noOp option will be inserted with weight `null`,
- * to be normalized as described above.
- */
-function createWeightedOptionReplacer(choices, includeNoOp) {
-  let normalizedWeights;
-  if (includeNoOp === true) {
-    let choicesWithNoOp = choices.slice();
-    choicesWithNoOp.push(new WeightedChoice(noOp, null));
-    normalizedWeights = normalizeWeights(choicesWithNoOp);
-  } else {
-    normalizedWeights = normalizeWeights(choices);
-  }
-  function replacerFunction(match, fullText, matchIndex, ...options) {
-    return weightedChoose(normalizedWeights);
-  };
-  return new Replacer(replacerFunction);
 }
 
 exports.setRandomSeed = setRandomSeed;
@@ -99,4 +72,3 @@ exports.randomFloat = randomFloat;
 exports.randomInt = randomInt;
 exports.normalizeWeights = normalizeWeights;
 exports.weightedChoose = weightedChoose;
-exports.createWeightedOptionReplacer = createWeightedOptionReplacer;

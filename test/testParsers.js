@@ -215,6 +215,18 @@ describe('parseRule', function() {
     expect(lexer.index).to.equal(testString.length - 1);
     expect(rule.matchers.length).to.equal(1);
   });
+  
+  it('does not allow identifiers in replacers', function() {
+    let testString = '(x) as MisplacedTestIdentifier: (y)\n}';
+    let lexer = new Lexer(testString);
+    try {
+      parseRule(lexer);
+      assert(false, 'error expected');
+    } catch (e) {
+      expect(e).to.be.an.instanceof(BMLSyntaxError);
+      expect(e.message).to.have.string('Choice identifiers are not allowed in rules');
+    }
+  });
 });
 
 
@@ -280,6 +292,14 @@ describe('parseInlineChoose', function() {
     assert.strictEqual(result.blockEndIndex, testString.length);
     assert(result.replacer instanceof Replacer);
   });
+  
+  it('allows the choice to be prefixed by an identifier for reference in later choices', function() {
+    let testString = '{TestChoice: (test) 50, call someFunc 40}';
+    let result = parseInlineChoose(testString, 0);
+    assert.strictEqual(result.blockEndIndex, testString.length);
+    assert(result.replacer instanceof Replacer);
+    assert.strictEqual(result.replacer.identifier, 'TestChoice');
+  });
 });
 
 
@@ -290,8 +310,8 @@ describe('parseMatchers', function() {
     let result = parseMatchers(lexer);
     assert.deepStrictEqual(result, [/test/y]);
     assert.deepStrictEqual(lexer.peek(), new Token(TokenType.KW_AS,
-                                             testString.indexOf('as'),
-                                             'as'));
+                                                   testString.indexOf('as'),
+                                                   'as'));
   });
 
   it('parses a single simple regex matcher', function() {
@@ -300,8 +320,8 @@ describe('parseMatchers', function() {
     let result = parseMatchers(lexer);
     assert.deepStrictEqual(result, [/test/y]);
     assert.deepStrictEqual(lexer.peek(), new Token(TokenType.KW_AS,
-                                             testString.indexOf('as'),
-                                             'as'));
+                                                   testString.indexOf('as'),
+                                                   'as'));
   });
 
   it('parses a regex matcher with escaped chars', function() {
@@ -310,8 +330,8 @@ describe('parseMatchers', function() {
     let result = parseMatchers(lexer);
     assert.deepStrictEqual(result, [/\stest/y]);
     assert.deepStrictEqual(lexer.peek(), new Token(TokenType.KW_AS,
-                                             testString.indexOf('as'),
-                                             'as'));
+                                                   testString.indexOf('as'),
+                                                   'as'));
   });
 
   it('parses multiple matchers', function() {
@@ -320,8 +340,8 @@ describe('parseMatchers', function() {
     let result = parseMatchers(lexer);
     assert.deepStrictEqual(result, [/test/y, /test2/y]);
     assert.deepStrictEqual(lexer.peek(), new Token(TokenType.KW_AS,
-                                             testString.indexOf('as'),
-                                             'as'));
+                                                   testString.indexOf('as'),
+                                                   'as'));
   });
 });
 
@@ -364,67 +384,67 @@ describe('parseReplacements', function() {
   it('parses a string literal replacer with braces', function() {
     let testString = '(test)}';
     let lexer = new Lexer(testString);
-    let result = parseReplacements(lexer);
-    expect(result.length).to.equal(1);
-    expect(result[0]).to.be.an.instanceof(WeightedChoice);
-    expect(result[0].choice).to.equal('test');
-    expect(result[0].weight).to.equal(null);
+    let result = parseReplacements(lexer, false);
+    expect(result.weights.length).to.equal(1);
+    expect(result.weights[0]).to.be.an.instanceof(WeightedChoice);
+    expect(result.weights[0].choice).to.equal('test');
+    expect(result.weights[0].weight).to.equal(100);
     expect(lexer.index).to.equal(testString.length - 1);
   });
 
   it('parses a call replacer', function() {
     let testString = 'call test}';
     let lexer = new Lexer(testString);
-    let result = parseReplacements(lexer);
-    expect(result.length).to.equal(1);
-    expect(result[0]).to.be.an.instanceof(WeightedChoice);
-    expect(result[0].choice).to.be.an.instanceof(EvalBlock);
-    expect(result[0].choice.string).to.equal('test');
-    expect(result[0].weight).to.equal(null);
+    let result = parseReplacements(lexer, false);
+    expect(result.weights.length).to.equal(1);
+    expect(result.weights[0]).to.be.an.instanceof(WeightedChoice);
+    expect(result.weights[0].choice).to.be.an.instanceof(EvalBlock);
+    expect(result.weights[0].choice.string).to.equal('test');
+    expect(result.weights[0].weight).to.equal(100);
     expect(lexer.index).to.equal(testString.length - 1);
   });
 
   it('parses strings with weights', function() {
     let testString = '(test) 5}';
     let lexer = new Lexer(testString);
-    let result = parseReplacements(lexer);
-    expect(result.length).to.equal(1);
-    expect(result[0]).to.be.an.instanceof(WeightedChoice);
-    expect(result[0].choice).to.equal('test');
-    expect(result[0].weight).to.equal(5);
+    let result = parseReplacements(lexer, false);
+    expect(result.weights.length).to.equal(1);
+    expect(result.weights[0]).to.be.an.instanceof(WeightedChoice);
+    expect(result.weights[0].choice).to.equal('test');
+    expect(result.weights[0].weight).to.equal(5);
     expect(lexer.index).to.equal(testString.length - 1);
   });
 
   it('parses call replacers with weights', function() {
     let testString = 'call test 5}';
     let lexer = new Lexer(testString);
-    let result = parseReplacements(lexer);
-    expect(result.length).to.equal(1);
-    expect(result[0]).to.be.an.instanceof(WeightedChoice);
-    expect(result[0].choice).to.be.an.instanceof(EvalBlock);
-    expect(result[0].choice.string).to.equal('test');
-    expect(result[0].weight).to.equal(5);
+    let result = parseReplacements(lexer, false);
+    expect(result.weights.length).to.equal(1);
+    expect(result.weights[0]).to.be.an.instanceof(WeightedChoice);
+    expect(result.weights[0].choice).to.be.an.instanceof(EvalBlock);
+    expect(result.weights[0].choice.string).to.equal('test');
+    expect(result.weights[0].weight).to.equal(5);
     expect(lexer.index).to.equal(testString.length - 1);
   });
 
   it('parses many replacers with and without weights', function() {
     let testString = 'call test 5, (test2), (test3) 3}';
     let lexer = new Lexer(testString);
-    let result = parseReplacements(lexer);
-    expect(result.length).to.equal(3);
+    let result = parseReplacements(lexer, false);
+    expect(result.weights.length).to.equal(3);
 
-    expect(result[0]).to.be.an.instanceof(WeightedChoice);
-    expect(result[0].choice).to.be.an.instanceof(EvalBlock);
-    expect(result[0].choice.string).to.equal('test');
-    expect(result[0].weight).to.equal(5);
+    expect(result.weights[0]).to.be.an.instanceof(WeightedChoice);
+    expect(result.weights[0].choice).to.be.an.instanceof(EvalBlock);
+    expect(result.weights[0].choice.string).to.equal('test');
+    expect(result.weights[0].weight).to.equal(5);
 
-    expect(result[1]).to.be.an.instanceof(WeightedChoice);
-    expect(result[1].choice).to.equal('test2');
-    expect(result[1].weight).to.equal(null);
+    expect(result.weights[1]).to.be.an.instanceof(WeightedChoice);
+    expect(result.weights[1].choice).to.equal('test2');
+    expect(result.weights[1].weight).to.equal(92);
 
-    expect(result[2]).to.be.an.instanceof(WeightedChoice);
-    expect(result[2].choice).to.equal('test3');
-    expect(result[2].weight).to.equal(3);
+    expect(result.weights[2]).to.be.an.instanceof(WeightedChoice);
+    expect(result.weights[2].choice).to.equal('test3');
+    expect(result.weights[2].weight).to.equal(3);
 
     expect(lexer.index).to.equal(testString.length - 1);
   });
@@ -432,11 +452,11 @@ describe('parseReplacements', function() {
   it('treats a new replacement not after a comma as the end of the replacer', function() {
     let testString = '(test) (part of next rule)';
     let lexer = new Lexer(testString);
-    let result = parseReplacements(lexer);
-    expect(result.length).to.equal(1);
-    expect(result[0]).to.be.an.instanceof(WeightedChoice);
-    expect(result[0].choice).to.equal('test');
-    expect(result[0].weight).to.equal(null);
+    let result = parseReplacements(lexer, false);
+    expect(result.weights.length).to.equal(1);
+    expect(result.weights[0]).to.be.an.instanceof(WeightedChoice);
+    expect(result.weights[0].choice).to.equal('test');
+    expect(result.weights[0].weight).to.equal(100);
     expect(lexer.index).to.equal(testString.indexOf('(part'));
   });
 });
