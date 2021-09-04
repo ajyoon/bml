@@ -1,6 +1,6 @@
-let expect = require('chai').expect;
+const expect = require('chai').expect;
 
-let Mode = require('../src/mode.js').Mode;
+const Mode = require('../src/mode.js').Mode;
 
 
 describe('Mode', function() {

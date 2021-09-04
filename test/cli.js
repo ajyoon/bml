@@ -1,6 +1,6 @@
-let assert = require('assert');
+const assert = require('assert');
 
-let cli = require('../cli.js');
+const cli = require('../cli.js');
 
 
 describe('cli', function() {

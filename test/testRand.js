@@ -1,11 +1,13 @@
-let assert = require('assert');
-let fs = require('fs');
+const assert = require('assert');
+const fs = require('fs');
 var decache = require('decache');
-let expect = require('chai').expect;
-let sha = require('sha.js');
+const expect = require('chai').expect;
+const sha = require('sha.js');
 
+const WeightedChoice = require('../src/weightedChoice.js').WeightedChoice;
+
+// this import is made mutable for test purposes
 let rand = require('../src/rand.js');
-let WeightedChoice = require('../src/weightedChoice.js').WeightedChoice;
 
 function testGeneratorFunctionTypeAndRange(randomFunction, typeValidationFunction, min, max) {
   for (let i = 0; i < 100; i++) {

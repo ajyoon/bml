@@ -1,9 +1,9 @@
-let assert = require('assert');
-let expect = require('chai').expect;
+const assert = require('assert');
+const expect = require('chai').expect;
 
-let Lexer = require('../src/lexer.js').Lexer;
-let Token = require('../src/token.js').Token;
-let TokenType = require('../src/tokenType.js').TokenType;
+const Lexer = require('../src/lexer.js').Lexer;
+const Token = require('../src/token.js').Token;
+const TokenType = require('../src/tokenType.js').TokenType;
 
 
 describe('Lexer', function() {

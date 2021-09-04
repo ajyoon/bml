@@ -1,6 +1,6 @@
-let expect = require('chai').expect;
+const expect = require('chai').expect;
 
-let prettyPrinting = require('../src/prettyPrinting.js');
+const prettyPrinting = require('../src/prettyPrinting.js');
 
 
 describe('prettyPrintArray', function() {

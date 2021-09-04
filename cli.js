@@ -1,10 +1,10 @@
 #! /usr/bin/env node
 'use strict';
 
-let fs = require('fs');
-let process = require('process');
-let packageJson = require('./package.json');
-let bml = require('./bml.js');
+const fs = require('fs');
+const process = require('process');
+const packageJson = require('./package.json');
+const bml = require('./bml.js');
 
 
 const HELP_SWITCHES = ['-h', '--h', '-help', '--help'];

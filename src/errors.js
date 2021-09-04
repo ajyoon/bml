@@ -1,4 +1,4 @@
-let stringUtils = require('./stringUtils.js');
+const stringUtils = require('./stringUtils.js');
 
 function JavascriptSyntaxError(string, charIndex) {
   this.name = 'JavascriptSyntaxError';

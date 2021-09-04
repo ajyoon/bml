@@ -1,26 +1,26 @@
-let marked = require('marked');
+const marked = require('marked');
 
-let _parsers = require('./parsers.js');
-let _settings = require('./settings.js');
-let _errors = require('./errors.js');
-let rand = require('./rand.js');
+const _parsers = require('./parsers.js');
+const _settings = require('./settings.js');
+const _errors = require('./errors.js');
+const rand = require('./rand.js');
 
-let defaultSettings = _settings.defaultSettings;
-let mergeSettings = _settings.mergeSettings;
-let parsePrelude = _parsers.parsePrelude;
-let parseUse = _parsers.parseUse;
-let parseInlineChoose = _parsers.parseInlineChoose;
-let EvalBlock = require('./evalBlock.js').EvalBlock;
-let noOp = require('./noOp.js');
-let UnknownModeError = _errors.UnknownModeError;
-let BML_VERSION = require('../package.json')['version'];
+const defaultSettings = _settings.defaultSettings;
+const mergeSettings = _settings.mergeSettings;
+const parsePrelude = _parsers.parsePrelude;
+const parseUse = _parsers.parseUse;
+const parseInlineChoose = _parsers.parseInlineChoose;
+const EvalBlock = require('./evalBlock.js').EvalBlock;
+const noOp = require('./noOp.js');
+const UnknownModeError = _errors.UnknownModeError;
+const BML_VERSION = require('../package.json')['version'];
 
 // imports for exposure to eval blocks
 /* eslint-disable no-unused-vars */
-let WeightedChoice = require('./weightedChoice.js').WeightedChoice;
-let weightedChoose = rand.weightedChoose;
-let randomInt = rand.randomInt;
-let randomFloat = rand.randomFloat;
+const WeightedChoice = require('./weightedChoice.js').WeightedChoice;
+const weightedChoose = rand.weightedChoose;
+const randomInt = rand.randomInt;
+const randomFloat = rand.randomFloat;
 /* eslint-enable no-unused-vars */
 
 /**

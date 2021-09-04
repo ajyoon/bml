@@ -1,21 +1,21 @@
-let _rand = require('./rand.js');
-let _errors = require('./errors.js');
-let _stringUtils = require('./stringUtils.js');
-let EvalBlock = require('./evalBlock.js').EvalBlock;
-let Mode = require('./mode.js').Mode;
-let WeightedChoice = require('./weightedChoice.js').WeightedChoice;
-let Lexer = require('./lexer.js').Lexer;
-let TokenType = require('./tokenType.js').TokenType;
-let Rule = require('./rule.js').Rule;
-let Replacer = require('./replacer').Replacer;
-let BackReference = require('./backReference.js').BackReference;
+const _rand = require('./rand.js');
+const _errors = require('./errors.js');
+const _stringUtils = require('./stringUtils.js');
+const EvalBlock = require('./evalBlock.js').EvalBlock;
+const Mode = require('./mode.js').Mode;
+const WeightedChoice = require('./weightedChoice.js').WeightedChoice;
+const Lexer = require('./lexer.js').Lexer;
+const TokenType = require('./tokenType.js').TokenType;
+const Rule = require('./rule.js').Rule;
+const Replacer = require('./replacer').Replacer;
+const BackReference = require('./backReference.js').BackReference;
 
-let UnknownTransformError = _errors.UnknownTransformError;
-let UnknownModeError = _errors.UnknownModeError;
-let JavascriptSyntaxError = _errors.JavascriptSyntaxError;
-let BMLSyntaxError = _errors.BMLSyntaxError;
-let BMLDuplicatedRefIndexError = _errors.BMLDuplicatedRefIndexError;
-let escapeRegExp = _stringUtils.escapeRegExp;
+const UnknownTransformError = _errors.UnknownTransformError;
+const UnknownModeError = _errors.UnknownModeError;
+const JavascriptSyntaxError = _errors.JavascriptSyntaxError;
+const BMLSyntaxError = _errors.BMLSyntaxError;
+const BMLDuplicatedRefIndexError = _errors.BMLDuplicatedRefIndexError;
+const escapeRegExp = _stringUtils.escapeRegExp;
 
 
 /**
@@ -576,6 +576,8 @@ function parseBackReference(lexer) {
             currentReplacement = parseCall(lexer);
           }
           if (choiceMap.hasOwnProperty(currentChoiceIndex)) {
+            // it's not ideal to validate this here, but with the way it's currently
+            // built, if we don't it will just silently overwrite the key
             throw new BMLDuplicatedRefIndexError(
               referredIdentifier, currentChoiceIndex, lexer.string, token.index);
           }

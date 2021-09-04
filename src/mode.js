@@ -1,4 +1,4 @@
-let prettyPrinting = require('./prettyPrinting.js');
+const prettyPrinting = require('./prettyPrinting.js');
 
 
 class Mode {

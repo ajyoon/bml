@@ -1,6 +1,6 @@
-let fs = require('fs');
+const fs = require('fs');
 
-let highlighting = require('./highlighting.js');
+const highlighting = require('./highlighting.js');
 
 let bmlSrc = '' + fs.readFileSync('./sample.bml');
 let css = '' + fs.readFileSync('./node_modules/highlight.js/styles/darcula.css');

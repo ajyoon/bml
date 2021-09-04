@@ -1,5 +1,5 @@
-let rand = require('./rand.js');
-let Replacer = require('./replacer.js').Replacer;
+const rand = require('./rand.js');
+const Replacer = require('./replacer.js').Replacer;
 
 
 class Rule {

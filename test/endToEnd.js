@@ -1,12 +1,12 @@
-let assert = require('assert');
-let expect = require('chai').expect;
-let fs = require('fs');
+const assert = require('assert');
+const expect = require('chai').expect;
+const fs = require('fs');
 
-let bml = require('../bml.js');
+const bml = require('../bml.js');
 
 describe('bml', function() {
   it('doesn\'t explode when trying to process a sample document', function() {
-    let testString = '' + fs.readFileSync(require.resolve('../sample.bml'));
+    const testString = '' + fs.readFileSync(require.resolve('../sample.bml'));
     bml(testString);
     // If we make it here without an exception, we win
   });
@@ -56,7 +56,7 @@ describe('bml', function() {
   });
 
   it('produces the exact same document when using a fixed random seed', function() {
-    let testString = '' + fs.readFileSync(require.resolve('./randomSmokeTest.bml'));
+    const testString = '' + fs.readFileSync(require.resolve('./randomSmokeTest.bml'));
     let firstResult = bml(testString, { randomSeed: 1234 });
     let secondResult = bml(testString, { randomSeed: 1234 });
     expect(firstResult).to.equal(secondResult);

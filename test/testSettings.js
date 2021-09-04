@@ -1,7 +1,7 @@
-let assert = require('assert');
-let fs = require('fs');
+const assert = require('assert');
+const fs = require('fs');
 
-let mergeSettings = require('../src/settings.js').mergeSettings;
+const mergeSettings = require('../src/settings.js').mergeSettings;
 
 
 describe('mergeSettings', function() {

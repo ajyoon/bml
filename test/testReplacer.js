@@ -1,7 +1,7 @@
-let rand = require('../src/rand.js');
-let WeightedChoice = require('../src/weightedChoice.js').WeightedChoice;
-let Replacer = require('../src/replacer.js').Replacer;
-let expect = require('chai').expect;
+const rand = require('../src/rand.js');
+const WeightedChoice = require('../src/weightedChoice.js').WeightedChoice;
+const Replacer = require('../src/replacer.js').Replacer;
+const expect = require('chai').expect;
 const noOp = require('../src/noOp.js');
 
 describe('Replacer', function() {

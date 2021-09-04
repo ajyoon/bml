@@ -1,5 +1,5 @@
-let Token = require('./token.js').Token;
-let TokenType = require('./tokenType.js').TokenType;
+const Token = require('./token.js').Token;
+const TokenType = require('./tokenType.js').TokenType;
 
 class Lexer {
   constructor(string) {

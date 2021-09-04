@@ -1,5 +1,5 @@
-let WeightedChoice = require('./weightedChoice.js').WeightedChoice;
-let seedrandom = require('seedrandom');
+const WeightedChoice = require('./weightedChoice.js').WeightedChoice;
+const seedrandom = require('seedrandom');
 
 // A module-local seedable random number generator
 // The selected seed will be random unless `setRandomSeed()` is called.

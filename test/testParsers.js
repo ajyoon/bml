@@ -1,33 +1,33 @@
-let assert = require('assert');
-let expect = require('chai').expect;
-let fs = require('fs');
+const assert = require('assert');
+const expect = require('chai').expect;
+const fs = require('fs');
 
-let parsers = require('../src/parsers.js');
-let errors = require('../src/errors.js');
-let EvalBlock = require('../src/evalBlock.js').EvalBlock;
-let Mode = require('../src/mode.js').Mode;
-let Replacer = require('../src/replacer.js').Replacer;
-let Lexer = require('../src/lexer.js').Lexer;
-let Token = require('../src/token.js').Token;
-let TokenType = require('../src/tokenType.js').TokenType;
-let WeightedChoice = require('../src/weightedChoice.js').WeightedChoice;
+const parsers = require('../src/parsers.js');
+const errors = require('../src/errors.js');
+const EvalBlock = require('../src/evalBlock.js').EvalBlock;
+const Mode = require('../src/mode.js').Mode;
+const Replacer = require('../src/replacer.js').Replacer;
+const Lexer = require('../src/lexer.js').Lexer;
+const Token = require('../src/token.js').Token;
+const TokenType = require('../src/tokenType.js').TokenType;
+const WeightedChoice = require('../src/weightedChoice.js').WeightedChoice;
 
-let JavascriptSyntaxError = errors.JavascriptSyntaxError;
-let UnknownTransformError = errors.UnknownTransformError;
-let BMLSyntaxError = errors.BMLSyntaxError;
-let BMLDuplicatedRefIndexError = errors.BMLDuplicatedRefIndexError;
+const JavascriptSyntaxError = errors.JavascriptSyntaxError;
+const UnknownTransformError = errors.UnknownTransformError;
+const BMLSyntaxError = errors.BMLSyntaxError;
+const BMLDuplicatedRefIndexError = errors.BMLDuplicatedRefIndexError;
 
-let parseEval = parsers.parseEval;
-let parseRule = parsers.parseRule;
-let parseMode = parsers.parseMode;
-let parsePrelude = parsers.parsePrelude;
-let parseUse = parsers.parseUse;
-let parseInlineChoose = parsers.parseInlineChoose;
-let createMatcher = parsers.createMatcher;
-let parseMatchers = parsers.parseMatchers;
-let parseCall = parsers.parseCall;
-let parseReplacements = parsers.parseReplacements;
-let parseBackReference = parsers.parseBackReference;
+const parseEval = parsers.parseEval;
+const parseRule = parsers.parseRule;
+const parseMode = parsers.parseMode;
+const parsePrelude = parsers.parsePrelude;
+const parseUse = parsers.parseUse;
+const parseInlineChoose = parsers.parseInlineChoose;
+const createMatcher = parsers.createMatcher;
+const parseMatchers = parsers.parseMatchers;
+const parseCall = parsers.parseCall;
+const parseReplacements = parsers.parseReplacements;
+const parseBackReference = parsers.parseBackReference;
 
 
 describe('parseEval', function() {
@@ -110,7 +110,7 @@ describe('parseEval', function() {
   });
 
   it('should be able to read itself (very meta)', function() {
-    let parsersFilePath = require.resolve('../src/parsers.js');
+    const parsersFilePath = require.resolve('../src/parsers.js');
     let parsersFileContents = ('' + fs.readFileSync(parsersFilePath));
     let testString = 'eval {' + parsersFileContents + '}';
     let lexer = new Lexer(testString);
@@ -522,7 +522,6 @@ describe('parseBackReference', function() {
     testParseStrToGiveSyntaxError('@TestRef: 0 -> (foo), call bar, @TestRef2: 0 -> (foo)');
   });
   
-  // The parser shouldn't care if an index is repeated
   it('errors on repeated indexes', function() {
     expect(() => {
       parseBackReference(new Lexer('@TestRef: 0 -> (foo), 1 -> (bar), 0 -> (biz)'));

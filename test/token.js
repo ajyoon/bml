@@ -1,7 +1,7 @@
-let assert = require('assert');
+const assert = require('assert');
 
-let TokenType = require('../src/tokenType.js').TokenType;
-let Token = require('../src/token.js').Token;
+const TokenType = require('../src/tokenType.js').TokenType;
+const Token = require('../src/token.js').Token;
 
 describe('Token', function() {
   it('has a useful toString', function() {
