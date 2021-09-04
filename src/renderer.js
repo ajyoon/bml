@@ -9,7 +9,7 @@ const defaultSettings = _settings.defaultSettings;
 const mergeSettings = _settings.mergeSettings;
 const parsePrelude = _parsers.parsePrelude;
 const parseUse = _parsers.parseUse;
-const parseInlineChoose = _parsers.parseInlineChoose;
+const parseInlineCommand = _parsers.parseInlineCommand;
 const EvalBlock = require('./evalBlock.js').EvalBlock;
 const noOp = require('./noOp.js');
 const UnknownModeError = _errors.UnknownModeError;
@@ -105,8 +105,8 @@ function renderText(string, startIndex, evalBlock,
       chooseRe.lastIndex = index + 1;
       useRe.lastIndex = index + 1;
       if (chooseRe.test(string)) {
-        let parseInlineChooseResult = parseInlineChoose(string, index, false);
-        replacement = parseInlineChooseResult.replacer.call().replacement;
+        let parseInlineCommandResult = parseInlineCommand(string, index, false);
+        replacement = parseInlineCommandResult.replacer.call().replacement;
         if (replacement instanceof EvalBlock) {
           out += eval(replacement.string)([''], string, index);
         } else {
@@ -116,7 +116,7 @@ function renderText(string, startIndex, evalBlock,
             replacement, 0, null, modes, activeMode, settings, false);
           out += renderedReplacement;
         }
-        index = parseInlineChooseResult.blockEndIndex;
+        index = parseInlineCommandResult.blockEndIndex;
         continue;
       } else if (useRe.test(string)) {
         let parseUseResult = parseUse(string, index);

@@ -494,9 +494,7 @@ function extractNumberLiteral(string, numberIndex) {
   };
 }
 
-// TODO maybe this should be renamed to something like `parseInlineCommand`
-// since it seems to be becoming the general syntax for inline actions
-function parseInlineChoose(string, openBraceIndex) {
+function parseInlineCommand(string, openBraceIndex) {
   let lexer = new Lexer(string);
   lexer.overrideIndex(openBraceIndex + 1);
   let backReference = parseBackReference(lexer);
@@ -511,17 +509,16 @@ function parseInlineChoose(string, openBraceIndex) {
   };
 }
 
+// Returns null if there is no backref slug at the beginning of the block
 function parseBackReference(lexer) {
   let startIndex = lexer.index;
 
+  // TODO I think this doesn't work if there's a comment or linebreak
+  // after the opening brace but before the identifier slug
   let referredIdentifierRe = /\s*@(\w+):/y;
   referredIdentifierRe.lastIndex = lexer.index;
   let referredIdentifierMatch = referredIdentifierRe.exec(lexer.string);
   if (!referredIdentifierMatch) {
-    // not sure if this is the approach i want to ultimately use,
-    // but for now my idea is this method returns null if it's not
-    // a valid backref block. This way we can invoke this at the
-    // top of `parseReplacements` without duplicating the regex test.
     return null;
   }
   let referredIdentifier = referredIdentifierMatch[1];
@@ -629,7 +626,7 @@ exports.parseRule = parseRule;
 exports.parseMode = parseMode;
 exports.parsePrelude = parsePrelude;
 exports.parseUse = parseUse;
-exports.parseInlineChoose = parseInlineChoose;
+exports.parseInlineCommand = parseInlineCommand;
 exports.createMatcher = createMatcher;
 exports.parseMatchers = parseMatchers;
 exports.parseCall = parseCall;

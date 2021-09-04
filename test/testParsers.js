@@ -23,7 +23,7 @@ const parseRule = parsers.parseRule;
 const parseMode = parsers.parseMode;
 const parsePrelude = parsers.parsePrelude;
 const parseUse = parsers.parseUse;
-const parseInlineChoose = parsers.parseInlineChoose;
+const parseInlineCommand = parsers.parseInlineCommand;
 const createMatcher = parsers.createMatcher;
 const parseMatchers = parsers.parseMatchers;
 const parseCall = parsers.parseCall;
@@ -260,10 +260,10 @@ describe('parseUse', function() {
 });
 
 
-describe('parseInlineChoose', function() {
+describe('parseInlineCommand', function() {
   it('allows a single unweighted item', function() {
     let testString = '{(test)}';
-    let result = parseInlineChoose(testString, 0);
+    let result = parseInlineCommand(testString, 0);
     assert.strictEqual(result.blockEndIndex, testString.length);
     assert.strictEqual(result.backReference, null);
     assert(result.replacer instanceof Replacer);
@@ -271,7 +271,7 @@ describe('parseInlineChoose', function() {
 
   it('allows a single weighted item', function() {
     let testString = '{(test) 100}';
-    let result = parseInlineChoose(testString, 0);
+    let result = parseInlineCommand(testString, 0);
     assert.strictEqual(result.blockEndIndex, testString.length);
     assert.strictEqual(result.backReference, null);
     assert(result.replacer instanceof Replacer);
@@ -279,7 +279,7 @@ describe('parseInlineChoose', function() {
 
   it('allows a single unweighted call item', function() {
     let testString = '{call someFunc}';
-    let result = parseInlineChoose(testString, 0);
+    let result = parseInlineCommand(testString, 0);
     assert.strictEqual(result.blockEndIndex, testString.length);
     assert.strictEqual(result.backReference, null);
     assert(result.replacer instanceof Replacer);
@@ -287,7 +287,7 @@ describe('parseInlineChoose', function() {
 
   it('allows a single weighted call item', function() {
     let testString = '{call someFunc 100}';
-    let result = parseInlineChoose(testString, 0);
+    let result = parseInlineCommand(testString, 0);
     assert.strictEqual(result.blockEndIndex, testString.length);
     assert.strictEqual(result.backReference, null);
     assert(result.replacer instanceof Replacer);
@@ -295,7 +295,7 @@ describe('parseInlineChoose', function() {
 
   it('allows a comma separated mix of literals and calls', function() {
     let testString = '{(test) 50, call someFunc 40}';
-    let result = parseInlineChoose(testString, 0);
+    let result = parseInlineCommand(testString, 0);
     assert.strictEqual(result.blockEndIndex, testString.length);
     assert.strictEqual(result.backReference, null);
     assert(result.replacer instanceof Replacer);
@@ -303,7 +303,7 @@ describe('parseInlineChoose', function() {
   
   it('allows the choice to be prefixed by an identifier for reference in later choices', function() {
     let testString = '{TestChoice: (test) 50, call someFunc 40}';
-    let result = parseInlineChoose(testString, 0);
+    let result = parseInlineCommand(testString, 0);
     assert.strictEqual(result.blockEndIndex, testString.length);
     assert(result.replacer instanceof Replacer);
     assert.strictEqual(result.backReference, null);
@@ -312,7 +312,7 @@ describe('parseInlineChoose', function() {
   
   it('allows back references', function() {
     let testString = '{@TestChoice: 0 -> (foo)}';
-    let result = parseInlineChoose(testString, 0);
+    let result = parseInlineCommand(testString, 0);
     assert.strictEqual(result.blockEndIndex, testString.length);
     assert.deepStrictEqual(result.backReference,
                            new BackReference('TestChoice', {0: 'foo'}, null));
