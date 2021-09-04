@@ -314,8 +314,10 @@ describe('parseInlineCommand', function() {
     let testString = '{@TestChoice: 0 -> (foo)}';
     let result = parseInlineCommand(testString, 0);
     assert.strictEqual(result.blockEndIndex, testString.length);
+    let expectedChoiceMap = new Map();
+    expectedChoiceMap.set(0, 'foo');
     assert.deepStrictEqual(result.backReference,
-                           new BackReference('TestChoice', {0: 'foo'}, null));
+                           new BackReference('TestChoice', expectedChoiceMap, null));
     assert.strictEqual(result.replacer, null);
   });
 });
@@ -492,26 +494,26 @@ describe('parseBackReference', function() {
     let lexer = new Lexer(testString);
     let result = parseBackReference(lexer);
     expect(result.referredIdentifier).to.equal('TestRef');
-    expect(Object.keys(result.choiceMap)).to.have.lengthOf(1);
-    expect(result.choiceMap[0]).to.equal('foo');
+    expect(result.choiceMap).to.have.lengthOf(1);
+    expect(result.choiceMap.get(0)).to.equal('foo');
   });
   
   it('parses a simple case with a single call branch and no fallback', function() {
     let testString = '@TestRef: 0 -> call foo}';
     let result = parseBackReference(new Lexer(testString));
     expect(result.referredIdentifier).to.equal('TestRef');
-    expect(Object.keys(result.choiceMap)).to.have.lengthOf(1);
-    expect(result.choiceMap[0]).to.be.an.instanceof(EvalBlock);
-    expect(result.choiceMap[0].string).to.equal('foo');
+    expect(result.choiceMap).to.have.lengthOf(1);
+    expect(result.choiceMap.get(0)).to.be.an.instanceof(EvalBlock);
+    expect(result.choiceMap.get(0).string).to.equal('foo');
   });
   
   it('allows a single branch with a fallback', function() {
     let testString = '@TestRef: 0 -> call foo, (fallback)}';
     let result = parseBackReference(new Lexer(testString));
     expect(result.referredIdentifier).to.equal('TestRef');
-    expect(Object.keys(result.choiceMap)).to.have.lengthOf(1);
-    expect(result.choiceMap[0]).to.be.an.instanceof(EvalBlock);
-    expect(result.choiceMap[0].string).to.equal('foo');
+    expect(result.choiceMap).to.have.lengthOf(1);
+    expect(result.choiceMap.get(0)).to.be.an.instanceof(EvalBlock);
+    expect(result.choiceMap.get(0).string).to.equal('foo');
     expect(result.fallback).to.equal('fallback');
   });
   
@@ -519,11 +521,11 @@ describe('parseBackReference', function() {
     let testString = '@TestRef: 0 -> (foo), 1 -> call someFunc, 2 -> (bar), call fallbackFunc}';
     let result = parseBackReference(new Lexer(testString));
     expect(result.referredIdentifier).to.equal('TestRef');
-    expect(Object.keys(result.choiceMap)).to.have.lengthOf(3);
-    expect(result.choiceMap[0]).to.equal('foo');
-    expect(result.choiceMap[1]).to.be.an.instanceof(EvalBlock);
-    expect(result.choiceMap[1].string).to.equal('someFunc');
-    expect(result.choiceMap[2]).to.equal('bar');
+    expect(result.choiceMap).to.have.lengthOf(3);
+    expect(result.choiceMap.get(0)).to.equal('foo');
+    expect(result.choiceMap.get(1)).to.be.an.instanceof(EvalBlock);
+    expect(result.choiceMap.get(1).string).to.equal('someFunc');
+    expect(result.choiceMap.get(2)).to.equal('bar');
     expect(result.fallback).to.be.an.instanceof(EvalBlock);
     expect(result.fallback.string).to.equal('fallbackFunc');
   });

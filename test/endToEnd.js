@@ -54,6 +54,32 @@ describe('bml', function() {
       assert.fail(`Unexpected output: ${result}`);
     }
   });
+  
+  it('can process refs, backrefs, and unused fallbacks', function() {
+    let testString = '{Name: (Alice), (Bob)} went to the store. '
+        + '{@Name: 0 -> (She), 1 -> (He), (unused fallback)} bought some tofu.';
+    let result = bml(testString);
+    let possibleOutcomes = [
+      'Alice went to the store. She bought some tofu.',
+      'Bob went to the store. He bought some tofu.'
+    ];
+    if (possibleOutcomes.indexOf(result) === -1) {
+      assert.fail(`Unexpected output: ${result}`);
+    }
+  });
+  
+  it('can process refs and backrefs with used fallbacks', function() {
+    let testString = '{Name: (Alice), (Bob)} went to the store. '
+        + '{@Name: 0 -> (She), (USED FALLBACK)} bought some tofu.';
+    let result = bml(testString);
+    let possibleOutcomes = [
+      'Alice went to the store. She bought some tofu.',
+      'Bob went to the store. USED FALLBACK bought some tofu.'
+    ];
+    if (possibleOutcomes.indexOf(result) === -1) {
+      assert.fail(`Unexpected output: ${result}`);
+    }
+  });
 
   it('produces the exact same document when using a fixed random seed', function() {
     const testString = '' + fs.readFileSync(require.resolve('./randomSmokeTest.bml'));

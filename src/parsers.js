@@ -494,6 +494,10 @@ function extractNumberLiteral(string, numberIndex) {
   };
 }
 
+// TODO turns out actually this name doesnt fully make sense.
+// the renderer uses an ahead-of-time regex before going into parsing
+// since it will parse a 'use' command differently from replacers/backrefs.
+// maybe refactor to combine these into one brace-command parser here?
 function parseInlineCommand(string, openBraceIndex) {
   let lexer = new Lexer(string);
   lexer.overrideIndex(openBraceIndex + 1);
@@ -524,7 +528,7 @@ function parseBackReference(lexer) {
   let referredIdentifier = referredIdentifierMatch[1];
   lexer.overrideIndex(lexer.index + referredIdentifierMatch[0].length);
   
-  let choiceMap = {};
+  let choiceMap = new Map();
   let fallback = null;
 
   let acceptChoiceIndex = true;
@@ -579,13 +583,13 @@ function parseBackReference(lexer) {
             currentReplacement = parseCall(lexer);
           }
           if (currentChoiceIndex != null) {
-            if (choiceMap.hasOwnProperty(currentChoiceIndex)) {
+            if (choiceMap.has(currentChoiceIndex)) {
               // it's not ideal to validate this here, but with the way it's currently
               // built, if we don't it will just silently overwrite the key
               throw new BMLDuplicatedRefIndexError(
                 referredIdentifier, currentChoiceIndex, lexer.string, token.index);
             }
-            choiceMap[currentChoiceIndex] = currentReplacement;
+            choiceMap.set(currentChoiceIndex, currentReplacement);
             // Reset state for next choice
             acceptReplacement = false;
             acceptComma = true;

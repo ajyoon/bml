@@ -13,6 +13,7 @@ const parseInlineCommand = _parsers.parseInlineCommand;
 const EvalBlock = require('./evalBlock.js').EvalBlock;
 const noOp = require('./noOp.js');
 const UnknownModeError = _errors.UnknownModeError;
+const BMLDuplicatedRefError = _errors.BMLDuplicatedRefError;
 const BML_VERSION = require('../package.json')['version'];
 
 // imports for exposure to eval blocks
@@ -44,6 +45,21 @@ function checkVersion(bmlVersion, specifiedInSettings) {
   }
 }
 
+function resolveBackReference(choiceResultMap, backReference) {
+  let referredChoiceOutcomeIndex = choiceResultMap[backReference.referredIdentifier];
+  if (!isNaN(referredChoiceOutcomeIndex)) {
+    let matchedBackReferenceResult = backReference.choiceMap.get(referredChoiceOutcomeIndex);
+    if (matchedBackReferenceResult) {
+      return matchedBackReferenceResult;
+    }
+  }
+  if (backReference.fallback === null) {
+    console.warn(`No matching reference or fallback found for ${backReference.referredIdentifier}`);
+    return '';
+  }
+  return backReference.fallback;
+}
+
 /**
  * The main loop which processes the text component of a bml document.
  *
@@ -58,15 +74,17 @@ function checkVersion(bmlVersion, specifiedInSettings) {
  */
 function renderText(string, startIndex, evalBlock,
                     modes, renderDefaultSettings, isTopLevel) {
+  // TODO this function is way too complex and badly needs refactor
   let activeMode = null;
   let isEscaped = false;
   let inLiteralBlock = false;
+  let choiceResultMap = {};
   let out = '';
   let index = startIndex;
   let currentRule = null;
   let foundMatch = false;
   let replacement = null;
-  let chooseRe = /\s*(\(|call)/y;
+  let chooseRe = /\s*(\(|call|@?\w+:)/y;
   let useRe = /\s*(use|using)/y;
 
   if (isTopLevel) {
@@ -106,7 +124,24 @@ function renderText(string, startIndex, evalBlock,
       useRe.lastIndex = index + 1;
       if (chooseRe.test(string)) {
         let parseInlineCommandResult = parseInlineCommand(string, index, false);
-        replacement = parseInlineCommandResult.replacer.call().replacement;
+        let replacer = parseInlineCommandResult.replacer;
+        let backReference = parseInlineCommandResult.backReference;
+        if (replacer) {
+          let replacerCallResult = replacer.call();
+          if (replacer.identifier) {
+            if (choiceResultMap.hasOwnProperty(replacer.identifier)) {
+              throw new BMLDuplicatedRefError(replacer.identifier, string, index);
+            }
+            choiceResultMap[replacer.identifier] = replacerCallResult.choiceIndex;
+          }
+          replacement = replacerCallResult.replacement;
+        } else {
+          // sanity check
+          if (!backReference) {
+            throw new Error('Illegal state - no replacer or backref from inline choose');
+          }
+          replacement = resolveBackReference(choiceResultMap, backReference);
+        }
         if (replacement instanceof EvalBlock) {
           out += eval(replacement.string)([''], string, index);
         } else {

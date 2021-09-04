@@ -1,6 +1,6 @@
 class BackReference {
   /**
-   * choiceMap is a map of form { choiceIndex: Int, boundResult: String }
+   * choiceMap is a *Map* (not simply object) of int choice indexes to bound results.
    */
   constructor(referredIdentifier, choiceMap, fallback) {
     this.referredIdentifier = referredIdentifier;
