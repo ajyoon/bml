@@ -47,6 +47,8 @@ function randomInt(min, max) {
  * The probability of any given `WeightedChoice` being
  * chosen is its weight divided by the sum of all given
  * choices.
+ *
+ * Returns an object of the form {choice, choiceIndex}
  */
 function weightedChoose(weights) {
   let sum = 0;
@@ -58,13 +60,14 @@ function weightedChoose(weights) {
   for (let w = 0; w < weights.length; w++) {
     progress += weights[w].weight;
     if (progress >= pickedValue) {
-      return weights[w].choice;
+      return { choice: weights[w].choice, choiceIndex: w };
     }
   }
   // If we're still here, something went wrong.
   // Log a warning but try to return a random value anyways.
   console.warn('Unable to pick weighted choice for weights: ' + weights);
-  return weights[randomInt(0, weights.length)].choice;
+  let fallbackIndex = randomInt(0, weights.length);
+  return { choice: weights[fallbackIndex].choice, choiceIndex: fallbackIndex};
 }
 
 exports.setRandomSeed = setRandomSeed;

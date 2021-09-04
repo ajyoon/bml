@@ -20,10 +20,12 @@ class Replacer {
     this.identifier = identifier;
   }
 
-  // Maybe when refs are implemented this will need to return also an index of
-  // the selected choice.
-  call(match, fullText, matchIndex, ...options) {
-    return weightedChoose(this.weights);
+  /**
+   * returns an object of the form {replacement, choiceIndex}
+   */
+  call() {
+    let result = weightedChoose(this.weights);
+    return { replacement: result.choice, choiceIndex: result.choiceIndex };
   }
 
   toString() {

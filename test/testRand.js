@@ -111,3 +111,26 @@ describe('setRandomSeed', function() {
     expect(hash).to.be.equal('9192c25b734fcbadbe32dadc28089c60db0e39f90cc20ce2e5733f57261acc0c');
   });
 });
+
+describe('weightedChoose', function() {
+  before(function() {
+    rand.setRandomSeed(0); // pin seed for reproducibility
+  });
+  it('behaves on well-formed weights', function() {
+    let weights = [
+      new WeightedChoice('foo', 40),
+      new WeightedChoice('bar', 60),
+    ];
+    let result = rand.weightedChoose(weights);
+    expect(result.choice).to.be.equal('foo');
+    expect(result.choiceIndex).to.be.equal(0);
+    
+    result = rand.weightedChoose(weights);
+    expect(result.choice).to.be.equal('foo');
+    expect(result.choiceIndex).to.be.equal(0);
+
+    result = rand.weightedChoose(weights);
+    expect(result.choice).to.be.equal('bar');
+    expect(result.choiceIndex).to.be.equal(1);
+  });
+});

@@ -106,8 +106,7 @@ function renderText(string, startIndex, evalBlock,
       useRe.lastIndex = index + 1;
       if (chooseRe.test(string)) {
         let parseInlineChooseResult = parseInlineChoose(string, index, false);
-        replacement = parseInlineChooseResult.replacer.call(
-          [''], string, index);
+        replacement = parseInlineChooseResult.replacer.call().replacement;
         if (replacement instanceof EvalBlock) {
           out += eval(replacement.string)([''], string, index);
         } else {
@@ -143,8 +142,7 @@ function renderText(string, startIndex, evalBlock,
               currentRule.matchers[m].lastIndex = index;
               let currentMatch = currentRule.matchers[m].exec(string);
               if (currentMatch !== null) {
-                replacement = currentRule.replacer
-                  .call(currentRule.matchers[m], string, index);
+                replacement = currentRule.replacer.call().replacement;
                 if (replacement instanceof EvalBlock) {
                   out += eval(replacement.string)(currentMatch, string, index);
                 } else if (replacement === noOp) {
