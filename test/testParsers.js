@@ -498,25 +498,36 @@ describe('parseBackReference', function() {
   
   it('parses a simple case with a single call branch and no fallback', function() {
     let testString = '@TestRef: 0 -> call foo}';
-    let lexer = new Lexer(testString);
-    let result = parseBackReference(lexer);
+    let result = parseBackReference(new Lexer(testString));
     expect(result.referredIdentifier).to.equal('TestRef');
     expect(Object.keys(result.choiceMap)).to.have.lengthOf(1);
     expect(result.choiceMap[0]).to.be.an.instanceof(EvalBlock);
     expect(result.choiceMap[0].string).to.equal('foo');
   });
   
-  it('parses multiple branches of all types', function() {
-    let testString = '@TestRef: 0 -> (foo), 1 -> call someFunc, 2 -> (bar)}';
-    let lexer = new Lexer(testString);
-    let result = parseBackReference(lexer);
+  it('allows a single branch with a fallback', function() {
+    let testString = '@TestRef: 0 -> call foo, (fallback)}';
+    let result = parseBackReference(new Lexer(testString));
+    expect(result.referredIdentifier).to.equal('TestRef');
+    expect(Object.keys(result.choiceMap)).to.have.lengthOf(1);
+    expect(result.choiceMap[0]).to.be.an.instanceof(EvalBlock);
+    expect(result.choiceMap[0].string).to.equal('foo');
+    expect(result.fallback).to.equal('fallback');
+  });
+  
+  it('parses multiple branches of all types with fallback', function() {
+    let testString = '@TestRef: 0 -> (foo), 1 -> call someFunc, 2 -> (bar), call fallbackFunc}';
+    let result = parseBackReference(new Lexer(testString));
     expect(result.referredIdentifier).to.equal('TestRef');
     expect(Object.keys(result.choiceMap)).to.have.lengthOf(3);
     expect(result.choiceMap[0]).to.equal('foo');
     expect(result.choiceMap[1]).to.be.an.instanceof(EvalBlock);
     expect(result.choiceMap[1].string).to.equal('someFunc');
     expect(result.choiceMap[2]).to.equal('bar');
+    expect(result.fallback).to.be.an.instanceof(EvalBlock);
+    expect(result.fallback.string).to.equal('fallbackFunc');
   });
+  
   
   function testParseStrToGiveSyntaxError(backRefString) {
     expect(() => {

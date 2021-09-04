@@ -525,6 +525,7 @@ function parseBackReference(lexer) {
   lexer.overrideIndex(lexer.index + referredIdentifierMatch[0].length);
   
   let choiceMap = {};
+  let fallback = null;
 
   let acceptChoiceIndex = true;
   let acceptArrow = false;
@@ -536,7 +537,6 @@ function parseBackReference(lexer) {
   let currentChoiceIndex = null;
   let currentReplacement = null;
   let token;
-
   
   while ((token = lexer.peek()) !== null) {
     if (inComment) {
@@ -573,21 +573,33 @@ function parseBackReference(lexer) {
       case TokenType.OPEN_PAREN:
       case TokenType.KW_CALL:
         if (acceptReplacement) {
-          acceptReplacement = false;
-          acceptComma = true;
-          acceptBlockEnd = true;
           if (token.tokenType === TokenType.OPEN_PAREN) {
             currentReplacement = parseReplacementWithLexer(lexer);
           } else {
             currentReplacement = parseCall(lexer);
           }
-          if (choiceMap.hasOwnProperty(currentChoiceIndex)) {
-            // it's not ideal to validate this here, but with the way it's currently
-            // built, if we don't it will just silently overwrite the key
-            throw new BMLDuplicatedRefIndexError(
-              referredIdentifier, currentChoiceIndex, lexer.string, token.index);
+          if (currentChoiceIndex != null) {
+            if (choiceMap.hasOwnProperty(currentChoiceIndex)) {
+              // it's not ideal to validate this here, but with the way it's currently
+              // built, if we don't it will just silently overwrite the key
+              throw new BMLDuplicatedRefIndexError(
+                referredIdentifier, currentChoiceIndex, lexer.string, token.index);
+            }
+            choiceMap[currentChoiceIndex] = currentReplacement;
+            // Reset state for next choice
+            acceptReplacement = false;
+            acceptComma = true;
+            acceptBlockEnd = true;
+            currentChoiceIndex = null;
+            currentReplacement = null;
+          } else {
+            // Since there is no current choice index, this must be a fallback choice
+            fallback = currentReplacement;
+            // Set state so the block must end here.
+            acceptReplacement = false;
+            acceptComma = false;
+            acceptBlockEnd = true;
           }
-          choiceMap[currentChoiceIndex] = currentReplacement;
         } else {
           throw new BMLSyntaxError('Unexpected replacement in back reference block', 
                                    lexer.string, token.index);
@@ -597,6 +609,8 @@ function parseBackReference(lexer) {
         if (acceptComma) {
           acceptComma = false;
           acceptChoiceIndex = true;
+          // Replacements can directly follow commas if they are fallbacks
+          acceptReplacement = true;
         } else {
           throw new BMLSyntaxError('Unexpected comma in back reference block', 
                                    lexer.string, token.index);
@@ -604,7 +618,7 @@ function parseBackReference(lexer) {
         break;
       case TokenType.CLOSE_BRACE:
         if (acceptBlockEnd) {
-          return new BackReference(referredIdentifier, choiceMap, null);
+          return new BackReference(referredIdentifier, choiceMap, fallback);
         } else {
           throw new BMLSyntaxError('Unexpected close brace in back reference block', 
                                    lexer.string, token.index);
