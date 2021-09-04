@@ -23,7 +23,19 @@ require('prismjs/components/prism-markdown');
         'paren': {
           pattern: new RegExp(/\(((?:\\\+|(?!\)))?.*?)\)/, 's'),
           alias: 'string'
-        }
+        },
+        'arrow': {
+          pattern: /operator/,
+          alias: 'punctuation'
+        },
+        'backRefIdentifier': {
+          pattern: /@\w+:/,
+          alias: 'symbol'
+        },
+        'identifier': {
+          pattern: /\w+:/,
+          alias: 'symbol'
+        },
       }
     },
   });
