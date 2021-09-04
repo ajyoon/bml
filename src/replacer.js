@@ -4,10 +4,6 @@ const _rand = require('./rand.js');
 const normalizeWeights = _rand.normalizeWeights;
 const weightedChoose = _rand.weightedChoose;
 
-function defaultReplacer(match, fullText, matchIndex, ...options) {
-  return match;
-}
-
 class Replacer {
   constructor(choices, includeNoOp, identifier) {
     if (includeNoOp) {
@@ -21,7 +17,7 @@ class Replacer {
   }
 
   /**
-   * returns an object of the form {replacement, choiceIndex}
+   * returns an object of the form {replacement: String, choiceIndex: Int}
    */
   call() {
     let result = weightedChoose(this.weights);

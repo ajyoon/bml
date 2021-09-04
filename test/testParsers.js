@@ -26,6 +26,7 @@ let createMatcher = parsers.createMatcher;
 let parseMatchers = parsers.parseMatchers;
 let parseCall = parsers.parseCall;
 let parseReplacements = parsers.parseReplacements;
+let parseBackReference = parsers.parseBackReference;
 
 
 describe('parseEval', function() {
@@ -458,5 +459,63 @@ describe('parseReplacements', function() {
     expect(result.weights[0].choice).to.equal('test');
     expect(result.weights[0].weight).to.equal(100);
     expect(lexer.index).to.equal(testString.indexOf('(part'));
+  });
+});
+
+describe('parseBackReference', function() {
+  it('returns null on non-backref blocks', function() {
+    let testString = '(test) 5}';
+    let lexer = new Lexer(testString);
+    let result = parseBackReference(lexer);
+    expect(result).to.equal(null);
+  });
+
+  it('parses a simple case with a single string branch and no fallback', function() {
+    let testString = '@TestRef: 0 -> (foo)}';
+    let lexer = new Lexer(testString);
+    let result = parseBackReference(lexer);
+    expect(result.referredIdentifier).to.equal('TestRef');
+    expect(Object.keys(result.choiceMap)).to.have.lengthOf(1);
+    expect(result.choiceMap[0]).to.equal('foo');
+  });
+  
+  it('parses a simple case with a single call branch and no fallback', function() {
+    let testString = '@TestRef: 0 -> call foo}';
+    let lexer = new Lexer(testString);
+    let result = parseBackReference(lexer);
+    expect(result.referredIdentifier).to.equal('TestRef');
+    expect(Object.keys(result.choiceMap)).to.have.lengthOf(1);
+    expect(result.choiceMap[0]).to.be.an.instanceof(EvalBlock);
+    expect(result.choiceMap[0].string).to.equal('foo');
+  });
+  
+  it('parses multiple branches of all types', function() {
+    let testString = '@TestRef: 0 -> (foo), 1 -> call someFunc, 2 -> (bar)}';
+    let lexer = new Lexer(testString);
+    let result = parseBackReference(lexer);
+    expect(result.referredIdentifier).to.equal('TestRef');
+    expect(Object.keys(result.choiceMap)).to.have.lengthOf(3);
+    expect(result.choiceMap[0]).to.equal('foo');
+    expect(result.choiceMap[1]).to.be.an.instanceof(EvalBlock);
+    expect(result.choiceMap[1].string).to.equal('someFunc');
+    expect(result.choiceMap[2]).to.equal('bar');
+  });
+  
+  it('throws an error when unexpected tokens are given', function() {
+    let testString = '@TestRef: 0 -> (foo), 1 -> call someFunc, 2 -> (bar)}';
+    let lexer = new Lexer(testString);
+    try {
+      parseBackReference(new Lexer('@TestRef: aaskfj'));
+      assert(false, 'error expected');
+    } catch (e) {
+      assert(e instanceof BMLSyntaxError);
+    }
+  });
+  
+  // TODO test more error cases like broken arrows, other nonsense input
+  
+  xit('disallows repeated indexes', function() {
+    // maybe this shouldn't be performed in the parser,
+    // but writing it down here so i don't forget
   });
 });

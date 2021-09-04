@@ -8,6 +8,7 @@ let Lexer = require('./lexer.js').Lexer;
 let TokenType = require('./tokenType.js').TokenType;
 let Rule = require('./rule.js').Rule;
 let Replacer = require('./replacer').Replacer;
+let BackReference = require('./backReference.js').BackReference;
 
 let UnknownTransformError = _errors.UnknownTransformError;
 let UnknownModeError = _errors.UnknownModeError;
@@ -500,6 +501,113 @@ function parseInlineChoose(string, openBraceIndex) {
   };
 }
 
+function parseBackReference(lexer) {
+  let startIndex = lexer.index;
+
+  let referredIdentifierRe = /\s*@(\w+):/y;
+  referredIdentifierRe.lastIndex = lexer.index;
+  let referredIdentifierMatch = referredIdentifierRe.exec(lexer.string);
+  if (!referredIdentifierMatch) {
+    // not sure if this is the approach i want to ultimately use,
+    // but for now my idea is this method returns null if it's not
+    // a valid backref block. This way we can invoke this at the
+    // top of `parseReplacements` without duplicating the regex test.
+    return null;
+  }
+  let referredIdentifier = referredIdentifierMatch[1];
+  lexer.overrideIndex(lexer.index + referredIdentifierMatch[0].length);
+  
+  let choiceMap = {};
+
+  let acceptChoiceIndex = true;
+  let acceptArrow = false;
+  let acceptReplacement = false;
+  let acceptComma = false;
+  let acceptBlockEnd = false;
+  let inComment = false;
+
+  let currentChoiceIndex = null;
+  let currentReplacement = null;
+  let token;
+
+  
+  while ((token = lexer.peek()) !== null) {
+    if (inComment) {
+      if (token.tokenType === TokenType.NEW_LINE) {
+        inComment = false;
+      }
+    } else {
+      switch (token.tokenType) {
+      case TokenType.WHITESPACE:
+      case TokenType.NEW_LINE:
+        break;
+      case TokenType.COMMENT:
+        inComment = true;
+        break;
+      case TokenType.NUMBER:
+        if (acceptChoiceIndex) {
+          acceptChoiceIndex = false;
+          acceptArrow = true;
+          currentChoiceIndex = Number(token.string);
+        } else {
+          throw new BMLSyntaxError('Unexpected number in back reference block',
+                                   lexer.string, token.index);
+        }
+        break;
+      case TokenType.ARROW:
+        if (acceptArrow) {
+          acceptArrow = false;
+          acceptReplacement = true;
+        } else {
+          throw new BMLSyntaxError('Unexpected arrow in back reference block', 
+                                   lexer.string, token.index);
+        }
+        break;
+      case TokenType.OPEN_PAREN:
+      case TokenType.KW_CALL:
+        if (acceptReplacement) {
+          acceptReplacement = false;
+          acceptComma = true;
+          acceptBlockEnd = true;
+          if (token.tokenType === TokenType.OPEN_PAREN) {
+            currentReplacement = parseReplacementWithLexer(lexer);
+          } else {
+            currentReplacement = parseCall(lexer);
+          }
+          choiceMap[currentChoiceIndex] = currentReplacement;
+        } else {
+          throw new BMLSyntaxError('Unexpected replacement in back reference block', 
+                                   lexer.string, token.index);
+        }
+        continue;
+      case TokenType.COMMA:
+        if (acceptComma) {
+          acceptComma = false;
+          acceptChoiceIndex = true;
+        } else {
+          throw new BMLSyntaxError('Unexpected comma in back reference block', 
+                                   lexer.string, token.index);
+        }
+        break;
+      case TokenType.CLOSE_BRACE:
+        if (acceptBlockEnd) {
+          return new BackReference(referredIdentifier, choiceMap, null);
+        } else {
+          throw new BMLSyntaxError('Unexpected close brace in back reference block', 
+                                   lexer.string, token.index);
+        }
+      default:
+        throw new BMLSyntaxError(`Unexpected token ${token}`,
+                                 lexer.string, token.index);
+      }
+    }
+    // If we haven't broken out or thrown an error by now, consume this token.
+    lexer.next();
+  }
+  throw new BMLSyntaxError('Could not find end of back reference block.',
+                           lexer.string, startIndex);
+}
+
 exports.parseEval = parseEval;
 exports.parseRule = parseRule;
 exports.parseMode = parseMode;
@@ -510,3 +618,4 @@ exports.createMatcher = createMatcher;
 exports.parseMatchers = parseMatchers;
 exports.parseCall = parseCall;
 exports.parseReplacements = parseReplacements;
+exports.parseBackReference = parseBackReference;
