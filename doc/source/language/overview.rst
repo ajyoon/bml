@@ -1,9 +1,9 @@
 .. _marked docs: https://github.com/markedjs/marked/blob/master/USING_ADVANCED.md#options
 .. _regex match: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions
 
-========================
-the blur markup language
-========================
+########################
+the language
+########################
 
 The blur markup language (``bml``) is a hybrid language combining javascript,
 ``bml`` constructs, and whatever target format you use. Markdown and HTML are
@@ -12,8 +12,9 @@ supported out of the box.
 
 .. _document-structure:
 
+******************
 document structure
-==================
+******************
 
 A ``bml`` document consists of two sections: an optional
 :ref:`prelude<the-prelude>` and a body. The prelude is considered finished
@@ -26,8 +27,9 @@ at the first non-prelude-looking text.::
 
 .. _the-prelude:
 
+***********
 the prelude
-===========
+***********
 
 A ``bml`` prelude consists of:
 
@@ -110,9 +112,9 @@ their defaults.
 replacement functions
 ---------------------
 
-Replacement functions allow you to perform nontrivial substitutions in your
-document. They may be used by modes in :ref:`rules` and in :ref:`commands
-<commands>`.
+Replacement functions allow you to perform custom substitutions in
+your document. They may be used by modes in :ref:`rules` and in
+:ref:`commands <commands>`.
 
 Replacement functions have the following signature: ::
 
@@ -133,7 +135,7 @@ point.
 
    Any replacement function which might use random elements should use the
    :ref:`provided eval API <provided-eval-api>` for random operations.
-   Direct invokation of ``Math.random()`` will undermine bml's ability
+   Direct invocation of ``Math.random()`` will undermine bml's ability
    to create reproducible document versions pinned to random seeds.
 
 provided eval api
@@ -244,15 +246,16 @@ matched text will never be chosen.
 
 .. _the-body:
 
+********
 the body
-========
+********
 
 The body of a ``bml`` document is just normal text, aside from :ref:`commands <commands>` and literal blocks. ``bml`` considers the body to have begun at its first encounter of non-prelude-like text.
 
 .. _literal-blocks:
 
 literal blocks
---------------
+==============
 
 Literal blocks tell ``bml`` that their enclosed text should not be processed by
 any rules. They are notated with double square brackets: ::
@@ -263,7 +266,7 @@ any rules. They are notated with double square brackets: ::
 .. _commands:
 
 commands
---------
+========
 
 Commands tell ``bml`` to do something during body processing. They are notated
 with curly braces.
@@ -271,7 +274,7 @@ with curly braces.
 .. _mode-changes:
 
 mode changes
-^^^^^^^^^^^^
+------------
 
 The active mode can be changed at any time using a ``use`` command: ::
 
@@ -286,7 +289,7 @@ The active mode can be changed at any time using a ``use`` command: ::
 .. _choose-commands:
 
 choose commands
-^^^^^^^^^^^^^^^
+---------------
 
 A weighted choice may be declared inline using the same syntax for the
 replacement component of :ref:`rules <rules>`: ::
@@ -304,12 +307,35 @@ This can also be useful for unconditionally calling functions with a single-choi
 
   {call someFunc}
 
-.. _nested-replacements:
+.. _reference-commands:
+  
+references
+----------
 
+For more context-dependent text, it can be necessary for some choices to depend on the results of previously made choices. As of version ``0.0.15``, BML experimentally supports this with a system of references and back-references.
+
+Any :ref:`choose command <choose-commands>` can be prefixed with an identifier like so: ::
+
+  {SomeChoiceIdentifier: (Alice), (Bob)} went to the store.
+
+This identifier can then be referred back to using a reference command mapping the result from ``SomeChoiceIdentifier`` to other text by index: ::
+
+  {@SomeChoiceIdentifier 0 -> (She), 1 -> (He)} bought some tofu.
+
+Reference commands need not exhaustively cover every possible outcome from the referred choice, but a fallback option should be provided as the final branch and without an associated index arrow: ::
+
+  {Name: (Alex), (Riley), (Alice)} went to the store.
+  {@Name: 2 -> (She), (They)} bought some tofu.
+
+Fallback options are also necessary if the referred choice was never made. This can happen if the referred choice is in a :ref:`nested evaluation <nested-evaluation>` path that was not taken. If a reference command refers to an unexcuted (or non-existant) choice, or if it provides no mapping for the choice index, the fallback will be used. If no fallback is present, a warning will be logged and an empty string will be inserted.
+
+.. _nested-evaluation:
+
+*****************
 nested evaluation
------------------
+*****************
 
-Text replacements inserted by both :ref:`choose commands <_choose-commands>` and :ref:`rules <rules>` are themselves treated as body bml, so they can contain everything from choose commands to call commands to mode switches. Modes and rules are evaluated on them as well.
+Text replacements inserted by :ref:`choose commands <choose-commands>`, :ref:`reference commands <reference-commands>`, and :ref:`rules <rules>` are themselves treated as body bml, so they can contain everything from choose commands to call commands to mode switches. Modes and rules are evaluated on them as well.
 
 For instance, we could set up nested choices like so: ::
   
@@ -348,3 +374,4 @@ Which can be rendered as:
 * some outer text with inner with magic word foo [no-op rule branch taking the unclaimed probability of 25% in the rule]
 
 Note that nested evaluation *does not* occur on text inserted by function calls or by text left untouched by "no-op" rule branches.
+

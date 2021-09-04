@@ -1,7 +1,14 @@
 # Changelog
 
-### 0.0.15
+### 0.0.16
 * tbd...
+
+### 0.0.15
+* Add experimental support for references and back-references
+  ```bml
+  {Name: (Alice), (Bob)} went to the store.
+  {@Name: 0 -> (She), 1 -> (He)} bought some tofu.
+  ```
 
 ### 0.0.14: MAJOR BREAKING CHANGES
 * Replaces double-brace syntax with single braces. This affects inline

@@ -74,6 +74,15 @@ Available one-time transformations include:
 * choose: `\{(x) 20, (y) 30, (z) 50, call someFunc}`
 * using: `\{using literal}`
 
+### references
+
+Choices can refer to previously made choices using identifiers and choice indexes with optional fallbacks:
+
+```bml
+\{Name: (Alice), (Bob), (Someone)} went to the store.
+\{@Name: 0 -> (She), 1 -> (He), (They)} bought some tofu.
+```
+
 ## syntax highlighting
 
 Experimental syntax highlighting for the browser is supported.
@@ -84,13 +93,10 @@ npm run buildHighlighting
 <script src="/path/to/bml_highlighting.bundle.js"></script>
 ```
 
-Be warned, this currently pulls in _all_ of `highlight.js`, including a whole
-lot of languages irrelevant to bml. Pruning this to drastically reduce the
-bundle size is high on the list of upcoming improvements.
-
 ---
 
 This is a very early, very unstable project. Lots of fixes and improvements coming soon!
 
-By the way, as you may have guessed, this is a BML document. To generate this readme,
+By the way, this README is itself generated from a BML document. To generate this readme,
 run `node readmeBuilder.js`!
+

@@ -26,7 +26,7 @@ author = 'Andrew Yoon'
 # The short X.Y version
 version = ''
 # The full version, including alpha/beta/rc tags
-release = '0.0.15-dev'
+release = '0.0.15'
 
 
 # -- General configuration ---------------------------------------------------
@@ -156,4 +156,4 @@ texinfo_documents = [
 
 
 def setup(app):
-    app.add_javascript('js/matomo.js')
+    app.add_js_file('js/matomo.js')

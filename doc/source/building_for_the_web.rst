@@ -36,10 +36,11 @@ markup and returns a rendered output string.
 syntax highlighting
 ===================
 
-.. _highlightjs: https://highlightjs.org/
-.. _highlightjs stylesheet: https://github.com/isagalaev/highlight.js/tree/master/src/styles
 
-Experimental syntax highlighting with `highlightjs`_ for the browser is
+.. _PrismJS: https://prismjs.com/
+.. _PrismJS stylesheet: https://github.com/PrismJS/prism/tree/master/themes
+
+Experimental syntax highlighting with `prismjs`_ for the browser is
 supported. To build it, run:
 
 .. code:: bash
@@ -48,28 +49,4 @@ supported. To build it, run:
 
 Once loaded in your site, a method ``bmlHighlighting.highlightBml()`` is exposed
 which similarly takes string of markup and returns an HTML string with syntax
-highlighting HTML tags. Note that you will also need to load a `highlightjs
-stylesheet`_ to see the pretty colors.
-
-.. code:: html
-
-  <head>
-      <script src="/path/to/bml_highlighting.bundle.js"></script>
-      <link rel="stylesheet"
-            href="/path/to/a_highlightjs_style.css" />
-  </head>
-  <body>
-      <div id="a-bml-snippet"></div>
-  </body>
-  <foot>
-      <script>
-          document.getElementById("a-bml-snippet").innerHTML =
-              bml("some bml loaded as a js string");
-      </script>
-  </foot>
-
-.. warning::
-
-   This currently pulls in *all* of `highlight.js`, including a whole lot of
-   languages irrelevant to bml. Pruning this to drastically reduce the bundle size
-   is high on the list of upcoming improvements.
+highlighting HTML tags. Note that you will also need to load a `PrismJS stylesheet`_ to see the pretty colors.

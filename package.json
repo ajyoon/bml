@@ -1,11 +1,11 @@
 {
   "name": "bml",
-  "version": "0.0.15-dev",
+  "version": "0.0.15",
   "description": "A stochastic markup language",
   "author": {
     "name": "Andrew Yoon",
     "email": "andrew@nothing-to-say.org",
-    "url": "http://andrewjyoon.com"
+    "url": "https://andrewyoon.art"
   },
   "man": "./man/bml.1",
   "repository": {
