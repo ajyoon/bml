@@ -222,6 +222,8 @@ function parseReplacements(lexer, forRule) {
   let acceptComma = false;
   let acceptReplacerEnd = false;
   
+  // I think this will fail if there is a linebreak or
+  // comments after open brace but before identifier
   let identifier = null;
   let identifierRe = /\s*(\w+):/y;
   identifierRe.lastIndex = lexer.index;
@@ -492,12 +494,19 @@ function extractNumberLiteral(string, numberIndex) {
   };
 }
 
+// TODO maybe this should be renamed to something like `parseInlineCommand`
+// since it seems to be becoming the general syntax for inline actions
 function parseInlineChoose(string, openBraceIndex) {
   let lexer = new Lexer(string);
   lexer.overrideIndex(openBraceIndex + 1);
-  let replacements = parseReplacements(lexer, false);
+  let backReference = parseBackReference(lexer);
+  let replacements = null;
+  if (backReference == null) {
+    replacements = parseReplacements(lexer, false);
+  }
   return {
     blockEndIndex: lexer.index + 1,
+    backReference: backReference,
     replacer: replacements,
   };
 }

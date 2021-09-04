@@ -11,6 +11,7 @@ const Lexer = require('../src/lexer.js').Lexer;
 const Token = require('../src/token.js').Token;
 const TokenType = require('../src/tokenType.js').TokenType;
 const WeightedChoice = require('../src/weightedChoice.js').WeightedChoice;
+const BackReference = require('../src/backReference.js').BackReference;
 
 const JavascriptSyntaxError = errors.JavascriptSyntaxError;
 const UnknownTransformError = errors.UnknownTransformError;
@@ -264,6 +265,7 @@ describe('parseInlineChoose', function() {
     let testString = '{(test)}';
     let result = parseInlineChoose(testString, 0);
     assert.strictEqual(result.blockEndIndex, testString.length);
+    assert.strictEqual(result.backReference, null);
     assert(result.replacer instanceof Replacer);
   });
 
@@ -271,6 +273,7 @@ describe('parseInlineChoose', function() {
     let testString = '{(test) 100}';
     let result = parseInlineChoose(testString, 0);
     assert.strictEqual(result.blockEndIndex, testString.length);
+    assert.strictEqual(result.backReference, null);
     assert(result.replacer instanceof Replacer);
   });
 
@@ -278,6 +281,7 @@ describe('parseInlineChoose', function() {
     let testString = '{call someFunc}';
     let result = parseInlineChoose(testString, 0);
     assert.strictEqual(result.blockEndIndex, testString.length);
+    assert.strictEqual(result.backReference, null);
     assert(result.replacer instanceof Replacer);
   });
 
@@ -285,6 +289,7 @@ describe('parseInlineChoose', function() {
     let testString = '{call someFunc 100}';
     let result = parseInlineChoose(testString, 0);
     assert.strictEqual(result.blockEndIndex, testString.length);
+    assert.strictEqual(result.backReference, null);
     assert(result.replacer instanceof Replacer);
   });
 
@@ -292,6 +297,7 @@ describe('parseInlineChoose', function() {
     let testString = '{(test) 50, call someFunc 40}';
     let result = parseInlineChoose(testString, 0);
     assert.strictEqual(result.blockEndIndex, testString.length);
+    assert.strictEqual(result.backReference, null);
     assert(result.replacer instanceof Replacer);
   });
   
@@ -300,7 +306,17 @@ describe('parseInlineChoose', function() {
     let result = parseInlineChoose(testString, 0);
     assert.strictEqual(result.blockEndIndex, testString.length);
     assert(result.replacer instanceof Replacer);
+    assert.strictEqual(result.backReference, null);
     assert.strictEqual(result.replacer.identifier, 'TestChoice');
+  });
+  
+  it('allows back references', function() {
+    let testString = '{@TestChoice: 0 -> (foo)}';
+    let result = parseInlineChoose(testString, 0);
+    assert.strictEqual(result.blockEndIndex, testString.length);
+    assert.deepStrictEqual(result.backReference,
+                           new BackReference('TestChoice', {0: 'foo'}, null));
+    assert.strictEqual(result.replacer, null);
   });
 });
 
