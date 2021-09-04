@@ -30,6 +30,17 @@ function BMLSyntaxError(message, string, charIndex) {
 BMLSyntaxError.prototype = Object.create(Error.prototype);
 
 
+function BMLDuplicatedRefIndexError(refIdentifier, choiceIndex, string, charIndex) {
+  this.name = 'BMLDuplicatedRefIndexError';
+  this.message = `Duplicated reference index ${choiceIndex} for reference ${refIdentifier} `
+    + `at ${stringUtils.lineColumnString(string, charIndex)}`;
+  let error = new Error(this.message);
+  error.name = this.name;
+  this.stack = error.stack;
+}
+BMLDuplicatedRefIndexError.prototype = Object.create(Error.prototype);
+
+
 function BMLNameError(name, string, charIndex) {
   this.name = 'BMLNameError';
   this.message = 'Unknown name: "' + name + '" at '
@@ -38,7 +49,8 @@ function BMLNameError(name, string, charIndex) {
   error.name = this.name;
   this.stack = error.stack;
 }
-JavascriptSyntaxError.prototype = Object.create(Error.prototype);
+BMLNameError.prototype = Object.create(Error.prototype);
+
 
 
 function UnknownModeError(string, charIndex, modeName) {
@@ -65,6 +77,7 @@ UnknownTransformError.prototype = Object.create(Error.prototype);
 
 exports.JavascriptSyntaxError = JavascriptSyntaxError;
 exports.BMLSyntaxError = BMLSyntaxError;
+exports.BMLDuplicatedRefIndexError = BMLDuplicatedRefIndexError;
 exports.BMLNameError = BMLNameError;
 exports.UnknownModeError = UnknownModeError;
 exports.UnknownTransformError = UnknownTransformError;

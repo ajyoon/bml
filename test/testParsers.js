@@ -15,6 +15,7 @@ let WeightedChoice = require('../src/weightedChoice.js').WeightedChoice;
 let JavascriptSyntaxError = errors.JavascriptSyntaxError;
 let UnknownTransformError = errors.UnknownTransformError;
 let BMLSyntaxError = errors.BMLSyntaxError;
+let BMLDuplicatedRefIndexError = errors.BMLDuplicatedRefIndexError;
 
 let parseEval = parsers.parseEval;
 let parseRule = parsers.parseRule;
@@ -501,21 +502,30 @@ describe('parseBackReference', function() {
     expect(result.choiceMap[2]).to.equal('bar');
   });
   
-  it('throws an error when unexpected tokens are given', function() {
+  function testParseStrToGiveSyntaxError(backRefString) {
+    expect(() => {
+      parseBackReference(new Lexer(backRefString));
+    }).to.throw(BMLSyntaxError);
+  }
+  
+  it('throws an error when invalid syntax is used', function() {
     let testString = '@TestRef: 0 -> (foo), 1 -> call someFunc, 2 -> (bar)}';
-    let lexer = new Lexer(testString);
-    try {
-      parseBackReference(new Lexer('@TestRef: aaskfj'));
-      assert(false, 'error expected');
-    } catch (e) {
-      assert(e instanceof BMLSyntaxError);
-    }
+    testParseStrToGiveSyntaxError('@TestRef: aaskfj');
+    testParseStrToGiveSyntaxError('@TestRef: 0 - > (foo)');
+    testParseStrToGiveSyntaxError('@TestRef: 0 -> {foo}');
+    testParseStrToGiveSyntaxError('@TestRef: (foo) -> {foo}');
+    testParseStrToGiveSyntaxError('@TestRef: (foo)');
+    testParseStrToGiveSyntaxError('@TestRef: (foo) 10');
+    testParseStrToGiveSyntaxError('@TestRef: 0 -> (foo),, 1 -> (bar)');
+    testParseStrToGiveSyntaxError('@TestRef: 0 -> (foo), (bar)');
+    testParseStrToGiveSyntaxError('@TestRef: 0 -> (foo), call bar');
+    testParseStrToGiveSyntaxError('@TestRef: 0 -> (foo), call bar, @TestRef2: 0 -> (foo)');
   });
   
-  // TODO test more error cases like broken arrows, other nonsense input
-  
-  xit('disallows repeated indexes', function() {
-    // maybe this shouldn't be performed in the parser,
-    // but writing it down here so i don't forget
+  // The parser shouldn't care if an index is repeated
+  it('errors on repeated indexes', function() {
+    expect(() => {
+      parseBackReference(new Lexer('@TestRef: 0 -> (foo), 1 -> (bar), 0 -> (biz)'));
+    }).to.throw(BMLDuplicatedRefIndexError);
   });
 });

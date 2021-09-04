@@ -14,6 +14,7 @@ let UnknownTransformError = _errors.UnknownTransformError;
 let UnknownModeError = _errors.UnknownModeError;
 let JavascriptSyntaxError = _errors.JavascriptSyntaxError;
 let BMLSyntaxError = _errors.BMLSyntaxError;
+let BMLDuplicatedRefIndexError = _errors.BMLDuplicatedRefIndexError;
 let escapeRegExp = _stringUtils.escapeRegExp;
 
 
@@ -573,6 +574,10 @@ function parseBackReference(lexer) {
             currentReplacement = parseReplacementWithLexer(lexer);
           } else {
             currentReplacement = parseCall(lexer);
+          }
+          if (choiceMap.hasOwnProperty(currentChoiceIndex)) {
+            throw new BMLDuplicatedRefIndexError(
+              referredIdentifier, currentChoiceIndex, lexer.string, token.index);
           }
           choiceMap[currentChoiceIndex] = currentReplacement;
         } else {
