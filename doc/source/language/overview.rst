@@ -329,8 +329,8 @@ Fallback options are also necessary if the referred choice was never made. This 
 
 Bare references without any branches or fallback will unconditionally copy the output from the referred choice, including any nested evaluations executed within it: ::
 
-  {Name: (Alice), (Bob)}
-  {@Name}
+    {Name: (Alice), (Bob)}
+    {@Name}
 
 For complex documents, it can be helpful to define complex or frequently referenced choices separately from their use. This can be achieved by marking named choices as silent with a ``#`` identifier prefix. Silent choices are executed and tracked, but not inserted in the output text: ::
 
