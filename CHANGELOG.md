@@ -6,6 +6,11 @@
   {Name: (Alice), (Bob)} {@Name}
   // results in "Alice Alice" or "Bob Bob"
   ```
+* Support silent named choices
+  ```bml
+  silent {#Name: (Alice), (Bob)} then referenced {@Name}
+  // results in "silent  then referenced Alice" or "silent  then referenced Bob"
+  ```
 * No longer log warnings when no bml version is present in settings.
   While this is probably a good idea, in practice it's pretty
   annoying.

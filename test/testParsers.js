@@ -309,6 +309,16 @@ describe('parseInlineCommand', function() {
     assert.strictEqual(result.backReference, null);
     assert.strictEqual(result.replacer.identifier, 'TestChoice');
   });
+
+  it('allows blocks with identifiers to be marked silent with # prefix', function() {
+    let testString = '{#TestChoice: (test)}';
+    let result = parseInlineCommand(testString, 0);
+    assert.strictEqual(result.blockEndIndex, testString.length);
+    assert(result.replacer instanceof Replacer);
+    assert.strictEqual(result.backReference, null);
+    assert.strictEqual(result.replacer.identifier, 'TestChoice');
+    assert.strictEqual(result.replacer.isSilent, true);
+  });
   
   it('allows back references', function() {
     let testString = '{@TestChoice: 0 -> (foo)}';

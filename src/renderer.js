@@ -36,9 +36,9 @@ function checkVersion(bmlVersion, specifiedInSettings) {
   if (specifiedInSettings !== null) {
     if (specifiedInSettings !== bmlVersion) {
       console.warn('BML VERSION MISMATCH.' +
-        ' bml source file specifies version ' + specifiedInSettings +
-        ' but running version is ' + BML_VERSION + '.' +
-        ' unexpected behavior may occur.');
+                   ' bml source file specifies version ' + specifiedInSettings +
+                   ' but running version is ' + BML_VERSION + '.' +
+                   ' unexpected behavior may occur.');
     }
   }
 }
@@ -86,7 +86,7 @@ function renderText(string, startIndex, evalBlock,
   let currentRule = null;
   let foundMatch = false;
   let replacement = null;
-  let chooseRe = /\s*(\(|call|\w+:|@\w+)/y;
+  let chooseRe = /\s*(\(|call|#?\w+:|@\w+)/y;
   let useRe = /\s*(use|using)/y;
 
   if (isTopLevel) {
@@ -153,7 +153,9 @@ function renderText(string, startIndex, evalBlock,
           renderedReplacement = renderText(
             replacement, 0, null, modes, activeMode, settings, false);
         }
-        out += renderedReplacement;
+        if (!(replacer && replacer.isSilent)) {
+          out += renderedReplacement;
+        }
         if (replacerCallResult) {
           choiceResultMap.set(
             replacer.identifier,

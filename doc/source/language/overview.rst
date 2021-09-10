@@ -310,7 +310,7 @@ This can also be useful for unconditionally calling functions with a single-choi
 references
 ----------
 
-For more context-dependent text, it can be necessary for some choices to depend on the results of previously made choices. As of version ``0.0.15``, BML experimentally supports this with a system of references and back-references.
+For more context-dependent text, it can be necessary for some choices to depend on the results of previously made choices. ``bml`` experimentally supports this with a system of references and back-references.
 
 Any :ref:`choose command <choose-commands>` can be prefixed with an identifier like so: ::
 
@@ -332,6 +332,11 @@ Bare references without any branches or fallback will unconditionally copy the o
   {Name: (Alice), (Bob)}
   {@Name}
 
+For complex documents, it can be helpful to define complex or frequently referenced choices separately from their use. This can be achieved by marking named choices as silent with a ``#`` identifier prefix. Silent choices are executed and tracked, but not inserted in the output text: ::
+
+  {#Name: (Alice), (Bob)}
+  {@Name}
+  
 .. _nested-evaluation:
 
 *****************

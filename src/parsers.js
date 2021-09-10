@@ -225,7 +225,8 @@ function parseReplacements(lexer, forRule) {
   // I think this will fail if there is a linebreak or
   // comments after open brace but before identifier
   let identifier = null;
-  let identifierRe = /\s*(\w+):/y;
+  let isSilent = null;
+  let identifierRe = /\s*(#?)(\w+):/y;
   identifierRe.lastIndex = lexer.index;
   let identifierMatch = identifierRe.exec(lexer.string);
   if (identifierMatch) {
@@ -233,7 +234,10 @@ function parseReplacements(lexer, forRule) {
       throw new BMLSyntaxError('Choice identifiers are not allowed in rules',
                                lexer.string, lexer.index);
     }
-    identifier = identifierMatch[1];
+    identifier = identifierMatch[2];
+    if (identifierMatch[1]) {
+      isSilent = true;
+    }
     lexer.overrideIndex(lexer.index + identifierMatch[0].length);
   }
 
@@ -260,7 +264,7 @@ function parseReplacements(lexer, forRule) {
             parseReplacementWithLexer(lexer), null));
           continue;
         } else if (acceptReplacerEnd) {
-          return new Replacer(choices, forRule, identifier);
+          return new Replacer(choices, forRule, identifier, isSilent);
         } else {
           throw new BMLSyntaxError('unexpected open paren',
                                    lexer.string, token.index);
@@ -269,7 +273,7 @@ function parseReplacements(lexer, forRule) {
       case TokenType.CLOSE_BRACE:
       case TokenType.LETTER_R:
         if (acceptReplacerEnd) {
-          return new Replacer(choices, forRule, identifier);
+          return new Replacer(choices, forRule, identifier, isSilent);
         } else {
           throw new BMLSyntaxError(
             `unexpected end of replacer: ${token.tokenType}`,

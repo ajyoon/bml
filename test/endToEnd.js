@@ -94,6 +94,18 @@ describe('bml', function() {
       assert.fail(`Unexpected output: ${result}`);
     }
   });
+  
+  it('outputs nothing for silent replacers, but tracks their results', function() {
+    let testString = 'silent {#Name: (Alice), (Bob)} then referenced {@Name}';
+    let result = bml(testString);
+    let possibleOutcomes = [
+      'silent  then referenced Alice',
+      'silent  then referenced Bob'
+    ];
+    if (possibleOutcomes.indexOf(result) === -1) {
+      assert.fail(`Unexpected output: ${result}`);
+    }
+  });
 
   it('produces the exact same document when using a fixed random seed', function() {
     const testString = '' + fs.readFileSync(require.resolve('./randomSmokeTest.bml'));
