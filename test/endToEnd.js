@@ -1,5 +1,7 @@
 const assert = require('assert');
-const expect = require('chai').expect;
+const chai = require('chai');
+const expect = chai.expect;
+chai.use(require('chai-string'));
 const fs = require('fs');
 
 const bml = require('../bml.js');
@@ -98,5 +100,63 @@ describe('bml', function() {
     let firstResult = bml(testString, { randomSeed: 1234 });
     let secondResult = bml(testString, { randomSeed: 1234 });
     expect(firstResult).to.equal(secondResult);
+  });
+});
+
+// via https://stackoverflow.com/a/18543419/5615927
+function captureStream(stream){
+  var oldWrite = stream.write;
+  var buf = '';
+  stream.write = function(chunk, encoding, callback) {
+    buf += chunk.toString(); // chunk is a String or Buffer
+    oldWrite.apply(stream, arguments);
+  };
+  return {
+    unhook: function unhook(){
+     stream.write = oldWrite;
+    },
+    captured: function(){
+      return buf;
+    }
+  };
+}
+
+describe('bml logging', function() {
+  var hook;
+  beforeEach(function(){
+    hook = captureStream(process.stderr);
+  });
+  afterEach(function(){
+    hook.unhook(); 
+  });
+
+  it('warns on version mismatch', function() {
+    let testString = `
+        eval {
+            settings = { version: 'nonsense' }
+        }
+        testing 123
+    `;
+    bml(testString);
+    expect(hook.captured()).to.startsWith(
+      'BML VERSION MISMATCH. bml source file specifies version nonsense');
+  });
+  
+  it('does not warn on version when no version is present', function() {
+    let testString = `testing 123`;
+    bml(testString);
+    expect(hook.captured()).to.equal('');
+  });
+  
+  it('does not warn on recursive renders when top level has version', function() {
+    const BML_VERSION = require('../package.json')['version'];
+    let testString = `
+        eval {
+            settings = { version: '${BML_VERSION}' }
+        }
+        testing 123 {(sub-rendered text)}
+    `;
+    bml(testString);
+    expect(hook.captured()).to.equal('');
   });
 });

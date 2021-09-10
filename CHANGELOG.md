@@ -6,6 +6,9 @@
   {Name: (Alice), (Bob)} {@Name}
   // results in "Alice Alice" or "Bob Bob"
   ```
+* No longer log warnings when no bml version is present in settings.
+  While this is probably a good idea, in practice it's pretty
+  annoying.
 * tbd...
 
 ### 0.0.15

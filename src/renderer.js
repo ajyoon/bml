@@ -28,6 +28,7 @@ const randomFloat = rand.randomFloat;
  * Check if the running version of bml aligns with a specified one.
  *
  * If the versions do not align, log a warning to the console.
+ * If no version is specified, do nothing.
  *
  * @return {void}
  */
@@ -39,9 +40,6 @@ function checkVersion(bmlVersion, specifiedInSettings) {
         ' but running version is ' + BML_VERSION + '.' +
         ' unexpected behavior may occur.');
     }
-  } else {
-    console.warn(
-      'no bml version specified in settings, unexpected behavior may occur.');
   }
 }
 

@@ -31,6 +31,7 @@
     "babel-core": "^6.26.3",
     "babel-loader": "^8.1.0",
     "chai": "^4.3",
+    "chai-string": "^1.5.0",
     "decache": "^4.5.1",
     "eslint": "^6.6.0",
     "eslint-config-google": "^0.8.0",
@@ -43,8 +44,8 @@
     "webpack-cli": "^3.3.11"
   },
   "dependencies": {
-    "prismjs": "1.20.0",
     "marked": "0.3.9",
+    "prismjs": "1.20.0",
     "seedrandom": "2.4.4"
   },
   "license": "BSD-3-Clause"

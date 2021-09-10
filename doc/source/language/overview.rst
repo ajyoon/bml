@@ -101,9 +101,7 @@ their defaults.
 |                    |         |written for. If present, ``bml`` will check   |
 |                    |         |that this matches the version running. If it  |
 |                    |         |does not, a warning will be logged to the     |
-|                    |         |console. If this is omitted, a warning will be|
-|                    |         |logged to the console that this is            |
-|                    |         |recommended.                                  |
+|                    |         |console.                                      |
 +--------------------+---------+----------------------------------------------+
 
 
