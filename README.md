@@ -22,7 +22,7 @@ mode literal {
 
 # bml
 
-[![Build Status](https://travis-ci.org/ajyoon/bml.svg?branch=master)](https://travis-ci.org/ajyoon/bml) [![Coverage Status](https://coveralls.io/repos/github/ajyoon/bml/badge.svg?branch=master)](https://coveralls.io/github/ajyoon/bml?branch=master) [![Built with Spacemacs](https://cdn.rawgit.com/syl20bnr/spacemacs/442d025779da2f62fc86c2082703697714db6514/assets/spacemacs-badge.svg)](http://spacemacs.org)
+[![Build Status](https://travis-ci.org/ajyoon/bml.svg?branch=master)](https://app.travis-ci.com/github/ajyoon/bml) [![Coverage Status](https://coveralls.io/repos/github/ajyoon/bml/badge.svg?branch=master)](https://coveralls.io/github/ajyoon/bml?branch=master) [![Built with Spacemacs](https://cdn.rawgit.com/syl20bnr/spacemacs/442d025779da2f62fc86c2082703697714db6514/assets/spacemacs-badge.svg)](http://spacemacs.org)
 
 
 BML is a superset of natural language which applies stochastic transformations
@@ -87,7 +87,7 @@ Choices can refer to previously made choices using identifiers and choice indexe
 
 ## syntax highlighting
 
-Experimental syntax highlighting for the browser is supported, though it behaves very poorly in document preludes and recursive choices.
+Experimental syntax highlighting for the browser is supported.
 ```
 npm run buildHighlighting
 ```
