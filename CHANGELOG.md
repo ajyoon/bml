@@ -14,7 +14,6 @@
 * No longer log warnings when no bml version is present in settings.
   While this is probably a good idea, in practice it's pretty
   annoying.
-* tbd...
 
 ### 0.0.15
 * Add experimental support for references and back-references
