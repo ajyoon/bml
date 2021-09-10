@@ -519,7 +519,7 @@ function parseBackReference(lexer) {
 
   // TODO I think this doesn't work if there's a comment or linebreak
   // after the opening brace but before the identifier slug
-  let referredIdentifierRe = /\s*@(\w+):/y;
+  let referredIdentifierRe = /\s*@(\w+)/y;
   referredIdentifierRe.lastIndex = lexer.index;
   let referredIdentifierMatch = referredIdentifierRe.exec(lexer.string);
   if (!referredIdentifierMatch) {
@@ -531,11 +531,12 @@ function parseBackReference(lexer) {
   let choiceMap = new Map();
   let fallback = null;
 
-  let acceptChoiceIndex = true;
+  let acceptColon = true;
+  let acceptChoiceIndex = false;
   let acceptArrow = false;
   let acceptReplacement = false;
   let acceptComma = false;
-  let acceptBlockEnd = false;
+  let acceptBlockEnd = true;
   let inComment = false;
 
   let currentChoiceIndex = null;
@@ -554,6 +555,16 @@ function parseBackReference(lexer) {
         break;
       case TokenType.COMMENT:
         inComment = true;
+        break;
+      case TokenType.COLON:
+        if (acceptColon) {
+          acceptColon = false;
+          acceptChoiceIndex = true;
+          acceptBlockEnd = false;
+        } else {
+          throw new BMLSyntaxError('Unexpected colon in back reference block',
+                                   lexer.string, token.index);
+        }
         break;
       case TokenType.NUMBER:
         if (acceptChoiceIndex) {

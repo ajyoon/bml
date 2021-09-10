@@ -1,6 +1,11 @@
 # Changelog
 
 ### 0.0.16
+* Support copy back-references
+  ```bml
+  {Name: (Alice), (Bob)} {@Name}
+  // results in "Alice Alice" or "Bob Bob"
+  ```
 * tbd...
 
 ### 0.0.15

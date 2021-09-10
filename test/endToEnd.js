@@ -80,6 +80,18 @@ describe('bml', function() {
       assert.fail(`Unexpected output: ${result}`);
     }
   });
+  
+  it('correctly executes copy-backrefs', function() {
+    let testString = '{Name: (Alice), (Bob)} {@Name}';
+    let result = bml(testString);
+    let possibleOutcomes = [
+      'Alice Alice',
+      'Bob Bob'
+    ];
+    if (possibleOutcomes.indexOf(result) === -1) {
+      assert.fail(`Unexpected output: ${result}`);
+    }
+  });
 
   it('produces the exact same document when using a fixed random seed', function() {
     const testString = '' + fs.readFileSync(require.resolve('./randomSmokeTest.bml'));

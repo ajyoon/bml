@@ -46,9 +46,13 @@ function checkVersion(bmlVersion, specifiedInSettings) {
 }
 
 function resolveBackReference(choiceResultMap, backReference) {
-  let referredChoiceOutcomeIndex = choiceResultMap[backReference.referredIdentifier];
-  if (!isNaN(referredChoiceOutcomeIndex)) {
-    let matchedBackReferenceResult = backReference.choiceMap.get(referredChoiceOutcomeIndex);
+  let referredChoiceResult = choiceResultMap.get(backReference.referredIdentifier);
+  if (referredChoiceResult) {
+    if (backReference.choiceMap.size === 0 && backReference.fallback === null) {
+      // this is a special "copy" backref
+      return referredChoiceResult.renderedOutput;
+    }
+    let matchedBackReferenceResult = backReference.choiceMap.get(referredChoiceResult.choiceIndex);
     if (matchedBackReferenceResult) {
       return matchedBackReferenceResult;
     }
@@ -78,13 +82,13 @@ function renderText(string, startIndex, evalBlock,
   let activeMode = null;
   let isEscaped = false;
   let inLiteralBlock = false;
-  let choiceResultMap = {};
+  let choiceResultMap = new Map();
   let out = '';
   let index = startIndex;
   let currentRule = null;
   let foundMatch = false;
   let replacement = null;
-  let chooseRe = /\s*(\(|call|@?\w+:)/y;
+  let chooseRe = /\s*(\(|call|\w+:|@\w+)/y;
   let useRe = /\s*(use|using)/y;
 
   if (isTopLevel) {
@@ -126,13 +130,13 @@ function renderText(string, startIndex, evalBlock,
         let parseInlineCommandResult = parseInlineCommand(string, index, false);
         let replacer = parseInlineCommandResult.replacer;
         let backReference = parseInlineCommandResult.backReference;
+        let replacerCallResult;
         if (replacer) {
-          let replacerCallResult = replacer.call();
+          replacerCallResult = replacer.call();
           if (replacer.identifier) {
-            if (choiceResultMap.hasOwnProperty(replacer.identifier)) {
+            if (choiceResultMap.has(replacer.identifier)) {
               throw new BMLDuplicatedRefError(replacer.identifier, string, index);
             }
-            choiceResultMap[replacer.identifier] = replacerCallResult.choiceIndex;
           }
           replacement = replacerCallResult.replacement;
         } else {
@@ -142,14 +146,20 @@ function renderText(string, startIndex, evalBlock,
           }
           replacement = resolveBackReference(choiceResultMap, backReference);
         }
+        let renderedReplacement;
         if (replacement instanceof EvalBlock) {
-          out += eval(replacement.string)([''], string, index);
+          renderedReplacement = eval(replacement.string)([''], string, index);
         } else {
           // To handle nested choices and to run rules over chosen text,
           // we recursively render the chosen text.
-          let renderedReplacement = renderText(
+          renderedReplacement = renderText(
             replacement, 0, null, modes, activeMode, settings, false);
-          out += renderedReplacement;
+        }
+        out += renderedReplacement;
+        if (replacerCallResult) {
+          choiceResultMap.set(
+            replacer.identifier,
+            { choiceIndex: replacerCallResult.choiceIndex, renderedOutput: renderedReplacement});
         }
         index = parseInlineCommandResult.blockEndIndex;
         continue;

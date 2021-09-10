@@ -530,6 +530,13 @@ describe('parseBackReference', function() {
     expect(result.fallback.string).to.equal('fallbackFunc');
   });
   
+  it('parses copy refs', function() {
+    let testString = '@TestRef}';
+    let lexer = new Lexer(testString);
+    let result = parseBackReference(lexer);
+    expect(result.referredIdentifier).to.equal('TestRef');
+    expect(result.choiceMap).to.have.lengthOf(0);
+  });
   
   function testParseStrToGiveSyntaxError(backRefString) {
     expect(() => {
