@@ -74,13 +74,14 @@ function resolveBackReference(choiceResultMap, backReference) {
  *
  * @returns {String} the rendered text.
  */
-function renderText(string, startIndex, evalBlock,
-                    modes, renderDefaultSettings, isTopLevel) {
+function renderText(string, startIndex, evalBlock, modes, activeMode,
+                    renderDefaultSettings, choiceResultMap, isTopLevel) {
   // TODO this function is way too complex and badly needs refactor
-  let activeMode = null;
+  // TODO replace isTopLevel with incrementing depth tracker
+  choiceResultMap = choiceResultMap || new Map();
+  activeMode = activeMode || null;
   let isEscaped = false;
   let inLiteralBlock = false;
-  let choiceResultMap = new Map();
   let out = '';
   let index = startIndex;
   let currentRule = null;
@@ -151,7 +152,7 @@ function renderText(string, startIndex, evalBlock,
           // To handle nested choices and to run rules over chosen text,
           // we recursively render the chosen text.
           renderedReplacement = renderText(
-            replacement, 0, null, modes, activeMode, settings, false);
+            replacement, 0, null, modes, activeMode, settings, choiceResultMap, false);
         }
         if (!(replacer && replacer.isSilent)) {
           out += renderedReplacement;
@@ -196,7 +197,7 @@ function renderText(string, startIndex, evalBlock,
                   // To handle nested choices and to run rules over replaced text,
                   // we recursively render the chosen text.
                   let renderedReplacement = renderText(
-                    replacement, 0, null, modes, activeMode, settings, false);
+                    replacement, 0, null, modes, activeMode, settings, choiceResultMap, false);
                   out += renderedReplacement;
                 }
                 index += currentMatch[0].length;
@@ -260,7 +261,7 @@ function render(bmlDocumentString, renderSettings, defaultDocumentSettings) {
     evalBlock = null;
   }
   return renderText(
-    bmlDocumentString, preludeEndIndex, evalBlock, modes, defaultDocumentSettings, true);
+    bmlDocumentString, preludeEndIndex, evalBlock, modes, null, defaultDocumentSettings, null, true);
 }
 
 exports.renderText = renderText;

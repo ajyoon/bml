@@ -44,6 +44,18 @@ describe('bml', function() {
     }
   });
   
+  it('respects the active mode on recursively rendered text', function() {
+    let testString =
+        `mode test {
+            (foo) as (bar) 100
+        }
+        {use test}
+        {(foo)}
+        `;
+    let result = bml(testString).trim();
+    expect(result).to.equal('bar');
+  });
+  
   it('can process recursive inline choices', function() {
     let testString = 'hello {(simple), ({(very ), ()}recursive)} world!';
     let result = bml(testString);
@@ -105,6 +117,14 @@ describe('bml', function() {
     if (possibleOutcomes.indexOf(result) === -1) {
       assert.fail(`Unexpected output: ${result}`);
     }
+  });
+  
+  it('tracks named choices made inside recursively rendered text', function() {
+    let testString = `
+      {({TestChoice: (foo)})} {@TestChoice}
+    `;
+    let result = bml(testString).trim();
+    expect(result).to.equal('foo foo');
   });
 
   it('produces the exact same document when using a fixed random seed', function() {

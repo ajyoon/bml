@@ -1,6 +1,10 @@
 # Changelog
 
 ### 0.0.17
+* Fix bug causing the active mode to not be passed down into
+  recursively rendered text.
+* Fix bug causing named choices executed inside recursively rendered
+  text to not propagate upward.
 * tbd...
 
 ### 0.0.16
