@@ -90,7 +90,6 @@ html_theme_options = {
     'fixed_sidebar': True,
     'github_banner': True,
     'github_button': False,
-    'travis_button': True,
     'show_powered_by': True,
 }
 
