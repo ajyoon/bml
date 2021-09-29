@@ -1,11 +1,20 @@
 # Changelog
 
-### 0.0.17
+### 0.0.17: BREAKING CHANGE
 * Fix bug causing the active mode to not be passed down into
   recursively rendered text.
 * Fix bug causing named choices executed inside recursively rendered
   text to not propagate upward.
-* tbd...
+* Fix a CLI bug where passed-in seeds were interpreted as strings, not
+  integers. This caused discrepancies between generated text with the
+  same fixed seed when BML was invoked from the CLI vs the API. The
+  CLI has been updated to require that seeds are integers and it now
+  casts to integers as expected, aligning it with expected outputs as
+  seen in the wild.
+
+  This change breaks breaks fixed-seed reproducibility on the CLI.
+  Texts generated with fixed seeds on the CLI prior to `0.0.17` will
+  differ from newly reproducibly outputs.
 
 ### 0.0.16
 * Support copy back-references

@@ -57,7 +57,7 @@ function printHelp() {
 
     Other options:
 
-    ${SEED_SWITCHES} VALUE           set the random seed for the bml render
+    ${SEED_SWITCHES} INTEGER         set the random seed for the bml render
 
   Source Code at https://github.com/ajyoon/bml
   Report Bugs at https://github.com/ajyoon/bml/issues
@@ -94,10 +94,7 @@ function determineAction(args) {
 
   case 1:
     if (HELP_SWITCHES.indexOf(args[0]) !== -1) {
-      return {
-        function: printHelp,
-        args: [],
-      };
+      return defaultAction;
     } else if (VERSION_SWITCHES.indexOf(args[0]) !== -1) {
       return {
         function: printVersionInfo,
@@ -113,9 +110,13 @@ function determineAction(args) {
     // Only really handle the case where a seed is given and bml
     // is taken from stdin
     if (SEED_SWITCHES.indexOf(args[0]) !== -1) {
+      let seedNum = Number(args[1]);
+      if (isNaN(seedNum) || !Number.isInteger(seedNum)) {
+        return defaultAction;
+      }
       return {
         function: readFromStdin,
-        args: [args[1]]
+        args: [seedNum]
       }
     }
     return defaultAction;
@@ -123,9 +124,13 @@ function determineAction(args) {
     // Only really handle the case where a seed and path are given
     // e.g. `bml --seed 1234 ./someFile.bml`
     if (SEED_SWITCHES.indexOf(args[0]) !== -1) {
+      let seedNum = Number(args[1]);
+      if (isNaN(seedNum) || !Number.isInteger(seedNum)) {
+        return defaultAction;
+      }
       return {
         function: readFromPath,
-        args: [args[2], args[1]]
+        args: [args[2], seedNum]
       }
     }
     return defaultAction;
