@@ -1,5 +1,8 @@
 # Changelog
 
+### 0.0.18
+* tbd...
+
 ### 0.0.17: BREAKING CHANGE
 * Fix bug causing the active mode to not be passed down into
   recursively rendered text.
