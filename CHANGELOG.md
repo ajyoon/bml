@@ -1,5 +1,8 @@
 # Changelog
 
+### 0.0.19
+* tbd...
+
 ### 0.0.18
 * Fix markdown rendering bug by only rendering markdown at the topmost
   render pass.
