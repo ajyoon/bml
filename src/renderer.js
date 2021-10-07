@@ -218,7 +218,7 @@ function renderText(string, startIndex, evalBlock, modes, activeMode,
     index++;
   }
 
-  if (settings.renderMarkdown) {
+  if (settings.renderMarkdown && isTopLevel) {
     out = marked(out, settings.markdownSettings);
   }
   return out;
