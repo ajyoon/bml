@@ -3,7 +3,6 @@
 ### 0.0.18
 * Fix markdown rendering bug by only rendering markdown at the topmost
   render pass.
-* tbd...
 
 ### 0.0.17: BREAKING CHANGE
 * Fix bug causing the active mode to not be passed down into
