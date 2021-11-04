@@ -113,8 +113,8 @@ their defaults.
 |                     |         |document; 4) ensuring the text ends with a    |
 |                     |         |single line break. Note that this is generally|
 |                     |         |not necessary when markdown is enabled, but it|
-|                     |         |can't hurt unless you use markdown's "trailing|
-|                     |         |whitespace to make ``<br/>`` feature.         |
+|                     |         |can't hurt unless you use markdown's trailing |
+|                     |         |whitespace features.                          |
 +---------------------+---------+----------------------------------------------+
 
 .. _replacement-functions:
