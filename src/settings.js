@@ -5,6 +5,7 @@ let defaultSettings = {
   renderMarkdown: false,
   markdownSettings: {},
   version: null,
+  whitespaceCleanup: true,
 };
 
 /**

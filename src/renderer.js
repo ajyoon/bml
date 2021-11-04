@@ -1,9 +1,8 @@
-const marked = require('marked');
-
 const _parsers = require('./parsers.js');
 const _settings = require('./settings.js');
 const _errors = require('./errors.js');
 const rand = require('./rand.js');
+const postprocessing = require('./postprocessing.js');
 
 const defaultSettings = _settings.defaultSettings;
 const mergeSettings = _settings.mergeSettings;
@@ -219,7 +218,11 @@ function renderText(string, startIndex, evalBlock, modes, activeMode,
   }
 
   if (settings.renderMarkdown && isTopLevel) {
-    out = marked(out, settings.markdownSettings);
+    out = postprocessing.renderMarkdown(out, settings.markdownSettings);
+  }
+
+  if (settings.whitespaceCleanup && isTopLevel) {
+    out = postprocessing.whitespaceCleanup(out);
   }
   return out;
 }

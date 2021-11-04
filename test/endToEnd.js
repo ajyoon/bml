@@ -17,8 +17,8 @@ describe('bml', function() {
     let testString = 'hello {(beautiful) 60, (wonderful)} world!';
     let result = bml(testString);
     let possibleOutcomes = [
-      'hello beautiful world!',
-      'hello wonderful world!',
+      'hello beautiful world!\n',
+      'hello wonderful world!\n',
     ];
     if (possibleOutcomes.indexOf(result) === -1) {
       assert.fail(`Unexpected output: ${result}`);
@@ -33,11 +33,11 @@ describe('bml', function() {
         {use test}
         recurse!
         `;
-    let result = bml(testString).trim();
+    let result = bml(testString);
     let possibleOutcomes = [
-      'just kidding',
-      'outer inner 1',
-      'outer inner 2',
+      'just kidding\n',
+      'outer inner 1\n',
+      'outer inner 2\n',
     ];
     if (possibleOutcomes.indexOf(result) === -1) {
       assert.fail(`Unexpected output: ${result}`);
@@ -52,17 +52,17 @@ describe('bml', function() {
         {use test}
         {(foo)}
         `;
-    let result = bml(testString).trim();
-    expect(result).to.equal('bar');
+    let result = bml(testString);
+    expect(result).to.equal('bar\n');
   });
   
   it('can process recursive inline choices', function() {
     let testString = 'hello {(simple), ({(very ), ()}recursive)} world!';
     let result = bml(testString);
     let possibleOutcomes = [
-      'hello simple world!',
-      'hello recursive world!',
-      'hello very recursive world!',
+      'hello simple world!\n',
+      'hello recursive world!\n',
+      'hello very recursive world!\n',
     ];
     if (possibleOutcomes.indexOf(result) === -1) {
       assert.fail(`Unexpected output: ${result}`);
@@ -74,8 +74,8 @@ describe('bml', function() {
         + '{@Name: 0 -> (She), 1 -> (He), (unused fallback)} bought some tofu.';
     let result = bml(testString);
     let possibleOutcomes = [
-      'Alice went to the store. She bought some tofu.',
-      'Bob went to the store. He bought some tofu.'
+      'Alice went to the store. She bought some tofu.\n',
+      'Bob went to the store. He bought some tofu.\n'
     ];
     if (possibleOutcomes.indexOf(result) === -1) {
       assert.fail(`Unexpected output: ${result}`);
@@ -87,8 +87,8 @@ describe('bml', function() {
         + '{@Name: 0 -> (She), (USED FALLBACK)} bought some tofu.';
     let result = bml(testString);
     let possibleOutcomes = [
-      'Alice went to the store. She bought some tofu.',
-      'Bob went to the store. USED FALLBACK bought some tofu.'
+      'Alice went to the store. She bought some tofu.\n',
+      'Bob went to the store. USED FALLBACK bought some tofu.\n'
     ];
     if (possibleOutcomes.indexOf(result) === -1) {
       assert.fail(`Unexpected output: ${result}`);
@@ -99,8 +99,8 @@ describe('bml', function() {
     let testString = '{Name: (Alice), (Bob)} {@Name}';
     let result = bml(testString);
     let possibleOutcomes = [
-      'Alice Alice',
-      'Bob Bob'
+      'Alice Alice\n',
+      'Bob Bob\n'
     ];
     if (possibleOutcomes.indexOf(result) === -1) {
       assert.fail(`Unexpected output: ${result}`);
@@ -111,8 +111,8 @@ describe('bml', function() {
     let testString = 'silent {#Name: (Alice), (Bob)} then referenced {@Name}';
     let result = bml(testString);
     let possibleOutcomes = [
-      'silent  then referenced Alice',
-      'silent  then referenced Bob'
+      'silent  then referenced Alice\n',
+      'silent  then referenced Bob\n'
     ];
     if (possibleOutcomes.indexOf(result) === -1) {
       assert.fail(`Unexpected output: ${result}`);
@@ -123,8 +123,8 @@ describe('bml', function() {
     let testString = `
       {({TestChoice: (foo)})} {@TestChoice}
     `;
-    let result = bml(testString).trim();
-    expect(result).to.equal('foo foo');
+    let result = bml(testString);
+    expect(result).to.equal('foo foo\n');
   });
 
   it('produces the exact same document when using a fixed random seed', function() {
@@ -133,6 +133,19 @@ describe('bml', function() {
     let secondResult = bml(testString, { randomSeed: 1234 });
     expect(firstResult).to.equal(secondResult);
   });
+  
+  it('only renders markdown when set to', function() {
+    expect(bml('eval { settings = { renderMarkdown: true }; }\n# foo'))
+      .to.equal('<h1 id="foo">foo</h1>\n');
+    expect(bml('# foo')) .to.equal('# foo\n');
+  });
+  
+  it('cleans whitespace by default but allows disabling', function() {
+    expect(bml('eval { settings = { whitespaceCleanup: false }; }\nfoo'))
+      .to.equal('foo');
+    expect(bml('foo')) .to.equal('foo\n');
+  });
+
 });
 
 // via https://stackoverflow.com/a/18543419/5615927

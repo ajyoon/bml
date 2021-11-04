@@ -1,9 +1,10 @@
 # Changelog
 
-### 0.0.19
-* tbd...
+### 0.0.19-dev: BREAKING CHANGE
+* Support whitespace cleanup setting, and enable it by default.
+* TBD...
 
-### 0.0.18
+### 0.0.18: BREAKING CHANGE
 * Fix markdown rendering bug by only rendering markdown at the topmost
   render pass.
 
