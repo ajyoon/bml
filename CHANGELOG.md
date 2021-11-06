@@ -1,5 +1,8 @@
 # Changelog
 
+### 0.0.20-dev:
+* tbd...
+
 ### 0.0.19: BREAKING CHANGE
 * Move `renderMarkdown` setting from BML document settings (defined in
   document `eval` blocks) to the `renderSettings` passed into the BML
