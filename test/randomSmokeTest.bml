@@ -1,7 +1,7 @@
 eval {
     settings = {
         renderMarkdown: true,
-        version: '0.0.19-dev'
+        version: '0.0.19'
     };
 
     function someFunc(match, string, matchIndex) {

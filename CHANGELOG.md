@@ -1,6 +1,6 @@
 # Changelog
 
-### 0.0.19-dev: BREAKING CHANGE
+### 0.0.19: BREAKING CHANGE
 * Move `renderMarkdown` setting from BML document settings (defined in
   document `eval` blocks) to the `renderSettings` passed into the BML
   render call. To set this going forward, use `bml(src,
@@ -10,7 +10,6 @@
   cleanup after rendering. This new field is enabled by default.
 * Remove the top-level API field `defaultDocumentSettings`
   argument. This behavior is no longer supported.
-* tbd...
 
 ### 0.0.18: BREAKING CHANGE
 * Fix markdown rendering bug by only rendering markdown at the topmost
