@@ -59,7 +59,7 @@ the eval block
 The ``eval`` block allows you to evaluate arbitrary javascript prior to
 interpreting the document body. This is primarily useful for two purposes:
 
-* overriding default ``bml`` settings
+* overriding default ``bml`` document settings
 * defining :ref:`replacement functions <replacement-functions>`
 
 The entire contents of the eval block will be passed directly to a javascript
@@ -75,7 +75,7 @@ declared in the :ref:`eval` block::
 
   eval {
       settings = {
-          renderMarkdown: true
+          version: 'x.y.z'
       };
   }
 
@@ -85,36 +85,18 @@ their defaults.
 +---------------------+---------+----------------------------------------------+
 |setting              |default  |purpose                                       |
 +---------------------+---------+----------------------------------------------+
-|``renderMarkdown``   |``false``|Whether or not the rendered ``bml`` document  |
-|                     |         |should be post-processed as markdown. If      |
-|                     |         |``true``, the output will be processed as     |
-|                     |         |markdown and output as HTML.                  |
-+---------------------+---------+----------------------------------------------+
-|``markdownSettings`` |``{}``   |A settings object to be passed to ``marked``, |
-|                     |         |the markdown processor built in to ``bml``.   |
-|                     |         |For details on what settings can be passed to |
-|                     |         |this, see the `marked docs`_. If              |
-|                     |         |``renderMarkdown`` is ``false``, this has no  |
-|                     |         |effect.                                       |
-+---------------------+---------+----------------------------------------------+
 |``version``          |``null`` |The ``bml`` version number the document is    |
 |                     |         |written for. If present, ``bml`` will check   |
 |                     |         |that this matches the version running. If it  |
 |                     |         |does not, a warning will be logged to the     |
 |                     |         |console.                                      |
 +---------------------+---------+----------------------------------------------+
-|``whitespaceCleanup``|``true`` |Clean up the whitespace in the output         |
-|                     |         |document. This is useful for cleaning up      |
-|                     |         |unintentional whitespace left over from BML   |
-|                     |         |directives by 1) removing all trailing        |
-|                     |         |whitespace in every line; 2) collapsing all   |
-|                     |         |runs of over one blank line into just one; 3) |
-|                     |         |removing blank lines at the start of the      |
-|                     |         |document; 4) ensuring the text ends with a    |
-|                     |         |single line break. Note that this is generally|
-|                     |         |not necessary when markdown is enabled, but it|
-|                     |         |can't hurt unless you use markdown's trailing |
-|                     |         |whitespace features.                          |
+|``markdownSettings`` |``{}``   |A settings object to be passed to ``marked``, |
+|                     |         |the markdown processor built in to ``bml``.   |
+|                     |         |For details on what settings can be passed to |
+|                     |         |this, see the `marked docs`_. This only has an|
+|                     |         |effect if ``bml`` is invoked with markdown    |
+|                     |         |enabled via its ``renderSettings``.           |
 +---------------------+---------+----------------------------------------------+
 
 .. _replacement-functions:

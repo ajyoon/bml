@@ -4,7 +4,8 @@ const _errors = require('./errors.js');
 const rand = require('./rand.js');
 const postprocessing = require('./postprocessing.js');
 
-const defaultSettings = _settings.defaultSettings;
+const defaultBMLSettings = _settings.defaultBMLSettings;
+const defaultRenderSettings = _settings.defaultRenderSettings;
 const mergeSettings = _settings.mergeSettings;
 const parsePrelude = _parsers.parsePrelude;
 const parseUse = _parsers.parseUse;
@@ -74,7 +75,7 @@ function resolveBackReference(choiceResultMap, backReference) {
  * @returns {String} the rendered text.
  */
 function renderText(string, startIndex, evalBlock, modes, activeMode,
-                    renderDefaultSettings, choiceResultMap, isTopLevel) {
+                    settings, renderSettings, choiceResultMap, isTopLevel) {
   // TODO this function is way too complex and badly needs refactor
   // TODO replace isTopLevel with incrementing depth tracker
   choiceResultMap = choiceResultMap || new Map();
@@ -89,22 +90,20 @@ function renderText(string, startIndex, evalBlock, modes, activeMode,
   let chooseRe = /\s*(\(|call|#?\w+:|@\w+)/y;
   let useRe = /\s*(use|using)/y;
 
+  // Eval any eval block, resolve settings, do version check
+  // This has to be done inside this function so that things
+  // defined in the eval block can be accessed by other eval
+  // blocks exeecuted in this scope.
   if (isTopLevel) {
     if (evalBlock) {
       eval(evalBlock.string);
     }
-
-    let baseSettings = renderDefaultSettings ?
-        mergeSettings(defaultSettings, renderDefaultSettings) : defaultSettings;
-
     if (settings) {
-      settings = mergeSettings(baseSettings, settings);
+      settings = mergeSettings(defaultBMLSettings, settings);
     } else {
-      var settings = baseSettings;
+      var settings = defaultBMLSettings;
     }
     checkVersion(BML_VERSION, settings.version);
-  } else {
-    var settings = renderDefaultSettings;
   }
 
   while (index < string.length) {
@@ -151,7 +150,8 @@ function renderText(string, startIndex, evalBlock, modes, activeMode,
           // To handle nested choices and to run rules over chosen text,
           // we recursively render the chosen text.
           renderedReplacement = renderText(
-            replacement, 0, null, modes, activeMode, settings, choiceResultMap, false);
+            replacement, 0, null, modes, activeMode,
+            settings, renderSettings, choiceResultMap, false);
         }
         if (!(replacer && replacer.isSilent)) {
           out += renderedReplacement;
@@ -196,7 +196,8 @@ function renderText(string, startIndex, evalBlock, modes, activeMode,
                   // To handle nested choices and to run rules over replaced text,
                   // we recursively render the chosen text.
                   let renderedReplacement = renderText(
-                    replacement, 0, null, modes, activeMode, settings, choiceResultMap, false);
+                    replacement, 0, null, modes, activeMode,
+                    settings, renderSettings, choiceResultMap, false);
                   out += renderedReplacement;
                 }
                 index += currentMatch[0].length;
@@ -217,13 +218,17 @@ function renderText(string, startIndex, evalBlock, modes, activeMode,
     index++;
   }
 
-  if (settings.renderMarkdown && isTopLevel) {
-    out = postprocessing.renderMarkdown(out, settings.markdownSettings);
+  if (isTopLevel) {
+    // Postprocessing
+    if (renderSettings.renderMarkdown) {
+      out = postprocessing.renderMarkdown(out, settings.markdownSettings);
+    }
+
+    if (renderSettings.whitespaceCleanup) {
+      out = postprocessing.whitespaceCleanup(out);
+    }
   }
 
-  if (settings.whitespaceCleanup && isTopLevel) {
-    out = postprocessing.whitespaceCleanup(out);
-  }
   return out;
 }
 
@@ -238,33 +243,35 @@ function renderText(string, startIndex, evalBlock, modes, activeMode,
  *     this render. Can be any type, as this is fed directly to the `seedrandom`
  *     library, which converts the object to a string and uses that as the
  *     actual seed
- * @param {Boolean} renderSettings.allowEval - Set to `false` to ignore `eval`
+ * @param {Boolean} renderSettings.allowEval - set to `false` to ignore `eval`
  *     blocks in the document. This can be useful for security purposes.
- * @param {Object} defaultDocumentSettings - Optional default *document* settings
- *     which override the global defaults.
+ * @param {Boolean} renderSettings.renderMarkdown - whether to render the output
+ *     document as markdown to HTML.
+ * @param {Boolean} renderSettings.whitespaceCleanup - whether to perform a
+ *     post-processing step cleaning up whitespace.
  *
  * @return {String} the processed and rendered text.
  */
-function render(bmlDocumentString, renderSettings, defaultDocumentSettings) {
-  let allowEval = true;
-  if (renderSettings) {
-    if (renderSettings.hasOwnProperty('randomSeed')) {
+function render(bmlDocumentString, renderSettings) {
+  // Resolve render settings
+  renderSettings = mergeSettings(defaultRenderSettings, renderSettings);
+  if (renderSettings.randomSeed) {
       rand.setRandomSeed(renderSettings.randomSeed);
-    }
-    if (renderSettings.hasOwnProperty('allowEval')) {
-      allowEval = renderSettings.allowEval;
-    }
   }
+
+  // Parse prelude
   let {
     preludeEndIndex,
     evalBlock,
     modes,
   } = parsePrelude(bmlDocumentString);
-  if (!allowEval) {
-    evalBlock = null;
-  }
-  return renderText(
-    bmlDocumentString, preludeEndIndex, evalBlock, modes, null, defaultDocumentSettings, null, true);
+
+  // Main render pass
+  let output = renderText(
+    bmlDocumentString, preludeEndIndex, evalBlock, modes, null,
+    null, renderSettings, null, true);
+
+  return output;
 }
 
 exports.renderText = renderText;

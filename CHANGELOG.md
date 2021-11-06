@@ -1,8 +1,16 @@
 # Changelog
 
 ### 0.0.19-dev: BREAKING CHANGE
-* Support whitespace cleanup setting, and enable it by default.
-* TBD...
+* Move `renderMarkdown` setting from BML document settings (defined in
+  document `eval` blocks) to the `renderSettings` passed into the BML
+  render call. To set this going forward, use `bml(src,
+  {renderMarkdown: true, ...})`.
+* Support a new additional `renderSettings` field,
+  `whitespaceCleanup`, which performs typically desirable whitespace
+  cleanup after rendering. This new field is enabled by default.
+* Remove the top-level API field `defaultDocumentSettings`
+  argument. This behavior is no longer supported.
+* tbd...
 
 ### 0.0.18: BREAKING CHANGE
 * Fix markdown rendering bug by only rendering markdown at the topmost

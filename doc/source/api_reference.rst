@@ -14,25 +14,41 @@ where ``sourceString`` is a single string holding the contents of a complete bml
 document, and ``renderSettings`` is an optional ``Object`` with the following
 properties:
 
-+---------------+------------------------------------------------+
-|setting        |purpose                                         |
-+---------------+------------------------------------------------+
-|``randomSeed`` |a random seed for the render session. may be    |
-|               |any ``Object``. All bml documents rendered on   |
-|               |the same ``bml`` version with the same random   |
-|               |seed should result in the same output, assuming |
-|               |the bml document's ``eval`` block is            |
-|               |deterministic or uses the provided ``rand``     |
-|               |module functions for random components          |
-+---------------+------------------------------------------------+
-|``allowEval``  |A boolean flag controlling whether ``eval``     |
-|               |blocks should be executed in this render. This  |
-|               |is primarily useful for security purposes and   |
-|               |defaults to ``true``.                           |
-|               |                                                |
-|               |                                                |
-|               |                                                |
-+---------------+------------------------------------------------+
++---------------------+---------+----------------------------------------------+
+|setting              |default  |purpose                                       |
++---------------------+---------+----------------------------------------------+
+|``randomSeed``       |``null`` |a random seed for the render session. may be  |
+|                     |         |any ``Object``.Object``. All bml documents    |
+|                     |         |rendered on the same ``bml`` version with the |
+|                     |         |same random seed should result in the same    |
+|                     |         |output, assuming the bml document's ``eval``  |
+|                     |         |block is deterministic or uses the provided   |
+|                     |         |``rand`` module functions for random          |
+|                     |         |components                                    |
++---------------------+---------+----------------------------------------------+
+|``allowEval``        |``true`` |A boolean flag controlling whether ``eval``   |
+|                     |         |blocks should be executed in this render. This|
+|                     |         |is primarily useful for security purposes.    |
++---------------------+---------+----------------------------------------------+
+|``renderMarkdown``   |``false``|Whether or not the rendered ``bml`` document  |
+|                     |         |should be post-processed as markdown. If      |
+|                     |         |``true``, the output will be processed as     |     
+|                     |         |markdown and output as HTML.                  |
++---------------------+---------+----------------------------------------------+
+|``whitespaceCleanup``|``true`` |Clean up the whitespace in the output         |
+|                     |         |document. This is useful for cleaning up      |
+|                     |         |unintentional whitespace left over from BML   |
+|                     |         |directives by 1) removing all trailing        |
+|                     |         |whitespace in every line; 2) collapsing all   |
+|                     |         |runs of over one blank line into just one; 3) |
+|                     |         |removing blank lines at the start of the      |
+|                     |         |document; 4) ensuring the text ends with a    |
+|                     |         |single line break. Note that this is generally|
+|                     |         |not necessary when markdown is enabled, but it|
+|                     |         |can't hurt unless you use markdown's trailing |
+|                     |         |whitespace features.                          |
++---------------------+---------+----------------------------------------------+
+
 
 ``defaultDocumentSettings`` is an optional ``Object`` containing
 :ref:`document settings <bml-settings>` overriding the global defaults

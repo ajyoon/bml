@@ -135,15 +135,16 @@ describe('bml', function() {
   });
   
   it('only renders markdown when set to', function() {
-    expect(bml('eval { settings = { renderMarkdown: true }; }\n# foo'))
+    let src = '# foo';
+    expect(bml(src, {renderMarkdown: true}))
       .to.equal('<h1 id="foo">foo</h1>\n');
-    expect(bml('# foo')) .to.equal('# foo\n');
+    expect(bml(src)).to.equal('# foo\n');
   });
   
   it('cleans whitespace by default but allows disabling', function() {
-    expect(bml('eval { settings = { whitespaceCleanup: false }; }\nfoo'))
-      .to.equal('foo');
-    expect(bml('foo')) .to.equal('foo\n');
+    let src = 'foo';
+    expect(bml(src, {whitespaceCleanup: false})).to.equal('foo');
+    expect(bml(src)).to.equal('foo\n');
   });
 
 });
