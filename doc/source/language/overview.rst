@@ -40,7 +40,7 @@ a basic example::
 
   eval {
       provide({
-          settings: { version: '0.0.20-dev' },
+          settings: { version: '0.0.20' },
           someFunc: (match, string, matchIndex) => {
               return 'some replacement';
           }
