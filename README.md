@@ -1,24 +1,19 @@
 ```
 eval {
-    // arbitrary javascript
-    // global bml interpreter settings
-    settings = {
-        renderMarkdown: false,  // Since md is the target
-    };
-    function someFunc(match, string, matchIndex) {
-        return 'some replacement string';
-    }
-    // Copy the prelude into literal text.
-    function copyPrelude(match, string, matchIndex) {
-        return '```\n' + string.slice(0, matchIndex) + '```\n';
-    }
+    provide({
+        someFunc: (match, string, matchIndex) => {
+            return 'some replacement string';
+        },
+        copyPrelude: (match, string, matchIndex) => {
+            return '```\n' + string.slice(0, matchIndex) + '```\n';
+        }
+    });
 }
 mode literal {
     // No rules
 }
 {use literal}
 ```
-
 
 # bml
 
@@ -101,4 +96,3 @@ This is a very early, very unstable project. Lots of fixes and improvements comi
 
 By the way, this README is itself generated from a BML document. To generate this readme,
 run `node readmeBuilder.js`!
-

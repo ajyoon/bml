@@ -1,7 +1,14 @@
 # Changelog
 
-### 0.0.20-dev:
-* tbd...
+### 0.0.20-dev: BREAKING CHANGE
+* Overhaul the `eval` system:
+  * `eval` blocks are now executed with `new Function(...)` instead of
+    raw (evil) eval.
+  * User-defined functions and settings are now explicitly passed to
+    the BML interpreter using the `provide` function.
+  * The provided eval API (micro-stdlib) is now scoped to a `bml`
+    namespace available in `eval` blocks.
+* Set a render recursion sanity limit of 1000
 
 ### 0.0.19: BREAKING CHANGE
 * Move `renderMarkdown` setting from BML document settings (defined in

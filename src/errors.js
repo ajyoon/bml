@@ -85,6 +85,28 @@ function UnknownTransformError(string, charIndex) {
 UnknownTransformError.prototype = Object.create(Error.prototype);
 
 
+function FunctionNotFoundError(functionName, string, charIndex) {
+  this.name = 'FunctionNotFoundError';
+  this.message = 'Attempted to call unknown function "' + functionName + '" at '
+    + stringUtils.lineColumnString(string, charIndex);
+  let error = new Error(this.message);
+  error.name = this.name;
+  this.stack = error.stack;
+}
+FunctionNotFoundError.prototype = Object.create(Error.prototype);
+
+
+function NotAFunctionError(functionName, string, charIndex) {
+  this.name = 'NotAFunctionError';
+  this.message = 'Attempted to call non-function "' + functionName + '" at '
+    + stringUtils.lineColumnString(string, charIndex);
+  let error = new Error(this.message);
+  error.name = this.name;
+  this.stack = error.stack;
+}
+NotAFunctionError.prototype = Object.create(Error.prototype);
+
+
 exports.JavascriptSyntaxError = JavascriptSyntaxError;
 exports.BMLSyntaxError = BMLSyntaxError;
 exports.BMLDuplicatedRefIndexError = BMLDuplicatedRefIndexError;
@@ -92,3 +114,5 @@ exports.BMLDuplicatedRefError = BMLDuplicatedRefIndexError;
 exports.BMLNameError = BMLNameError;
 exports.UnknownModeError = UnknownModeError;
 exports.UnknownTransformError = UnknownTransformError;
+exports.FunctionNotFoundError = FunctionNotFoundError;
+exports.NotAFunctionError = NotAFunctionError;

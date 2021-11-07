@@ -1,17 +1,15 @@
 eval {
-    settings = {
-        renderMarkdown: true,
-        version: '0.0.20-dev'
-    };
-
-    function someFunc(match, string, matchIndex) {
-        return 'some replacement string';
-    }
-
-    function replaceWithRandomNumber(match, string, matchIndex) {
-        //return '' + Math.random();
-        return '' + rand.randomFloat(0, 1000);
-    }
+    provide({
+        settings: {
+            version: '0.0.20-dev'
+        },
+        someFunc: (match, string, matchIndex) => {
+            return 'some replacement string';
+        },
+        replaceWithRandomNumber: (match, string, matchIndex) => {
+            return '' + bml.randomFloat(0, 1000);
+        }
+    });
 }
 
 mode main {

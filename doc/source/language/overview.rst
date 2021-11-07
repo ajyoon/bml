@@ -33,18 +33,18 @@ the prelude
 
 A ``bml`` prelude consists of:
 
-* any number of :ref:`eval` blocks
+* any number of :ref:`eval blocks <eval>`
 * any number of :ref:`modes <mode>`
 
 a basic example::
 
   eval {
-      settings = {
-          renderMarkdown: true
-      };
-      function someFunc(match, string, matchIndex) {
-          return 'some replacement';
-      }
+      provide({
+          settings: { version: '0.0.20-dev' },
+          someFunc: (match, string, matchIndex) => {
+              return 'some replacement';
+          }
+      });
   }
 
   mode someMode {
@@ -59,24 +59,57 @@ the eval block
 The ``eval`` block allows you to evaluate arbitrary javascript prior to
 interpreting the document body. This is primarily useful for two purposes:
 
-* overriding default ``bml`` document settings
+* overriding default :ref:`document settings <bml-settings>`
 * defining :ref:`replacement functions <replacement-functions>`
 
-The entire contents of the eval block will be passed directly to a javascript
-``eval()`` call.
+Both settings and defined replacement functions are exposed to the
+``bml`` interpreter via the special ``provide`` function, which takes
+an object and exposes all its fields to ``bml``. ::
+
+  eval {
+      provide({
+          someFunc: (match, string, matchIndex) => {
+              return 'some replacement';
+          }
+      });
+
+      // Because `provide` is just a JS function accepting an object,
+      // you can also use plain `function` syntax like so:
+      function someFunc(match, string, matchIndex) {
+          return 'some replacement';
+      }
+      provide({
+          someFunc
+      });
+  }
+  
+``eval`` blocks can also access a very small "standard library"
+through the ``bml`` namespace. See :ref:`the Eval API reference
+<provided-eval-api>`.
+
+.. warning::
+
+   Internally, ``eval`` blocks are executed inside a JS ``new
+   Function(...)``. While this is more secure than raw JS ``eval``, it
+   should not be lightly used on untrusted input. ``eval`` blocks can
+   be disabled entirely with the :ref:`render setting
+   <render-settings>` ``allowEval``.
 
 .. _bml-settings:
 
 bml settings
 ------------
 
-The ``settings`` object is a javascript object of setting overrides that may be
-declared in the :ref:`eval` block::
+The ``settings`` object is a javascript object of setting overrides
+that may be provided in the :ref:`eval block <eval>`. The ``settings`` object
+must be given the magic name ``settings`` to be recognized.::
 
   eval {
-      settings = {
-          version: 'x.y.z'
-      };
+      provide({
+          settings: {
+              version: 'x.y.z'
+          }
+      });
   }
 
 If it is created during prelude evaluation, all provided settings will override
@@ -130,13 +163,6 @@ point.
    Direct invocation of ``Math.random()`` will undermine bml's ability
    to create reproducible document versions pinned to random seeds.
 
-provided eval api
------------------
-
-Some functions are automatically provided to the scope in which eval blocks
-are evaluated during bml rendering.
-See :ref:`its reference here <provided-eval-api>`
-
 .. _mode:
 
 modes
@@ -181,10 +207,12 @@ Here we have a rule which matches on all words starting with the letter *A* and
 uses a replacement function to capitalize the word. ::
 
   eval {
-      // capitalize the match contents
-      function capitalize(match, string, index) {
-          return match[0].toUpperCase();
-      }
+      provide({
+          // capitalize the match contents
+          capitalize: (match, string, index) {
+              return match[0].toUpperCase();
+          }
+      });
   }
 
   mode capitalizingWordsStartingWithA {

@@ -11,18 +11,11 @@ const parsePrelude = _parsers.parsePrelude;
 const parseUse = _parsers.parseUse;
 const parseInlineCommand = _parsers.parseInlineCommand;
 const EvalBlock = require('./evalBlock.js').EvalBlock;
+const FunctionCall = require('./functionCall.js').FunctionCall;
 const noOp = require('./noOp.js');
 const UnknownModeError = _errors.UnknownModeError;
 const BMLDuplicatedRefError = _errors.BMLDuplicatedRefError;
 const BML_VERSION = require('../package.json')['version'];
-
-// imports for exposure to eval blocks
-/* eslint-disable no-unused-vars */
-const WeightedChoice = require('./weightedChoice.js').WeightedChoice;
-const weightedChoose = rand.weightedChoose;
-const randomInt = rand.randomInt;
-const randomFloat = rand.randomFloat;
-/* eslint-enable no-unused-vars */
 
 /**
  * Check if the running version of bml aligns with a specified one.
@@ -74,10 +67,9 @@ function resolveBackReference(choiceResultMap, backReference) {
  *
  * @returns {String} the rendered text.
  */
-function renderText(string, startIndex, evalBlock, modes, activeMode,
-                    settings, renderSettings, choiceResultMap, isTopLevel) {
+function renderText(string, startIndex, modes, activeMode,
+                    userDefs, choiceResultMap, stackDepth) {
   // TODO this function is way too complex and badly needs refactor
-  // TODO replace isTopLevel with incrementing depth tracker
   choiceResultMap = choiceResultMap || new Map();
   activeMode = activeMode || null;
   let isEscaped = false;
@@ -89,21 +81,10 @@ function renderText(string, startIndex, evalBlock, modes, activeMode,
   let replacement = null;
   let chooseRe = /\s*(\(|call|#?\w+:|@\w+)/y;
   let useRe = /\s*(use|using)/y;
-
-  // Eval any eval block, resolve settings, do version check
-  // This has to be done inside this function so that things
-  // defined in the eval block can be accessed by other eval
-  // blocks exeecuted in this scope.
-  if (isTopLevel) {
-    if (evalBlock) {
-      eval(evalBlock.string);
-    }
-    if (settings) {
-      settings = mergeSettings(defaultBMLSettings, settings);
-    } else {
-      var settings = defaultBMLSettings;
-    }
-    checkVersion(BML_VERSION, settings.version);
+  
+  if (stackDepth > 1000) {
+    throw new Error(
+      'render stack depth exceeded 1000, aborting likely infinite recursion.');
   }
 
   while (index < string.length) {
@@ -144,14 +125,13 @@ function renderText(string, startIndex, evalBlock, modes, activeMode,
           replacement = resolveBackReference(choiceResultMap, backReference);
         }
         let renderedReplacement;
-        if (replacement instanceof EvalBlock) {
-          renderedReplacement = eval(replacement.string)([''], string, index);
+        if (replacement instanceof FunctionCall) {
+          renderedReplacement = replacement.execute(userDefs, null, string, index);
         } else {
           // To handle nested choices and to run rules over chosen text,
           // we recursively render the chosen text.
           renderedReplacement = renderText(
-            replacement, 0, null, modes, activeMode,
-            settings, renderSettings, choiceResultMap, false);
+            replacement, 0, modes, activeMode, userDefs, choiceResultMap, stackDepth + 1);
         }
         if (!(replacer && replacer.isSilent)) {
           out += renderedReplacement;
@@ -188,16 +168,15 @@ function renderText(string, startIndex, evalBlock, modes, activeMode,
               let currentMatch = currentRule.matchers[m].exec(string);
               if (currentMatch !== null) {
                 replacement = currentRule.replacer.call().replacement;
-                if (replacement instanceof EvalBlock) {
-                  out += eval(replacement.string)(currentMatch, string, index);
+                if (replacement instanceof FunctionCall) {
+                  out += replacement.execute(userDefs, currentMatch, string, index);
                 } else if (replacement === noOp) {
                   out += currentMatch[0];
                 } else {
                   // To handle nested choices and to run rules over replaced text,
                   // we recursively render the chosen text.
                   let renderedReplacement = renderText(
-                    replacement, 0, null, modes, activeMode,
-                    settings, renderSettings, choiceResultMap, false);
+                    replacement, 0, modes, activeMode, userDefs, choiceResultMap, stackDepth + 1);
                   out += renderedReplacement;
                 }
                 index += currentMatch[0].length;
@@ -216,17 +195,6 @@ function renderText(string, startIndex, evalBlock, modes, activeMode,
       }
     }
     index++;
-  }
-
-  if (isTopLevel) {
-    // Postprocessing
-    if (renderSettings.renderMarkdown) {
-      out = postprocessing.renderMarkdown(out, settings.markdownSettings);
-    }
-
-    if (renderSettings.whitespaceCleanup) {
-      out = postprocessing.whitespaceCleanup(out);
-    }
   }
 
   return out;
@@ -265,11 +233,25 @@ function render(bmlDocumentString, renderSettings) {
     evalBlock,
     modes,
   } = parsePrelude(bmlDocumentString);
+  
+  let userDefs = {};
+  if (evalBlock && renderSettings.allowEval) {
+    userDefs = evalBlock.execute();
+    userDefs.settings = mergeSettings(defaultBMLSettings, userDefs.settings);
+    checkVersion(BML_VERSION, userDefs.settings.version);
+  }
 
   // Main render pass
   let output = renderText(
-    bmlDocumentString, preludeEndIndex, evalBlock, modes, null,
-    null, renderSettings, null, true);
+    bmlDocumentString, preludeEndIndex, modes, null, userDefs, null, 0);
+  
+  // Post-processing
+  if (renderSettings.renderMarkdown) {
+    output = postprocessing.renderMarkdown(output, userDefs.markdownSettings);
+  }
+  if (renderSettings.whitespaceCleanup) {
+    output = postprocessing.whitespaceCleanup(output);
+  }
 
   return output;
 }

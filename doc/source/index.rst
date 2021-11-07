@@ -31,6 +31,12 @@ This function renders a given string of ``bml`` markup and returns its output.
 the `BSD 3-Clause license <https://github.com/ajyoon/bml/blob/master/LICENSE>`_.
 All source code is available at `<https://github.com/ajyoon/bml>`_.
 
+.. warning::
+
+   By default, ``bml`` supports the :ref:`evaluation of arbitrary
+   Javascript <eval>`. Before running ``bml`` on untrusted input, please
+   consider :ref:`disabling this feature <render-settings>`.
+
 .. toctree::
    :caption: Contents:
 

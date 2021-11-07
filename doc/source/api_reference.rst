@@ -8,11 +8,13 @@ The bml library is exposed by a single function:
 
 .. code:: javascript
 
-   bml(sourceString, renderSettings, defaultDocumentSettings)
+   bml(sourceString, renderSettings)
 
 where ``sourceString`` is a single string holding the contents of a complete bml
 document, and ``renderSettings`` is an optional ``Object`` with the following
 properties:
+
+.. _render-settings:
 
 +---------------------+---------+----------------------------------------------+
 |setting              |default  |purpose                                       |
@@ -49,35 +51,34 @@ properties:
 |                     |         |whitespace features.                          |
 +---------------------+---------+----------------------------------------------+
 
-
-``defaultDocumentSettings`` is an optional ``Object`` containing
-:ref:`document settings <bml-settings>` overriding the global defaults
-*before* settings from the document are applied. When provided, the
-setting resolution order is:
-
-1. Global :ref:`document settings <bml-settings>`
-2. ``defaultDocumentSettings`` from render call here
-3. Settings defined in document's ``eval`` block.
-
 .. _provided-eval-api:
 
 provided eval api
 =================
 
-Some functions are automatically made available to :ref:`eval blocks <eval>`. Of
-particular note are those functions in the ``rand`` module, which allow random
-values to be made which conform to the optional random seed provided to bml.
+Some functions are automatically made available to :ref:`eval blocks
+<eval>` under the ``bml`` namespace. They can be invoked like any
+other javascript function like so::
 
-.. warning::
+  eval {
+      provide({
+          customFunction: () => {
+              return bml.randomInt(0, 20);
+          }
+      });
+  }
+  {call customFunction}
 
-   These functions are NOT part of the public API of bml. They can only be
+.. note::
+
+   These functions are not part of the public API of bml. They can only be
    accessed in the ``eval`` block of bml scripts.
 
 -----------------
 
 .. code:: javascript
 
-   rand.randomFloat(min, max)
+   bml.randomFloat(min, max)
 
 Return a random float within the given bounds
 
@@ -85,6 +86,6 @@ Return a random float within the given bounds
 
 .. code:: javascript
 
-   rand.randomInt(min, max)
+   bml.randomInt(min, max)
 
 Return a random integer within the given bounds

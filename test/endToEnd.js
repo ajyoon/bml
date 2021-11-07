@@ -25,6 +25,19 @@ describe('bml', function() {
     }
   });
   
+  it('can execute user-defined functions', function() {
+    let testString = `
+        eval {
+            provide({
+                foo: () => { return 'foo!' }
+            });
+        }
+        {call foo}
+    `;
+    let result = bml(testString);
+    expect(result).to.equal('foo!\n');
+  });
+  
   it('can process recursive rule choices', function() {
     let testString =
         `mode test {
@@ -146,7 +159,6 @@ describe('bml', function() {
     expect(bml(src, {whitespaceCleanup: false})).to.equal('foo');
     expect(bml(src)).to.equal('foo\n');
   });
-
 });
 
 // via https://stackoverflow.com/a/18543419/5615927
@@ -179,7 +191,9 @@ describe('bml logging', function() {
   it('warns on version mismatch', function() {
     let testString = `
         eval {
-            settings = { version: 'nonsense' }
+            provide({
+                settings: { version: 'nonsense' }
+            });
         }
         testing 123
     `;

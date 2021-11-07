@@ -5,6 +5,7 @@ const fs = require('fs');
 const parsers = require('../src/parsers.js');
 const errors = require('../src/errors.js');
 const EvalBlock = require('../src/evalBlock.js').EvalBlock;
+const FunctionCall = require('../src/functionCall.js').FunctionCall;
 const Mode = require('../src/mode.js').Mode;
 const Replacer = require('../src/replacer.js').Replacer;
 const Lexer = require('../src/lexer.js').Lexer;
@@ -402,9 +403,9 @@ describe('parseCall', function() {
   it('moves the lexer to the character after the call block', function() {
     let testString = 'call test,';
     let lexer = new Lexer(testString);
-    let evalBlock = parseCall(lexer);
-    expect(evalBlock).to.be.an.instanceof(EvalBlock);
-    expect(evalBlock.string).to.equal('test');
+    let functionCall = parseCall(lexer);
+    expect(functionCall).to.be.an.instanceof(FunctionCall);
+    expect(functionCall.functionName).to.equal('test');
     expect(lexer.index).to.equal(testString.length - 1);
   });
 });
@@ -428,8 +429,8 @@ describe('parseReplacements', function() {
     let result = parseReplacements(lexer, false);
     expect(result.weights.length).to.equal(1);
     expect(result.weights[0]).to.be.an.instanceof(WeightedChoice);
-    expect(result.weights[0].choice).to.be.an.instanceof(EvalBlock);
-    expect(result.weights[0].choice.string).to.equal('test');
+    expect(result.weights[0].choice).to.be.an.instanceof(FunctionCall);
+    expect(result.weights[0].choice.functionName).to.equal('test');
     expect(result.weights[0].weight).to.equal(100);
     expect(lexer.index).to.equal(testString.length - 1);
   });
@@ -451,8 +452,8 @@ describe('parseReplacements', function() {
     let result = parseReplacements(lexer, false);
     expect(result.weights.length).to.equal(1);
     expect(result.weights[0]).to.be.an.instanceof(WeightedChoice);
-    expect(result.weights[0].choice).to.be.an.instanceof(EvalBlock);
-    expect(result.weights[0].choice.string).to.equal('test');
+    expect(result.weights[0].choice).to.be.an.instanceof(FunctionCall);
+    expect(result.weights[0].choice.functionName).to.equal('test');
     expect(result.weights[0].weight).to.equal(5);
     expect(lexer.index).to.equal(testString.length - 1);
   });
@@ -464,8 +465,8 @@ describe('parseReplacements', function() {
     expect(result.weights.length).to.equal(3);
 
     expect(result.weights[0]).to.be.an.instanceof(WeightedChoice);
-    expect(result.weights[0].choice).to.be.an.instanceof(EvalBlock);
-    expect(result.weights[0].choice.string).to.equal('test');
+    expect(result.weights[0].choice).to.be.an.instanceof(FunctionCall);
+    expect(result.weights[0].choice.functionName).to.equal('test');
     expect(result.weights[0].weight).to.equal(5);
 
     expect(result.weights[1]).to.be.an.instanceof(WeightedChoice);
@@ -513,8 +514,8 @@ describe('parseBackReference', function() {
     let result = parseBackReference(new Lexer(testString));
     expect(result.referredIdentifier).to.equal('TestRef');
     expect(result.choiceMap).to.have.lengthOf(1);
-    expect(result.choiceMap.get(0)).to.be.an.instanceof(EvalBlock);
-    expect(result.choiceMap.get(0).string).to.equal('foo');
+    expect(result.choiceMap.get(0)).to.be.an.instanceof(FunctionCall);
+    expect(result.choiceMap.get(0).functionName).to.equal('foo');
   });
   
   it('allows a single branch with a fallback', function() {
@@ -522,8 +523,8 @@ describe('parseBackReference', function() {
     let result = parseBackReference(new Lexer(testString));
     expect(result.referredIdentifier).to.equal('TestRef');
     expect(result.choiceMap).to.have.lengthOf(1);
-    expect(result.choiceMap.get(0)).to.be.an.instanceof(EvalBlock);
-    expect(result.choiceMap.get(0).string).to.equal('foo');
+    expect(result.choiceMap.get(0)).to.be.an.instanceof(FunctionCall);
+    expect(result.choiceMap.get(0).functionName).to.equal('foo');
     expect(result.fallback).to.equal('fallback');
   });
   
@@ -533,11 +534,11 @@ describe('parseBackReference', function() {
     expect(result.referredIdentifier).to.equal('TestRef');
     expect(result.choiceMap).to.have.lengthOf(3);
     expect(result.choiceMap.get(0)).to.equal('foo');
-    expect(result.choiceMap.get(1)).to.be.an.instanceof(EvalBlock);
-    expect(result.choiceMap.get(1).string).to.equal('someFunc');
+    expect(result.choiceMap.get(1)).to.be.an.instanceof(FunctionCall);
+    expect(result.choiceMap.get(1).functionName).to.equal('someFunc');
     expect(result.choiceMap.get(2)).to.equal('bar');
-    expect(result.fallback).to.be.an.instanceof(EvalBlock);
-    expect(result.fallback.string).to.equal('fallbackFunc');
+    expect(result.fallback).to.be.an.instanceof(FunctionCall);
+    expect(result.fallback.functionName).to.equal('fallbackFunc');
   });
   
   it('parses copy refs', function() {

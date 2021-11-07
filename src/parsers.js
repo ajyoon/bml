@@ -2,6 +2,7 @@ const _rand = require('./rand.js');
 const _errors = require('./errors.js');
 const _stringUtils = require('./stringUtils.js');
 const EvalBlock = require('./evalBlock.js').EvalBlock;
+const FunctionCall = require('./functionCall.js').FunctionCall;
 const Mode = require('./mode.js').Mode;
 const WeightedChoice = require('./weightedChoice.js').WeightedChoice;
 const Lexer = require('./lexer.js').Lexer;
@@ -209,7 +210,7 @@ function parseCall(lexer) {
                              lexer.string, lexer.index);
   }
   lexer.overrideIndex(lexer.index + callMatch[0].length);
-  return new EvalBlock(callMatch[1]);
+  return new FunctionCall(callMatch[1]);
 }
 
 function parseReplacements(lexer, forRule) {
