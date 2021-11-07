@@ -44,7 +44,7 @@
     "webpack-cli": "^3.3.11"
   },
   "dependencies": {
-    "marked": "0.3.9",
+    "marked": "0.3.18",
     "prismjs": "1.20.0",
     "seedrandom": "2.4.4"
   },
