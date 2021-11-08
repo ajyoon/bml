@@ -247,7 +247,7 @@ function render(bmlDocumentString, renderSettings) {
   
   // Post-processing
   if (renderSettings.renderMarkdown) {
-    output = postprocessing.renderMarkdown(output, userDefs.markdownSettings);
+    output = postprocessing.renderMarkdown(output, userDefs.settings.markdownSettings);
   }
   if (renderSettings.whitespaceCleanup) {
     output = postprocessing.whitespaceCleanup(output);

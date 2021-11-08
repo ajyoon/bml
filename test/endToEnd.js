@@ -7,12 +7,6 @@ const fs = require('fs');
 const bml = require('../bml.js');
 
 describe('bml', function() {
-  it('doesn\'t explode when trying to process a sample document', function() {
-    const testString = '' + fs.readFileSync(require.resolve('../sample.bml'));
-    bml(testString);
-    // If we make it here without an exception, we win
-  });
-
   it('can process a document without a prelude', function() {
     let testString = 'hello {(beautiful) 60, (wonderful)} world!';
     let result = bml(testString);
@@ -152,6 +146,23 @@ describe('bml', function() {
     expect(bml(src, {renderMarkdown: true}))
       .to.equal('<h1 id="foo">foo</h1>\n');
     expect(bml(src)).to.equal('# foo\n');
+  });
+  
+  it('respects markdown settings provided by user', function() {
+    let testString = `
+        eval {
+            provide({
+                settings: {
+                    markdownSettings: {
+                        smartypants: true,
+                    }
+                }
+            });
+        }
+        "testing"---
+    `;
+    let result = bml(testString, {renderMarkdown: true});
+    expect(result).to.equal('<p>“testing”—</p>\n');
   });
   
   it('cleans whitespace by default but allows disabling', function() {

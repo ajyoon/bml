@@ -1,7 +1,8 @@
 # Changelog
 
 ### 0.0.21-dev:
-* tbd...
+* Fix bug introduced in 0.0.20 which prevented user-defined markdown
+  settings from being passed to the markdown processor.
 
 ### 0.0.20: BREAKING CHANGE
 * Overhaul the `eval` system:
