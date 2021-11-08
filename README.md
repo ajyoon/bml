@@ -1,24 +1,6 @@
-```
-eval {
-    provide({
-        someFunc: (match, string, matchIndex) => {
-            return 'some replacement string';
-        },
-        copyPrelude: (match, string, matchIndex) => {
-            return '```\n' + string.slice(0, matchIndex) + '```\n';
-        }
-    });
-}
-mode literal {
-    // No rules
-}
-{use literal}
-```
-
 # bml
 
 [![Build Status](https://travis-ci.org/ajyoon/bml.svg?branch=master)](https://app.travis-ci.com/github/ajyoon/bml) [![Coverage Status](https://coveralls.io/repos/github/ajyoon/bml/badge.svg?branch=master)](https://coveralls.io/github/ajyoon/bml?branch=master)
-
 
 BML is a superset of natural language which applies stochastic transformations
 on text. Words and strings can be used as triggers for weighted random
@@ -69,7 +51,7 @@ for them being {curly braces}.
 Available one-time transformations include:
 
 * choose: `{(x) 20, (y) 30, (z) 50, call someFunc}`
-* using: `{using literal}`
+* set the active mode: `{use literal}`
 
 ### references
 
@@ -92,7 +74,4 @@ npm run buildHighlighting
 
 ---
 
-This is a very early, very unstable project. Lots of fixes and improvements coming soon!
-
-By the way, this README is itself generated from a BML document. To generate this readme,
-run `node readmeBuilder.js`!
+This project is under active development, and the language itself is not yet stable. Please expect breaking changes.
