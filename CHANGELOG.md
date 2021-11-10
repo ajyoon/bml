@@ -1,7 +1,7 @@
 # Changelog
 
 
-### 0.0.21-dev: BREAKING CHANGE
+### 0.0.21: BREAKING CHANGE
 * Fix bug introduced in 0.0.20 which prevented user-defined markdown
   settings from being passed to the markdown processor.
 * Change the syntax for regex matchers from `r(foo)` to `/foo/`. This
