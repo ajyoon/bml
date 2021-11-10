@@ -186,18 +186,18 @@ the ``bml`` :ref:`body <the-body>`, and when matches are found they
 are replaced using the replacer defined in the corresponding rule.
 
 A matcher can be a simple string (any text enclosed in parentheses)
-or, when prefixed by the character ``r``, a regular expression. ::
+or a regular expression delimited by slashes (JS style). ::
 
   mode someModeName {
       (a matcher) as (foo)
-      r(a regex matcher) as (foo)
+      /a regex matcher/ as (foo)
   }
 
 Multiple matchers can apply to a single rule, making the previous example
 equivalent to: ::
 
   mode someModeName {
-      (a matcher), r(a regex matcher) as (foo)
+      (a matcher), /a regex matcher/ as (foo)
   }
 
 Replacements can be literal strings or references to replacement
@@ -216,7 +216,7 @@ uses a replacement function to capitalize the word. ::
   }
 
   mode capitalizingWordsStartingWithA {
-      r(\s[aA](\w?)) as call capitalize
+      /\s[aA](\w?)/ as call capitalize
   }
 
 Multiple possible replacements can be specified. The unmodified matched text is

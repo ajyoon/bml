@@ -367,7 +367,7 @@ describe('parseMatchers', function() {
   });
 
   it('parses multiple matchers', function() {
-    let testString = '(test), (test2) as';
+    let testString = '(test), /test2/ as';
     let lexer = new Lexer(testString);
     let result = parseMatchers(lexer);
     assert.deepStrictEqual(result, [/test/y, /test2/y]);
