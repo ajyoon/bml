@@ -358,7 +358,6 @@ describe('parseMatchers', function() {
     // verified this is how `/\s escaped \/ slash!/ as` read from
     // file is written in a string.
     let testString = '/space \\s and escaped \\/ slash!/ as';
-    console.log(testString.length);
     let lexer = new Lexer(testString);
     let result = parseMatchers(lexer);
     expect(result).to.be.deep.equal([/space \s and escaped \/ slash!/y]);

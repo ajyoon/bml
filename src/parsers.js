@@ -486,7 +486,6 @@ function parseRegexMatcher(lexer) {
   let stringLiteral = '';
   let token;
   while ((token = lexer.next()) !== null) {
-    console.log(token);
     switch (token.tokenType) {
     case TokenType.SLASH:
       return new RegExp(stringLiteral, 'y');
