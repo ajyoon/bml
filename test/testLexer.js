@@ -81,13 +81,7 @@ describe('Lexer', function() {
     assert.deepStrictEqual(lexer.next(), new Token(TokenType.BACKTICK, 0, '`'));
     assert.strictEqual(lexer.next(), null);
   });
-
-  it('tokenizes the letter r', function() {
-    let lexer = new Lexer('r');
-    assert.deepStrictEqual(lexer.next(), new Token(TokenType.LETTER_R, 0, 'r'));
-    assert.strictEqual(lexer.next(), null);
-  });
-
+  
   it('tokenizes open paren', function() {
     let lexer = new Lexer('(');
     assert.deepStrictEqual(lexer.next(), new Token(TokenType.OPEN_PAREN, 0, '('));

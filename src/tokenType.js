@@ -9,7 +9,6 @@ const TokenType = Object.freeze({
   SINGLE_QUOTE: Symbol('SINGLE_QUOTE'),
   DOUBLE_QUOTE: Symbol('DOUBLE_QUOTE'),
   BACKTICK: Symbol('BACKTICK'),
-  LETTER_R: Symbol('LETTER_R'),
   OPEN_PAREN: Symbol('OPEN_PAREN'),
   CLOSE_PAREN: Symbol('CLOSE_PAREN'),
   OPEN_BRACE: Symbol('OPEN_BRACE'),

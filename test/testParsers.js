@@ -7,6 +7,7 @@ const errors = require('../src/errors.js');
 const EvalBlock = require('../src/evalBlock.js').EvalBlock;
 const FunctionCall = require('../src/functionCall.js').FunctionCall;
 const Mode = require('../src/mode.js').Mode;
+const Rule = require('../src/rule.js').Rule;
 const Replacer = require('../src/replacer.js').Replacer;
 const Lexer = require('../src/lexer.js').Lexer;
 const Token = require('../src/token.js').Token;
@@ -25,7 +26,6 @@ const parseMode = parsers.parseMode;
 const parsePrelude = parsers.parsePrelude;
 const parseUse = parsers.parseUse;
 const parseInlineCommand = parsers.parseInlineCommand;
-const createMatcher = parsers.createMatcher;
 const parseMatchers = parsers.parseMatchers;
 const parseCall = parsers.parseCall;
 const parseReplacements = parsers.parseReplacements;
@@ -145,13 +145,13 @@ describe('parseMode', function() {
     expect(mode.name).to.equal('test');
   });
 
-  it('recognizes rules and passes them off to parseRule', function() {
+  it('can parse a mixture of literal and regex matcher rules', function() {
     let testString =
         `mode test {
              // some comments
              (bml) as (BML)
              // more comments
-             r(javascript) as (Javascript) 30, (JS) 10,
+             /javascript/ as (Javascript) 30, (JS) 10,
                  (js) 10
              // more comments
         }`;
@@ -160,7 +160,18 @@ describe('parseMode', function() {
     expect(lexer.index).to.equal(testString.length);
     expect(mode).to.be.an.instanceof(Mode);
     expect(mode.name).to.equal('test');
-    expect(mode.rules.length).to.equal(2);
+    expect(mode.rules).to.have.lengthOf(2);
+    expect(mode.rules[0]).to.be.deep.equal(
+      new Rule([/bml/y], new Replacer(
+        [new WeightedChoice('BML', null)], true, null, false))
+    );
+    expect(mode.rules[1]).to.be.deep.equal(
+      new Rule([/javascript/y], new Replacer(
+        [new WeightedChoice('Javascript', 30),
+         new WeightedChoice('JS', 10),
+         new WeightedChoice('js', 10)],
+        true, null, false))
+    );
   });
 });
 
@@ -194,19 +205,6 @@ describe('parsePrelude', function() {
     assert.strictEqual(result.preludeEndIndex, testString.indexOf('some text'));
     assert(result.modes.hasOwnProperty('firstMode'));
     assert(result.modes.hasOwnProperty('secondMode'));
-  });
-});
-
-
-describe('createMatcher', function() {
-  it('Escapes strings for regex when asked to', function() {
-    let result = createMatcher('.', false);
-    assert.deepStrictEqual(result, /\./y);
-  });
-
-  it('Doesn\'t escape strings when asked not to', function() {
-    let result = createMatcher('.', true);
-    assert.deepStrictEqual(result, /./y);
   });
 });
 
@@ -346,7 +344,7 @@ describe('parseMatchers', function() {
   });
 
   it('parses a single simple regex matcher', function() {
-    let testString = 'r(test) as';
+    let testString = '/test/ as';
     let lexer = new Lexer(testString);
     let result = parseMatchers(lexer);
     assert.deepStrictEqual(result, [/test/y]);
@@ -356,13 +354,16 @@ describe('parseMatchers', function() {
   });
 
   it('parses a regex matcher with escaped chars', function() {
-    let testString = 'r(\\stest) as';
+    // Escaping in JS string literals gets confusing, but I've
+    // verified this is how `/\s escaped \/ slash!/ as` read from
+    // file is written in a string.
+    let testString = '/space \\s and escaped \\/ slash!/ as';
+    console.log(testString.length);
     let lexer = new Lexer(testString);
     let result = parseMatchers(lexer);
-    assert.deepStrictEqual(result, [/\stest/y]);
-    assert.deepStrictEqual(lexer.peek(), new Token(TokenType.KW_AS,
-                                                   testString.indexOf('as'),
-                                                   'as'));
+    expect(result).to.be.deep.equal([/space \s and escaped \/ slash!/y]);
+    expect(lexer.peek()).to.be.deep.equal(
+      new Token(TokenType.KW_AS, 33, 'as'));
   });
 
   it('parses multiple matchers', function() {

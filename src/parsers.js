@@ -127,22 +127,12 @@ function parseEval(lexer) {
                            lexer.string, startIndex);
 }
 
-
-function createMatcher(string, isRegex) {
-  if (isRegex) {
-    return new RegExp(string, 'y');
-  } else {
-    return new RegExp(escapeRegExp(string), 'y');
-  }
-}
-
 /**
  * @returns {[RegExp]}
  */
 function parseMatchers(lexer) {
   let startIndex = lexer.index;
   let token;
-  let afterLetterR = false;
   let acceptMatcher = true;
   let inComment = false;
   let matchers = [];
@@ -151,10 +141,6 @@ function parseMatchers(lexer) {
       if (token.tokenType === TokenType.NEW_LINE) {
         inComment = false;
       }
-    } else if (afterLetterR && token.tokenType !== TokenType.OPEN_PAREN) {
-      throw new BMLSyntaxError('regex matcher signifier (\'r\') not '
-                               + 'immediately preceding string literal',
-                               lexer.string, startIndex);
     } else {
       switch (token.tokenType) {
       case TokenType.WHITESPACE:
@@ -165,11 +151,23 @@ function parseMatchers(lexer) {
         break;
       case TokenType.KW_AS:
         return matchers;
+      case TokenType.SLASH:
+        if (acceptMatcher) {
+          matchers.push(parseRegexMatcher(lexer));
+          acceptMatcher = false;
+          // break out of loop since the string literal token
+          // stream has already been consumed.
+          continue;
+        } else {
+          throw new BMLSyntaxError('unexpected regex literal.',
+                                   lexer.string, token.index);
+        }
+        break;
       case TokenType.OPEN_PAREN:
         if (acceptMatcher) {
-          matchers.push(createMatcher(parseReplacementWithLexer(lexer),
-                                      afterLetterR));
-          afterLetterR = false;
+          let strMatcher = parseReplacementWithLexer(lexer);
+          let matcher = new RegExp(escapeRegExp(strMatcher), 'y');
+          matchers.push(matcher);
           acceptMatcher = false;
           // break out of loop since the string literal token
           // stream has already been consumed.
@@ -181,13 +179,6 @@ function parseMatchers(lexer) {
         break;
       case TokenType.COMMA:
         acceptMatcher = true;
-        break;
-      case TokenType.LETTER_R:
-        if (afterLetterR) {
-          throw new BMLSyntaxError('Cannot have two consecutive LETTER_R tokens.',
-                                   lexer.string, token.index);
-        }
-        afterLetterR = true;
         break;
       default:
         throw new BMLSyntaxError(`Unexpected token ${token}`,
@@ -226,7 +217,7 @@ function parseReplacements(lexer, forRule) {
   // I think this will fail if there is a linebreak or
   // comments after open brace but before identifier
   let identifier = null;
-  let isSilent = null;
+  let isSilent = false;
   let identifierRe = /\s*(#?)(\w+):/y;
   identifierRe.lastIndex = lexer.index;
   let identifierMatch = identifierRe.exec(lexer.string);
@@ -272,7 +263,7 @@ function parseReplacements(lexer, forRule) {
         }
         break;
       case TokenType.CLOSE_BRACE:
-      case TokenType.LETTER_R:
+      case TokenType.SLASH:
         if (acceptReplacerEnd) {
           return new Replacer(choices, forRule, identifier, isSilent);
         } else {
@@ -372,7 +363,7 @@ function parseMode(lexer) {
         inComment = true;
         break;
       case TokenType.OPEN_PAREN:
-      case TokenType.LETTER_R:
+      case TokenType.SLASH:
         mode.rules.push(parseRule(lexer));
         continue;
       case TokenType.CLOSE_BRACE:
@@ -477,6 +468,28 @@ function parseReplacementWithLexer(lexer) {
         return stringLiteral;
       }
       break;
+    }
+    stringLiteral += token.string;
+  }
+  throw new BMLSyntaxError('Could not find end of replacement.',
+                           lexer.string, startIndex);
+}
+
+/**
+ * @param lexer {Lexer} a lexer whose next token is TokenType.SLASH
+ *
+ * @return {RegExp}
+ */
+function parseRegexMatcher(lexer) {
+  lexer.next();
+  let startIndex = lexer.index;
+  let stringLiteral = '';
+  let token;
+  while ((token = lexer.next()) !== null) {
+    console.log(token);
+    switch (token.tokenType) {
+    case TokenType.SLASH:
+      return new RegExp(stringLiteral, 'y');
     }
     stringLiteral += token.string;
   }
@@ -661,7 +674,6 @@ exports.parseMode = parseMode;
 exports.parsePrelude = parsePrelude;
 exports.parseUse = parseUse;
 exports.parseInlineCommand = parseInlineCommand;
-exports.createMatcher = createMatcher;
 exports.parseMatchers = parseMatchers;
 exports.parseCall = parseCall;
 exports.parseReplacements = parseReplacements;

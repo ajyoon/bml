@@ -110,15 +110,16 @@ class Lexer {
     } else if (this.string.slice(this.index, this.index + 3) === 'use') {
       tokenType = TokenType.KW_USE;
       tokenString = 'use';
-    } else if (this.string[this.index] === 'r') {
-      tokenType = TokenType.LETTER_R;
-      tokenString = 'r';
     } else {
       tokenType = TokenType.TEXT;
       if (this.string[this.index] === '\\') {
         switch (this.string[this.index + 1]) {
         case '\\':
           tokenString = '\\\\';
+          break;
+        case '/':
+          tokenString = '/';
+          this.index++;
           break;
         case 'n':
           tokenString = '\n';

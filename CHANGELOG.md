@@ -1,8 +1,14 @@
 # Changelog
 
-### 0.0.21-dev:
+
+### 0.0.21-dev: BREAKING CHANGE
 * Fix bug introduced in 0.0.20 which prevented user-defined markdown
   settings from being passed to the markdown processor.
+* Change the syntax for regex matchers from `r(foo)` to `/foo/`. This
+  is necessary because the old syntax used parens for its delimiter,
+  which is a special character in regex, meaning it was impossible to
+  match a regex like `/\)/`. This change also makes syntax
+  highlighting simpler.
 
 ### 0.0.20: BREAKING CHANGE
 * Overhaul the `eval` system:
