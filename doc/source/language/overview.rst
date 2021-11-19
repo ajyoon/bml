@@ -340,7 +340,7 @@ Any :ref:`choose command <choose-commands>` can be prefixed with an identifier l
 
 This identifier can then be referred back to using a reference command mapping the result from ``SomeChoiceIdentifier`` to other text by index: ::
 
-  {@SomeChoiceIdentifier 0 -> (She), 1 -> (He)} bought some tofu.
+  {@SomeChoiceIdentifier: 0 -> (She), 1 -> (He)} bought some tofu.
 
 Reference commands need not exhaustively cover every possible outcome from the referred choice, but a fallback option should be provided as the final branch and without an associated index arrow: ::
 
