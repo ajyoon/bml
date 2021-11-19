@@ -101,6 +101,15 @@ describe('bml', function() {
       assert.fail(`Unexpected output: ${result}`);
     }
   });
+
+  it('allows refs and backrefs with empty strings', function() {
+    // backref mapping is empty string
+    expect(bml('{t: (a) 100, (b)} => {@t: 0 -> (), (not a)}')).to.equal('a =>\n');
+    // backref mapping with empty string does not interfere with fallback
+    expect(bml('{t: (a), (b) 100} => {@t: 0 -> (), (not a)}')).to.equal('b => not a\n');
+    // fallback with empty string works too
+    expect(bml('{t: (a), (b) 100} => {@t: 0 -> (not b), ()}')).to.equal('b =>\n');
+  });
   
   it('correctly executes copy-backrefs', function() {
     let testString = '{Name: (Alice), (Bob)} {@Name}';

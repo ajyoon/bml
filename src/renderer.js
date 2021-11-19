@@ -44,7 +44,7 @@ function resolveBackReference(choiceResultMap, backReference) {
       return referredChoiceResult.renderedOutput;
     }
     let matchedBackReferenceResult = backReference.choiceMap.get(referredChoiceResult.choiceIndex);
-    if (matchedBackReferenceResult) {
+    if (matchedBackReferenceResult !== undefined) {
       return matchedBackReferenceResult;
     }
   }

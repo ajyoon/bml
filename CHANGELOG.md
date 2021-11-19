@@ -2,6 +2,8 @@
 
 ### 0.0.22-dev:
 * Remove accidentally-left-in debug log on regex matcher parsing
+* Fix bug preventing backref mappings pointing to empty strings from
+  being matched.
 
 ### 0.0.21: BREAKING CHANGE
 * Fix bug introduced in 0.0.20 which prevented user-defined markdown
