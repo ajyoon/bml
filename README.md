@@ -8,8 +8,6 @@ replacements and arbitrary transformations specified with javascript.
 
 [Try it online!](https://sandbox.bml-lang.org)
 
-And check out [the VS Code extension](https://marketplace.visualstudio.com/items?itemName=bml-lang.bml-vscode) for syntax highlighting and built-in runner support!
-
 ## setup
 
 To install:
