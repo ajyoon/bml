@@ -1,6 +1,6 @@
 # Changelog
 
-### 0.0.22-dev:
+### 0.0.22:
 * Remove accidentally-left-in debug log on regex matcher parsing
 * Fix bug preventing backref mappings pointing to empty strings from
   being matched.
