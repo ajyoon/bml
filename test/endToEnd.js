@@ -18,7 +18,7 @@ describe('bml', function() {
       assert.fail(`Unexpected output: ${result}`);
     }
   });
-  
+
   it('can execute user-defined functions', function() {
     let testString = `
         eval {
@@ -31,7 +31,7 @@ describe('bml', function() {
     let result = bml(testString);
     expect(result).to.equal('foo!\n');
   });
-  
+
   it('can process recursive rule choices', function() {
     let testString =
         `mode test {
@@ -50,7 +50,7 @@ describe('bml', function() {
       assert.fail(`Unexpected output: ${result}`);
     }
   });
-  
+
   it('respects the active mode on recursively rendered text', function() {
     let testString =
         `mode test {
@@ -62,7 +62,7 @@ describe('bml', function() {
     let result = bml(testString);
     expect(result).to.equal('bar\n');
   });
-  
+
   it('can process recursive inline choices', function() {
     let testString = 'hello {(simple), ({(very ), ()}recursive)} world!';
     let result = bml(testString);
@@ -75,7 +75,7 @@ describe('bml', function() {
       assert.fail(`Unexpected output: ${result}`);
     }
   });
-  
+
   it('can process refs, backrefs, and unused fallbacks', function() {
     let testString = '{Name: (Alice), (Bob)} went to the store. '
         + '{@Name: 0 -> (She), 1 -> (He), (unused fallback)} bought some tofu.';
@@ -88,7 +88,7 @@ describe('bml', function() {
       assert.fail(`Unexpected output: ${result}`);
     }
   });
-  
+
   it('can process refs and backrefs with used fallbacks', function() {
     let testString = '{Name: (Alice), (Bob)} went to the store. '
         + '{@Name: 0 -> (She), (USED FALLBACK)} bought some tofu.';
@@ -110,7 +110,7 @@ describe('bml', function() {
     // fallback with empty string works too
     expect(bml('{t: (a), (b) 100} => {@t: 0 -> (not b), ()}')).to.equal('b =>\n');
   });
-  
+
   it('correctly executes copy-backrefs', function() {
     let testString = '{Name: (Alice), (Bob)} {@Name}';
     let result = bml(testString);
@@ -122,7 +122,7 @@ describe('bml', function() {
       assert.fail(`Unexpected output: ${result}`);
     }
   });
-  
+
   it('outputs nothing for silent replacers, but tracks their results', function() {
     let testString = 'silent {#Name: (Alice), (Bob)} then referenced {@Name}';
     let result = bml(testString);
@@ -134,7 +134,23 @@ describe('bml', function() {
       assert.fail(`Unexpected output: ${result}`);
     }
   });
-  
+
+  /*
+    This demonstrates a known bug where inline commands can't start with comments.
+    It's part of a wider bug where inline commands generally don't handle comments
+    consistently. Unfortunately the fix is not straightforward, since the inline
+    command parser handles the various subtypes pretty differently, inconsistently
+    using regexes and lexers. Regex approaches do not play well with comments and
+    line breaks, and probably need to be replaced with lexers.
+   */
+  xit('detects inline choice blocks starting with comments', function() {
+    let testString = `{
+    // comment
+    (foo)}`;
+    let result = bml(testString);
+    expect(result).to.equal('foo\n');
+  });
+
   it('tracks named choices made inside recursively rendered text', function() {
     let testString = `
       {({TestChoice: (foo)})} {@TestChoice}
@@ -149,14 +165,14 @@ describe('bml', function() {
     let secondResult = bml(testString, { randomSeed: 1234 });
     expect(firstResult).to.equal(secondResult);
   });
-  
+
   it('only renders markdown when set to', function() {
     let src = '# foo';
     expect(bml(src, {renderMarkdown: true}))
       .to.equal('<h1 id="foo">foo</h1>\n');
     expect(bml(src)).to.equal('# foo\n');
   });
-  
+
   it('respects markdown settings provided by user', function() {
     let testString = `
         eval {
@@ -173,7 +189,7 @@ describe('bml', function() {
     let result = bml(testString, {renderMarkdown: true});
     expect(result).to.equal('<p>“testing”—</p>\n');
   });
-  
+
   it('cleans whitespace by default but allows disabling', function() {
     let src = 'foo';
     expect(bml(src, {whitespaceCleanup: false})).to.equal('foo');
@@ -205,7 +221,7 @@ describe('bml logging', function() {
     hook = captureStream(process.stderr);
   });
   afterEach(function(){
-    hook.unhook(); 
+    hook.unhook();
   });
 
   it('warns on version mismatch', function() {
@@ -221,13 +237,13 @@ describe('bml logging', function() {
     expect(hook.captured()).to.startsWith(
       'BML VERSION MISMATCH. bml source file specifies version nonsense');
   });
-  
+
   it('does not warn on version when no version is present', function() {
     let testString = `testing 123`;
     bml(testString);
     expect(hook.captured()).to.equal('');
   });
-  
+
   it('does not warn on recursive renders when top level has version', function() {
     const BML_VERSION = require('../package.json')['version'];
     let testString = `
