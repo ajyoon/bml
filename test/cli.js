@@ -1,4 +1,4 @@
-const assert = require('assert');
+const expect = require('chai').expect;
 
 const cli = require('../cli.js');
 const defaultSettings = require('../src/settings.js').defaultRenderSettings;
@@ -8,43 +8,43 @@ describe('cli', function() {
   it('prints help when given any help switch', function() {
     for (let arg of cli.HELP_SWITCHES) {
       let action = cli.determineAction([arg]);
-      assert.strictEqual(action.function, cli.printHelp);
+      expect(action.function).to.equal(cli.printHelp);
     }
   });
 
   it('prints version info when given any version switch', function() {
     for (let arg of cli.VERSION_SWITCHES) {
       let action = cli.determineAction([arg]);
-      assert.strictEqual(action.function, cli.printVersionInfo);
+      expect(action.function).to.equal(cli.printVersionInfo);
     }
   });
 
   it('reads from a path when given an argument', function() {
     let path = 'some path';
     action = cli.determineAction([path]);
-    assert.strictEqual(action.function, cli.readFromPath);
-    assert.deepEqual(action.args, [path, defaultSettings]);
+    expect(action.function).to.equal(cli.readFromPath);
+    expect(action.args).to.deep.equal([path, defaultSettings]);
   });
 
   it('reads from stdin when not given any arguments', function() {
     action = cli.determineAction([]);
-    assert.strictEqual(action.function, cli.readFromStdin);
-    assert.deepEqual(action.args, [defaultSettings]);
+    expect(action.function).to.equal(cli.readFromStdin);
+    expect(action.args).to.deep.equal([defaultSettings]);
   });
 
   it('strips away only the first arg when `node` is not the first', function() {
     let stripped = cli.stripArgs(['first', 'second']);
-    assert.deepEqual(stripped, ['second']);
+    expect(stripped).to.deep.equal(['second']);
   });
 
   it('strips away the first two args when `node` is the first', function() {
     let stripped = cli.stripArgs(['/usr/bin/node', 'second', 'third']);
-    assert.deepEqual(stripped, ['third']);
+    expect(stripped).to.deep.equal(['third']);
   });
   
   it('fails when seed flag is used but no seed is provided', function() {
     action = cli.determineAction(['--seed']);
-    assert.strictEqual(action.function, cli.printHelpForError);
+    expect(action.function).to.equal(cli.printHelpForError);
   });
 
   it('fails when seed is invalid', function() {
@@ -55,23 +55,23 @@ describe('cli', function() {
     ];
     for (let seed of badSeeds) {
       action = cli.determineAction(['--seed', seed]);
-      assert.strictEqual(action.function, cli.printHelpForError);
+      expect(action.function).to.equal(cli.printHelpForError);
     }
   });
   
   it('supports negative seeds', function() {
       action = cli.determineAction(['--seed', '-123']);
-      assert.strictEqual(action.function, cli.readFromStdin);
+      expect(action.function).to.equal(cli.readFromStdin);
   });
   
   it('fails on unknown flags', function() {
       action = cli.determineAction(['--foo']);
-      assert.strictEqual(action.function, cli.printHelpForError);
+      expect(action.function).to.equal(cli.printHelpForError);
   });
   
   it('fails when more than one path is provided', function() {
     action = cli.determineAction(['1.bml', '2.bml']);
-    assert.strictEqual(action.function, cli.printHelpForError);
+    expect(action.function).to.equal(cli.printHelpForError);
   });
   
   it('supports all settings', function() {
@@ -85,7 +85,7 @@ describe('cli', function() {
       renderMarkdown: true,
       whitespaceCleanup: false
     };
-    assert.strictEqual(action.function, cli.readFromPath);
-    assert.deepEqual(action.args, [path, expectedSettings]);
+    expect(action.function).to.equal(cli.readFromPath);
+    expect(action.args).to.deep.equal([path, expectedSettings]);
   });
 });

@@ -1,4 +1,3 @@
-const assert = require('assert');
 const chai = require('chai');
 const expect = chai.expect;
 chai.use(require('chai-string'));
@@ -14,9 +13,7 @@ describe('bml', function() {
       'hello beautiful world!\n',
       'hello wonderful world!\n',
     ];
-    if (possibleOutcomes.indexOf(result) === -1) {
-      assert.fail(`Unexpected output: ${result}`);
-    }
+    expect(result).to.be.oneOf(possibleOutcomes);
   });
 
   it('can execute user-defined functions', function() {
@@ -46,9 +43,7 @@ describe('bml', function() {
       'outer inner 1\n',
       'outer inner 2\n',
     ];
-    if (possibleOutcomes.indexOf(result) === -1) {
-      assert.fail(`Unexpected output: ${result}`);
-    }
+    expect(result).to.be.oneOf(possibleOutcomes);
   });
 
   it('respects the active mode on recursively rendered text', function() {
@@ -71,9 +66,7 @@ describe('bml', function() {
       'hello recursive world!\n',
       'hello very recursive world!\n',
     ];
-    if (possibleOutcomes.indexOf(result) === -1) {
-      assert.fail(`Unexpected output: ${result}`);
-    }
+    expect(result).to.be.oneOf(possibleOutcomes);
   });
 
   it('can process refs, backrefs, and unused fallbacks', function() {
@@ -84,9 +77,7 @@ describe('bml', function() {
       'Alice went to the store. She bought some tofu.\n',
       'Bob went to the store. He bought some tofu.\n'
     ];
-    if (possibleOutcomes.indexOf(result) === -1) {
-      assert.fail(`Unexpected output: ${result}`);
-    }
+    expect(result).to.be.oneOf(possibleOutcomes);
   });
 
   it('can process refs and backrefs with used fallbacks', function() {
@@ -97,9 +88,7 @@ describe('bml', function() {
       'Alice went to the store. She bought some tofu.\n',
       'Bob went to the store. USED FALLBACK bought some tofu.\n'
     ];
-    if (possibleOutcomes.indexOf(result) === -1) {
-      assert.fail(`Unexpected output: ${result}`);
-    }
+    expect(result).to.be.oneOf(possibleOutcomes);
   });
 
   it('allows refs and backrefs with empty strings', function() {
@@ -118,9 +107,7 @@ describe('bml', function() {
       'Alice Alice\n',
       'Bob Bob\n'
     ];
-    if (possibleOutcomes.indexOf(result) === -1) {
-      assert.fail(`Unexpected output: ${result}`);
-    }
+    expect(result).to.be.oneOf(possibleOutcomes);
   });
 
   it('outputs nothing for silent replacers, but tracks their results', function() {
@@ -130,9 +117,7 @@ describe('bml', function() {
       'silent  then referenced Alice\n',
       'silent  then referenced Bob\n'
     ];
-    if (possibleOutcomes.indexOf(result) === -1) {
-      assert.fail(`Unexpected output: ${result}`);
-    }
+    expect(result).to.be.oneOf(possibleOutcomes);
   });
 
   /*

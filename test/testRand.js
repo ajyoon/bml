@@ -1,4 +1,3 @@
-const assert = require('assert');
 const fs = require('fs');
 var decache = require('decache');
 const expect = require('chai').expect;
@@ -62,7 +61,7 @@ describe('normalizeWeights', function() {
       new WeightedChoice(1, 40),
       new WeightedChoice(1, 60),
     ];
-    assert.deepStrictEqual(rand.normalizeWeights(weights), weights);
+    expect(rand.normalizeWeights(weights)).to.deep.equal(weights);
   });
 });
 

@@ -1,4 +1,4 @@
-const assert = require('assert');
+const expect = require('chai').expect;
 const fs = require('fs');
 
 const mergeSettings = require('../src/settings.js').mergeSettings;
@@ -13,10 +13,10 @@ describe('mergeSettings', function() {
     let merged = mergeSettings(
       originalSettings,
       {
-          renderMarkdown: true,
-          contextSize: 1000,
+        renderMarkdown: true,
+        contextSize: 1000,
       });
-    assert.strictEqual(true, merged.renderMarkdown);
-    assert.strictEqual(1000, merged.contextSize);
+    expect(true).to.equal(merged.renderMarkdown);
+    expect(1000).to.equal(merged.contextSize);
   });
 });
