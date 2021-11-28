@@ -7,6 +7,10 @@ text with ease.
 
 `Try it online! <https://sandbox.bml-lang.org>`_
 
+And check out `the VS Code extension
+<https://marketplace.visualstudio.com/items?itemName=bml-lang.bml-vscode>`_
+for syntax highlighting and built-in runner support!
+
 getting started
 ===============
 
