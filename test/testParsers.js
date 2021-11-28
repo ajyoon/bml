@@ -217,7 +217,7 @@ describe('parseRule', function() {
     expect(lexer.index).to.equal(testString.length - 1);
     expect(rule.matchers.length).to.equal(1);
   });
-  
+
   it('does not allow identifiers in replacers', function() {
     let testString = '(x) as MisplacedTestIdentifier: (y)\n}';
     let lexer = new Lexer(testString);
@@ -299,7 +299,15 @@ describe('parseInlineCommand', function() {
     assert.strictEqual(result.backReference, null);
     assert(result.replacer instanceof Replacer);
   });
-  
+
+  it('allows trailing commas', function() {
+    let testString = '{(foo), (bar),}';
+    let result = parseInlineCommand(testString, 0);
+    assert.strictEqual(result.blockEndIndex, testString.length);
+    assert.strictEqual(result.backReference, null);
+    assert(result.replacer instanceof Replacer);
+  });
+
   it('allows the choice to be prefixed by an identifier for reference in later choices', function() {
     let testString = '{TestChoice: (test) 50, call someFunc 40}';
     let result = parseInlineCommand(testString, 0);
@@ -318,7 +326,7 @@ describe('parseInlineCommand', function() {
     assert.strictEqual(result.replacer.identifier, 'TestChoice');
     assert.strictEqual(result.replacer.isSilent, true);
   });
-  
+
   it('allows back references', function() {
     let testString = '{@TestChoice: 0 -> (foo)}';
     let result = parseInlineCommand(testString, 0);
@@ -479,7 +487,7 @@ describe('parseReplacements', function() {
 
     expect(lexer.index).to.equal(testString.length - 1);
   });
-  
+
   it('treats a new replacement not after a comma as the end of the replacer', function() {
     let testString = '(test) (part of next rule)';
     let lexer = new Lexer(testString);
@@ -508,7 +516,7 @@ describe('parseBackReference', function() {
     expect(result.choiceMap).to.have.lengthOf(1);
     expect(result.choiceMap.get(0)).to.equal('foo');
   });
-  
+
   it('parses a simple case with a single call branch and no fallback', function() {
     let testString = '@TestRef: 0 -> call foo}';
     let result = parseBackReference(new Lexer(testString));
@@ -517,7 +525,7 @@ describe('parseBackReference', function() {
     expect(result.choiceMap.get(0)).to.be.an.instanceof(FunctionCall);
     expect(result.choiceMap.get(0).functionName).to.equal('foo');
   });
-  
+
   it('allows a single branch with a fallback', function() {
     let testString = '@TestRef: 0 -> call foo, (fallback)}';
     let result = parseBackReference(new Lexer(testString));
@@ -527,7 +535,7 @@ describe('parseBackReference', function() {
     expect(result.choiceMap.get(0).functionName).to.equal('foo');
     expect(result.fallback).to.equal('fallback');
   });
-  
+
   it('parses multiple branches of all types with fallback', function() {
     let testString = '@TestRef: 0 -> (foo), 1 -> call someFunc, 2 -> (bar), call fallbackFunc}';
     let result = parseBackReference(new Lexer(testString));
@@ -540,7 +548,7 @@ describe('parseBackReference', function() {
     expect(result.fallback).to.be.an.instanceof(FunctionCall);
     expect(result.fallback.functionName).to.equal('fallbackFunc');
   });
-  
+
   it('parses copy refs', function() {
     let testString = '@TestRef}';
     let lexer = new Lexer(testString);
@@ -548,13 +556,13 @@ describe('parseBackReference', function() {
     expect(result.referredIdentifier).to.equal('TestRef');
     expect(result.choiceMap).to.have.lengthOf(0);
   });
-  
+
   function testParseStrToGiveSyntaxError(backRefString) {
     expect(() => {
       parseBackReference(new Lexer(backRefString));
     }).to.throw(BMLSyntaxError);
   }
-  
+
   it('throws an error when invalid syntax is used', function() {
     let testString = '@TestRef: 0 -> (foo), 1 -> call someFunc, 2 -> (bar)}';
     testParseStrToGiveSyntaxError('@TestRef: aaskfj');
@@ -568,7 +576,7 @@ describe('parseBackReference', function() {
     testParseStrToGiveSyntaxError('@TestRef: 0 -> (foo), call bar');
     testParseStrToGiveSyntaxError('@TestRef: 0 -> (foo), call bar, @TestRef2: 0 -> (foo)');
   });
-  
+
   it('errors on repeated indexes', function() {
     expect(() => {
       parseBackReference(new Lexer('@TestRef: 0 -> (foo), 1 -> (bar), 0 -> (biz)'));

@@ -299,7 +299,11 @@ function parseReplacements(lexer, forRule) {
           acceptComma = false;
           acceptReplacement = true;
           acceptWeight = false;
-          acceptReplacerEnd = false;
+          // Inline choices support trailing commas, but rules can't
+          // because that would make rule and mode ends ambiguous.
+          // (If rules used brace syntax this wouldn't be an issue,
+          // maybe something to consider.)
+          acceptReplacerEnd = !forRule;
         } else {
           throw new BMLSyntaxError('unexpected comma.',
                                    lexer.string, token.index);
