@@ -1,4 +1,3 @@
-const assert = require('assert');
 const expect = require('chai').expect;
 const fs = require('fs');
 
@@ -76,23 +75,13 @@ describe('parseEval', function() {
   it('should error on newline before matching single-quote', function() {
     let testString = 'eval {\'\n';
     let lexer = new Lexer(testString);
-    try {
-      let block = parseEval(lexer);
-      assert(false, 'error expected');
-    } catch (e) {
-      expect(e).to.be.an.instanceof(JavascriptSyntaxError);
-    }
+    expect(() => parseEval(lexer)).to.throw(JavascriptSyntaxError);
   });
 
   it('should error on newline before matching double-quote', function() {
     let testString = 'eval {"\n';
     let lexer = new Lexer(testString);
-    try {
-      let block = parseEval(lexer);
-      assert(false, 'error expected');
-    } catch (e) {
-      expect(e).to.be.an.instanceof(JavascriptSyntaxError);
-    }
+    expect(() => parseEval(lexer)).to.throw(JavascriptSyntaxError);
   });
 
   it('should ignore braces in backtick string literals', function() {
@@ -186,10 +175,11 @@ describe('parsePrelude', function() {
                       }
                       some text`;
     let result = parsePrelude(testString);
-    assert.strictEqual(result.preludeEndIndex, testString.indexOf('some text'));
-    assert(result.evalBlock.string.indexOf('global.evalTest = 1;\n') !== -1);
-    assert(result.evalBlock.string.indexOf('global.evalTest2 = 2;\n') !== -1);
-    assert.deepStrictEqual(result.modes, {});
+
+    expect(result.preludeEndIndex).to.equal(testString.indexOf('some text'));
+    expect(result.evalBlock.string).to.include('global.evalTest = 1;\n');
+    expect(result.evalBlock.string).to.include('global.evalTest2 = 2;\n');
+    expect(result.modes).to.deep.equal({});
   });
 
   it('recognizes mode blocks and passes them to parseMode', function() {
@@ -202,9 +192,9 @@ describe('parsePrelude', function() {
                       }
                       some text`;
     let result = parsePrelude(testString);
-    assert.strictEqual(result.preludeEndIndex, testString.indexOf('some text'));
-    assert(result.modes.hasOwnProperty('firstMode'));
-    assert(result.modes.hasOwnProperty('secondMode'));
+
+    expect(result.preludeEndIndex).to.equal(testString.indexOf('some text'));
+    expect(result.modes).to.have.all.keys('firstMode', 'secondMode');
   });
 });
 
@@ -221,13 +211,8 @@ describe('parseRule', function() {
   it('does not allow identifiers in replacers', function() {
     let testString = '(x) as MisplacedTestIdentifier: (y)\n}';
     let lexer = new Lexer(testString);
-    try {
-      parseRule(lexer);
-      assert(false, 'error expected');
-    } catch (e) {
-      expect(e).to.be.an.instanceof(BMLSyntaxError);
-      expect(e.message).to.have.string('Choice identifiers are not allowed in rules');
-    }
+    expect(() => parseRule(lexer)).to.throw(
+      BMLSyntaxError, 'Choice identifiers are not allowed in rules');
   });
 });
 
@@ -236,25 +221,20 @@ describe('parseUse', function() {
   it('Extracts the mode name with "use" syntax', function() {
     let testString = '{use testMode}';
     let result = parseUse(testString, 0);
-    assert.strictEqual(result.blockEndIndex, testString.length);
-    assert.strictEqual(result.modeName, 'testMode');
+    expect(result.blockEndIndex).to.equal(testString.length);
+    expect(result.modeName).to.equal('testMode');
   });
 
   it('Extracts the mode name with "using" syntax', function() {
     let testString = '{using testMode}';
     let result = parseUse(testString, 0);
-    assert.strictEqual(result.blockEndIndex, testString.length);
-    assert.strictEqual(result.modeName, 'testMode');
+    expect(result.blockEndIndex).to.equal(testString.length);
+    expect(result.modeName).to.equal('testMode');
   });
 
   it('Throws an UnknownTransformError when there is a syntax error.', function() {
     let testString = '{using ????}';
-    try {
-      parseUse(testString, 0);
-      assert(false, 'error expected');
-    } catch (e) {
-      assert(e instanceof UnknownTransformError);
-    }
+    expect(() => parseUse(testString, 0)).to.throw(UnknownTransformError);
   });
 });
 
@@ -263,79 +243,79 @@ describe('parseInlineCommand', function() {
   it('allows a single unweighted item', function() {
     let testString = '{(test)}';
     let result = parseInlineCommand(testString, 0);
-    assert.strictEqual(result.blockEndIndex, testString.length);
-    assert.strictEqual(result.backReference, null);
-    assert(result.replacer instanceof Replacer);
+    expect(result.blockEndIndex).to.equal(testString.length);
+    expect(result.backReference).to.equal(null);
+    expect(result.replacer).to.be.an.instanceof(Replacer);
   });
 
   it('allows a single weighted item', function() {
     let testString = '{(test) 100}';
     let result = parseInlineCommand(testString, 0);
-    assert.strictEqual(result.blockEndIndex, testString.length);
-    assert.strictEqual(result.backReference, null);
-    assert(result.replacer instanceof Replacer);
+    expect(result.blockEndIndex).to.equal(testString.length);
+    expect(result.backReference).to.equal(null);
+    expect(result.replacer).to.be.an.instanceof(Replacer);
   });
 
   it('allows a single unweighted call item', function() {
     let testString = '{call someFunc}';
     let result = parseInlineCommand(testString, 0);
-    assert.strictEqual(result.blockEndIndex, testString.length);
-    assert.strictEqual(result.backReference, null);
-    assert(result.replacer instanceof Replacer);
+    expect(result.blockEndIndex).to.equal(testString.length);
+    expect(result.backReference).to.equal(null);
+    expect(result.replacer).to.be.an.instanceof(Replacer);
   });
 
   it('allows a single weighted call item', function() {
     let testString = '{call someFunc 100}';
     let result = parseInlineCommand(testString, 0);
-    assert.strictEqual(result.blockEndIndex, testString.length);
-    assert.strictEqual(result.backReference, null);
-    assert(result.replacer instanceof Replacer);
+    expect(result.blockEndIndex).to.equal(testString.length);
+    expect(result.backReference).to.equal(null);
+    expect(result.replacer).to.be.an.instanceof(Replacer);
   });
 
   it('allows a comma separated mix of literals and calls', function() {
     let testString = '{(test) 50, call someFunc 40}';
     let result = parseInlineCommand(testString, 0);
-    assert.strictEqual(result.blockEndIndex, testString.length);
-    assert.strictEqual(result.backReference, null);
-    assert(result.replacer instanceof Replacer);
+    expect(result.blockEndIndex).to.equal(testString.length);
+    expect(result.backReference).to.equal(null);
+    expect(result.replacer).to.be.an.instanceof(Replacer);
   });
 
   it('allows trailing commas', function() {
     let testString = '{(foo), (bar),}';
     let result = parseInlineCommand(testString, 0);
-    assert.strictEqual(result.blockEndIndex, testString.length);
-    assert.strictEqual(result.backReference, null);
-    assert(result.replacer instanceof Replacer);
+    expect(result.blockEndIndex).to.equal(testString.length);
+    expect(result.backReference).to.equal(null);
+    expect(result.replacer).to.be.an.instanceof(Replacer);
   });
 
   it('allows the choice to be prefixed by an identifier for reference in later choices', function() {
     let testString = '{TestChoice: (test) 50, call someFunc 40}';
     let result = parseInlineCommand(testString, 0);
-    assert.strictEqual(result.blockEndIndex, testString.length);
-    assert(result.replacer instanceof Replacer);
-    assert.strictEqual(result.backReference, null);
-    assert.strictEqual(result.replacer.identifier, 'TestChoice');
+    expect(result.replacer).to.be.an.instanceof(Replacer);
+    expect(result.blockEndIndex).to.equal(testString.length);
+    expect(result.backReference).to.equal(null);
+    expect(result.replacer.identifier).to.equal('TestChoice');
   });
 
   it('allows blocks with identifiers to be marked silent with # prefix', function() {
     let testString = '{#TestChoice: (test)}';
     let result = parseInlineCommand(testString, 0);
-    assert.strictEqual(result.blockEndIndex, testString.length);
-    assert(result.replacer instanceof Replacer);
-    assert.strictEqual(result.backReference, null);
-    assert.strictEqual(result.replacer.identifier, 'TestChoice');
-    assert.strictEqual(result.replacer.isSilent, true);
+    expect(result.replacer).to.be.an.instanceof(Replacer);
+    expect(result.blockEndIndex).to.equal(testString.length);
+    expect(result.backReference).to.equal(null);
+    expect(result.replacer.identifier).to.equal('TestChoice');
+    expect(result.replacer.isSilent).to.equal(true);
   });
 
   it('allows back references', function() {
     let testString = '{@TestChoice: 0 -> (foo)}';
     let result = parseInlineCommand(testString, 0);
-    assert.strictEqual(result.blockEndIndex, testString.length);
+    expect(result.blockEndIndex).to.equal(testString.length);
     let expectedChoiceMap = new Map();
     expectedChoiceMap.set(0, 'foo');
-    assert.deepStrictEqual(result.backReference,
-                           new BackReference('TestChoice', expectedChoiceMap, null));
-    assert.strictEqual(result.replacer, null);
+    expect(result.backReference).to.deep.equal(
+      new BackReference('TestChoice', expectedChoiceMap, null));
+    expect(result.replacer).to.equal(null);
   });
 });
 
@@ -345,20 +325,18 @@ describe('parseMatchers', function() {
     let testString = '(test) as';
     let lexer = new Lexer(testString);
     let result = parseMatchers(lexer);
-    assert.deepStrictEqual(result, [/test/y]);
-    assert.deepStrictEqual(lexer.peek(), new Token(TokenType.KW_AS,
-                                                   testString.indexOf('as'),
-                                                   'as'));
+    expect(result).to.deep.equal([/test/y]);
+    expect(lexer.peek()).to.deep.equal(
+      new Token(TokenType.KW_AS, testString.indexOf('as'), 'as'));
   });
 
   it('parses a single simple regex matcher', function() {
     let testString = '/test/ as';
     let lexer = new Lexer(testString);
     let result = parseMatchers(lexer);
-    assert.deepStrictEqual(result, [/test/y]);
-    assert.deepStrictEqual(lexer.peek(), new Token(TokenType.KW_AS,
-                                                   testString.indexOf('as'),
-                                                   'as'));
+    expect(result).to.deep.equal([/test/y]);
+    expect(lexer.peek()).to.deep.equal(
+      new Token(TokenType.KW_AS, testString.indexOf('as'), 'as'));
   });
 
   it('parses a regex matcher with escaped chars', function() {
@@ -377,10 +355,9 @@ describe('parseMatchers', function() {
     let testString = '(test), /test2/ as';
     let lexer = new Lexer(testString);
     let result = parseMatchers(lexer);
-    assert.deepStrictEqual(result, [/test/y, /test2/y]);
-    assert.deepStrictEqual(lexer.peek(), new Token(TokenType.KW_AS,
-                                                   testString.indexOf('as'),
-                                                   'as'));
+    expect(result).to.deep.equal([/test/y, /test2/y]);
+    expect(lexer.peek()).to.deep.equal(
+      new Token(TokenType.KW_AS, testString.indexOf('as'), 'as'));
   });
 });
 
@@ -397,14 +374,7 @@ describe('parseCall', function() {
     for (let i = 0; i < failingStrings.length; i++) {
       let testString = failingStrings[i];
       let lexer = new Lexer(testString);
-      try {
-        parseCall(lexer);
-        assert(false, `error expected for test string: '${testString}'`);
-      } catch (e) {
-        expect(e).to.be.an.instanceof(
-          BMLSyntaxError,
-          `failure for test string: '${testString}'`);
-      }
+      expect(() => parseCall(lexer)).to.throw(BMLSyntaxError);
     }
   });
 
