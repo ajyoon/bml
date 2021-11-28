@@ -1,36 +1,35 @@
 const assert = require('assert');
 
 const cli = require('../cli.js');
+const defaultSettings = require('../src/settings.js').defaultRenderSettings;
 
 
 describe('cli', function() {
-  it('wants to print help when given any help switch', function() {
+  it('prints help when given any help switch', function() {
     for (let arg of cli.HELP_SWITCHES) {
       let action = cli.determineAction([arg]);
       assert.strictEqual(action.function, cli.printHelp);
-      assert.deepEqual(action.args, []);
     }
   });
 
-  it('wants to print version info when given any version switch', function() {
+  it('prints version info when given any version switch', function() {
     for (let arg of cli.VERSION_SWITCHES) {
       let action = cli.determineAction([arg]);
       assert.strictEqual(action.function, cli.printVersionInfo);
-      assert.deepEqual(action.args, []);
     }
   });
 
-  it('wants to read from a path when given an argument', function() {
+  it('reads from a path when given an argument', function() {
     let path = 'some path';
     action = cli.determineAction([path]);
     assert.strictEqual(action.function, cli.readFromPath);
-    assert.deepEqual(action.args, [path]);
+    assert.deepEqual(action.args, [path, defaultSettings]);
   });
 
-  it('wants to read from stdin when not given any arguments', function() {
+  it('reads from stdin when not given any arguments', function() {
     action = cli.determineAction([]);
     assert.strictEqual(action.function, cli.readFromStdin);
-    assert.deepEqual(action.args, []);
+    assert.deepEqual(action.args, [defaultSettings]);
   });
 
   it('strips away only the first arg when `node` is not the first', function() {
@@ -41,5 +40,52 @@ describe('cli', function() {
   it('strips away the first two args when `node` is the first', function() {
     let stripped = cli.stripArgs(['/usr/bin/node', 'second', 'third']);
     assert.deepEqual(stripped, ['third']);
+  });
+  
+  it('fails when seed flag is used but no seed is provided', function() {
+    action = cli.determineAction(['--seed']);
+    assert.strictEqual(action.function, cli.printHelpForError);
+  });
+
+  it('fails when seed is invalid', function() {
+    let badSeeds = [
+      '123.4',
+      'foo',
+      '--foo'
+    ];
+    for (let seed of badSeeds) {
+      action = cli.determineAction(['--seed', seed]);
+      assert.strictEqual(action.function, cli.printHelpForError);
+    }
+  });
+  
+  it('supports negative seeds', function() {
+      action = cli.determineAction(['--seed', '-123']);
+      assert.strictEqual(action.function, cli.readFromStdin);
+  });
+  
+  it('fails on unknown flags', function() {
+      action = cli.determineAction(['--foo']);
+      assert.strictEqual(action.function, cli.printHelpForError);
+  });
+  
+  it('fails when more than one path is provided', function() {
+    action = cli.determineAction(['1.bml', '2.bml']);
+    assert.strictEqual(action.function, cli.printHelpForError);
+  });
+  
+  it('supports all settings', function() {
+    let path = 'foo.bml';
+    action = cli.determineAction([
+      '--seed', '123', '--no-eval', '--render-markdown',
+      '--no-whitespace-cleanup', path]);
+    let expectedSettings = {
+      randomSeed: 123,
+      allowEval: false,
+      renderMarkdown: true,
+      whitespaceCleanup: false
+    };
+    assert.strictEqual(action.function, cli.readFromPath);
+    assert.deepEqual(action.args, [path, expectedSettings]);
   });
 });
