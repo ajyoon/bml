@@ -270,7 +270,9 @@ matched text will never be chosen.
 the body
 ********
 
-The body of a ``bml`` document is just normal text, aside from :ref:`commands <commands>` and literal blocks. ``bml`` considers the body to have begun at its first encounter of non-prelude-like text.
+The body of a ``bml`` document is just normal text, aside from
+:ref:`commands <commands>` and literal blocks. ``bml`` considers the
+body to have begun at its first encounter of non-prelude-like text.
 
 .. _literal-blocks:
 
@@ -405,3 +407,23 @@ Which can be rendered as:
 
 Note that nested evaluation *does not* occur on text inserted by function calls or by text left untouched by "no-op" rule branches.
 
+.. _escapes:
+
+escapes
+=======
+
+Special characters like brackets and braces can be inserted literally
+by prefixing them with a backslash escape: ::
+
+  \{these braces will be inserted literally\}
+
+Escapes can also be used to insert **visual line breaks**. By making
+the last character in a line a backslash, the line break and any
+following whitespace is collapsed into a single whitespace. For
+example, ::
+
+  foo\
+       bar
+
+will be rendered as simply "foo bar". This is useful for visually
+organizing and indenting complex text, especially in nested choices.

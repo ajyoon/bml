@@ -73,6 +73,7 @@ function renderText(string, startIndex, modes, activeMode,
   choiceResultMap = choiceResultMap || new Map();
   activeMode = activeMode || null;
   let isEscaped = false;
+  let inVisualLineBreak = false;
   let inLiteralBlock = false;
   let out = '';
   let index = startIndex;
@@ -81,6 +82,7 @@ function renderText(string, startIndex, modes, activeMode,
   let replacement = null;
   let chooseRe = /\s*(\(|call|#?\w+:|@\w+)/y;
   let useRe = /\s*(use|using)/y;
+  let nonNewlineWhitespaceRe = /[^\S\r\n]/;
   
   if (stackDepth > 1000) {
     throw new Error(
@@ -90,7 +92,22 @@ function renderText(string, startIndex, modes, activeMode,
   while (index < string.length) {
     if (isEscaped) {
       isEscaped = false;
-      out += string[index];
+      if (string[index] === '\n') {
+        // escaped line breaks are treated as visual line breaks which
+        // turn the newline and any following whitespace into a single
+        // whitespace.
+        inVisualLineBreak = true;
+        out += ' ';
+      } else {
+        out += string[index];
+      }
+    } else if (inVisualLineBreak) {
+      if (!nonNewlineWhitespaceRe.test(string[index])) {
+        // A gross hack, but make sure we process this character again
+        // normally now        
+        index -= 1;
+        inVisualLineBreak = false;
+      }
     } else if (inLiteralBlock) {
       if (string[index] === '\\') {
         isEscaped = true;

@@ -143,6 +143,12 @@ describe('bml', function() {
     let result = bml(testString);
     expect(result).to.equal('foo foo\n');
   });
+  
+  it('supports visual linebreaks', function() {
+    expect(bml("foo\\\nbar")).to.equal('foo bar\n');
+    expect(bml("foo\\\n      bar")).to.equal('foo bar\n');
+    expect(bml("foo\\\n      {(bar)}")).to.equal('foo bar\n');
+  });
 
   it('produces the exact same document when using a fixed random seed', function() {
     const testString = '' + fs.readFileSync(require.resolve('./randomSmokeTest.bml'));

@@ -5,6 +5,7 @@
 * Make CLI errors from invalid arguments log more useful messages to
   stderr and give exit code 1.
 * Support trailing commas in inline choices
+* Support visual line breaks, marked by ending a line with a backslash.
 
 ### 0.0.22:
 * Remove accidentally-left-in debug log on regex matcher parsing
