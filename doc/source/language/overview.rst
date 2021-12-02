@@ -351,6 +351,11 @@ Reference commands need not exhaustively cover every possible outcome from the r
 
 Fallback options are also necessary if the referred choice was never made. This can happen if the referred choice is in a :ref:`nested evaluation <nested-evaluation>` path that was not taken. If a reference command refers to an unexcuted (or non-existant) choice, or if it provides no mapping for the choice index, the fallback will be used. If no fallback is present, a warning will be logged and an empty string will be inserted.
 
+Reference indexes can also be conveniently aggregated with commas: ::
+
+  {Name: (Alex), (Riley), (Alice), (Bob)} went to the store.
+  {@Name: 0, 1 -> (They), 2 -> (She), 3 -> (He)} bought some tofu.
+
 Bare references without any branches or fallback will unconditionally copy the output from the referred choice, including any nested evaluations executed within it: ::
 
     {Name: (Alice), (Bob)}

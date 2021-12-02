@@ -560,7 +560,7 @@ function parseBackReference(lexer) {
   let acceptBlockEnd = true;
   let inComment = false;
 
-  let currentChoiceIndex = null;
+  let currentChoiceIndexes = [];
   let currentReplacement = null;
   let token;
   
@@ -591,7 +591,8 @@ function parseBackReference(lexer) {
         if (acceptChoiceIndex) {
           acceptChoiceIndex = false;
           acceptArrow = true;
-          currentChoiceIndex = Number(token.string);
+          acceptComma = true;
+          currentChoiceIndexes.push(Number(token.string));
         } else {
           throw new BMLSyntaxError('Unexpected number in back reference block',
                                    lexer.string, token.index);
@@ -601,6 +602,7 @@ function parseBackReference(lexer) {
         if (acceptArrow) {
           acceptArrow = false;
           acceptReplacement = true;
+          acceptComma = false;
         } else {
           throw new BMLSyntaxError('Unexpected arrow in back reference block', 
                                    lexer.string, token.index);
@@ -614,19 +616,21 @@ function parseBackReference(lexer) {
           } else {
             currentReplacement = parseCall(lexer);
           }
-          if (currentChoiceIndex != null) {
-            if (choiceMap.has(currentChoiceIndex)) {
-              // it's not ideal to validate this here, but with the way it's currently
-              // built, if we don't it will just silently overwrite the key
-              throw new BMLDuplicatedRefIndexError(
-                referredIdentifier, currentChoiceIndex, lexer.string, token.index);
+          if (currentChoiceIndexes.length) {
+            for (let choiceIndex of currentChoiceIndexes) {
+              if (choiceMap.has(choiceIndex)) {
+                // it's not ideal to validate this here, but with the way it's currently
+                // built, if we don't it will just silently overwrite the key
+                throw new BMLDuplicatedRefIndexError(
+                  referredIdentifier, choiceIndex, lexer.string, token.index);
+              }
+              choiceMap.set(choiceIndex, currentReplacement);
             }
-            choiceMap.set(currentChoiceIndex, currentReplacement);
             // Reset state for next choice
             acceptReplacement = false;
             acceptComma = true;
             acceptBlockEnd = true;
-            currentChoiceIndex = null;
+            currentChoiceIndexes = [];
             currentReplacement = null;
           } else {
             // Since there is no current choice index, this must be a fallback choice

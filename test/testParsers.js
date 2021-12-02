@@ -317,6 +317,20 @@ describe('parseInlineCommand', function() {
       new BackReference('TestChoice', expectedChoiceMap, null));
     expect(result.replacer).to.equal(null);
   });
+
+  it('allows grouped back references', function() {
+    let testString = '{@TestChoice: 0, 1 -> (foo), 2, 3 -> (bar), (baz)}';
+    let result = parseInlineCommand(testString, 0);
+    expect(result.blockEndIndex).to.equal(testString.length);
+    let expectedChoiceMap = new Map();
+    expectedChoiceMap.set(0, 'foo');
+    expectedChoiceMap.set(1, 'foo');
+    expectedChoiceMap.set(2, 'bar');
+    expectedChoiceMap.set(3, 'bar');
+    expect(result.backReference).to.deep.equal(
+      new BackReference('TestChoice', expectedChoiceMap, 'baz'));
+    expect(result.replacer).to.equal(null);
+  });
 });
 
 
@@ -542,6 +556,8 @@ describe('parseBackReference', function() {
     testParseStrToGiveSyntaxError('@TestRef: (foo)');
     testParseStrToGiveSyntaxError('@TestRef: (foo) 10');
     testParseStrToGiveSyntaxError('@TestRef: 0 -> (foo),, 1 -> (bar)');
+    testParseStrToGiveSyntaxError('@TestRef: 0,,2 -> (foo), 1 -> (bar)');
+    testParseStrToGiveSyntaxError('@TestRef: 0, 1');
     testParseStrToGiveSyntaxError('@TestRef: 0 -> (foo), (bar)');
     testParseStrToGiveSyntaxError('@TestRef: 0 -> (foo), call bar');
     testParseStrToGiveSyntaxError('@TestRef: 0 -> (foo), call bar, @TestRef2: 0 -> (foo)');

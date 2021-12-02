@@ -6,6 +6,7 @@
   stderr and give exit code 1.
 * Support trailing commas in inline choices
 * Support visual line breaks, marked by ending a line with a backslash.
+* Support grouping backrefs using `{@ref: 0, 1 -> (foo)}` syntax
 
 ### 0.0.22:
 * Remove accidentally-left-in debug log on regex matcher parsing
