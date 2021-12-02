@@ -1,7 +1,7 @@
 eval {
     provide({
         settings: {
-            version: '0.0.23-dev'
+            version: '0.0.23'
         },
         someFunc: (match, string, matchIndex) => {
             return 'some replacement string';
