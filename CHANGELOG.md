@@ -1,5 +1,8 @@
 # Changelog
 
+### 0.0.24:
+* tbd...
+
 ### 0.0.23:
 * Make all render settings available to the CLI
 * Make CLI errors from invalid arguments log more useful messages to
