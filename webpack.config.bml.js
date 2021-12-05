@@ -7,7 +7,7 @@ const config = {
   ],
   output: {
     path: path.resolve(__dirname, 'dist'),
-    filename: 'bml.bundle.js',
+    filename: 'bml.bundle.min.js',
   },
   module: {
     rules: [
@@ -29,7 +29,14 @@ const config = {
   },
   optimization: {
     minimize: true,
-    minimizer: [new TerserPlugin()]
+    minimizer: [new TerserPlugin({
+        terserOptions: {
+          format: {
+            comments: /@license/i,
+          },
+        },
+        extractComments: false,
+    })]
   }
 };
 
