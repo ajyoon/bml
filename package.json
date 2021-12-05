@@ -24,7 +24,10 @@
     "build": "./node_modules/.bin/webpack --config ./webpack.config.bml.js",
     "lint": "./node_modules/.bin/eslint .",
     "test-with-coverage": "./node_modules/.bin/nyc npm test",
-    "test-with-coverage-html": "./node_modules/.bin/nyc --reporter=html npm test"
+    "test-with-coverage-html": "./node_modules/.bin/nyc --reporter=html npm test",
+    "preversion": "npm test",
+    "version": "npm run build && git add -A dist",
+}
   },
   "devDependencies": {
     "babel-core": "^6.26.3",
