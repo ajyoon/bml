@@ -27,7 +27,6 @@
     "test-with-coverage-html": "./node_modules/.bin/nyc --reporter=html npm test",
     "preversion": "npm test",
     "version": "npm run build && git add -A dist"
-}
   },
   "devDependencies": {
     "babel-core": "^6.26.3",
