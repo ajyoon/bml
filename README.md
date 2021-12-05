@@ -64,16 +64,6 @@ Choices can refer to previously made choices using identifiers and choice indexe
 {@Name: 0 -> (She), 1 -> (He), (They)} bought some tofu.
 ```
 
-## syntax highlighting
-
-Experimental syntax highlighting for the browser is supported.
-```
-npm run buildHighlighting
-```
-```html
-<script src="/path/to/bml_highlighting.bundle.js"></script>
-```
-
 ---
 
 This project is under active development, and the language itself is not yet stable. Please expect breaking changes.

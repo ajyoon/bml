@@ -22,7 +22,6 @@
   "scripts": {
     "test": "./node_modules/.bin/mocha",
     "build": "./node_modules/.bin/webpack --config ./webpack.config.bml.js",
-    "buildHighlighting": "./node_modules/.bin/webpack --config ./webpack.config.bmlHighlighting.js",
     "lint": "./node_modules/.bin/eslint .",
     "test-with-coverage": "./node_modules/.bin/nyc npm test",
     "test-with-coverage-html": "./node_modules/.bin/nyc --reporter=html npm test"
@@ -44,7 +43,6 @@
   },
   "dependencies": {
     "marked": "^0.3.19",
-    "prismjs": "^1.25.0",
     "seedrandom": "2.4.4"
   },
   "license": "BSD-3-Clause"
