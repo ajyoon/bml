@@ -1,10 +1,8 @@
 node_modules
 .\#*
-dist/*
 npm-debug.log
 coverage/
 .nyc_output/
 
 **/.venv/
 **/build/
-*.bundle.js

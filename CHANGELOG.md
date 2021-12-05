@@ -1,7 +1,8 @@
 # Changelog
 
 ### 0.0.24:
-* tbd...
+* No real library or language changes. This is a stub release to start
+  uploading bundles to jsdelivr.
 
 ### 0.0.23:
 * Make all render settings available to the CLI
