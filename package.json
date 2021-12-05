@@ -26,7 +26,7 @@
     "test-with-coverage": "./node_modules/.bin/nyc npm test",
     "test-with-coverage-html": "./node_modules/.bin/nyc --reporter=html npm test",
     "preversion": "npm test",
-    "version": "npm run build && git add -A dist",
+    "version": "npm run build && git add -A dist"
 }
   },
   "devDependencies": {
