@@ -1,14 +1,13 @@
-# bml
+# [bml](https://bml-lang.org)
 
 [![Build Status](https://travis-ci.org/ajyoon/bml.svg?branch=master)](https://app.travis-ci.com/github/ajyoon/bml) [![Coverage Status](https://coveralls.io/repos/github/ajyoon/bml/badge.svg?branch=master)](https://coveralls.io/github/ajyoon/bml?branch=master)
 
-BML is a superset of natural language which applies stochastic transformations
-on text. Words and strings can be used as triggers for weighted random
-replacements and arbitrary transformations specified with javascript.
+BML is a superset of natural language which applies stochastic
+transformations on text.
 
-[Try it online!](https://sandbox.bml-lang.org)
-
-And check out [the VS Code extension](https://marketplace.visualstudio.com/items?itemName=bml-lang.bml-vscode) for syntax highlighting and built-in runner support!
+- [Try it online!](https://bml-lang.org/try)
+- [Read the docs](https://bml-lang.org)
+- [Install the VS Code extension](https://marketplace.visualstudio.com/items?itemName=bml-lang.bml-vscode)
 
 ## setup
 
