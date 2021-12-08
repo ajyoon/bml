@@ -204,6 +204,8 @@ function parseCall(lexer) {
   return new FunctionCall(callMatch[1]);
 }
 
+// Expects the lexer's current token immediately follows the
+// replacement list open braace.
 function parseReplacements(lexer, forRule) {
   let startIndex = lexer.index;
   let token;
@@ -255,16 +257,14 @@ function parseReplacements(lexer, forRule) {
           choices.push(new WeightedChoice(
             parseReplacementWithLexer(lexer), null));
           continue;
-        } else if (acceptReplacerEnd) {
-          return new Replacer(choices, forRule, identifier, isSilent);
         } else {
           throw new BMLSyntaxError('unexpected open paren',
                                    lexer.string, token.index);
         }
         break;
       case TokenType.CLOSE_BRACE:
-      case TokenType.SLASH:
         if (acceptReplacerEnd) {
+          lexer.next(); // Consume close brace
           return new Replacer(choices, forRule, identifier, isSilent);
         } else {
           throw new BMLSyntaxError(
@@ -299,11 +299,7 @@ function parseReplacements(lexer, forRule) {
           acceptComma = false;
           acceptReplacement = true;
           acceptWeight = false;
-          // Inline choices support trailing commas, but rules can't
-          // because that would make rule and mode ends ambiguous.
-          // (If rules used brace syntax this wouldn't be an issue,
-          // maybe something to consider.)
-          acceptReplacerEnd = !forRule;
+          acceptReplacerEnd = true;
         } else {
           throw new BMLSyntaxError('unexpected comma.',
                                    lexer.string, token.index);
@@ -329,6 +325,13 @@ function parseRule(lexer) {
                              lexer.string, lexer.index);
   }
   lexer.next();  // consume KW_AS
+
+  lexer.skipWhitespaceAndComments();
+  if (lexer.peek().tokenType !== TokenType.OPEN_BRACE) {
+    throw new BMLSyntaxError('rule replacers must be surrounded by braces',
+                             lexer.string, lexer.index);
+  }
+  lexer.next();  // consume OPEN_BRACE
   let replacements = parseReplacements(lexer, true);
   return new Rule(matchers, replacements);
 }
@@ -528,7 +531,7 @@ function parseInlineCommand(string, openBraceIndex) {
     replacements = parseReplacements(lexer, false);
   }
   return {
-    blockEndIndex: lexer.index + 1,
+    blockEndIndex: lexer.index,
     backReference: backReference,
     replacer: replacements,
   };
@@ -658,6 +661,7 @@ function parseBackReference(lexer) {
         break;
       case TokenType.CLOSE_BRACE:
         if (acceptBlockEnd) {
+          lexer.next();  // consume close brace
           return new BackReference(referredIdentifier, choiceMap, fallback);
         } else {
           throw new BMLSyntaxError('Unexpected close brace in back reference block', 

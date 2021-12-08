@@ -10,8 +10,8 @@ eval {
 }
 
 mode main {
-    (testslug) as call replaceWithRandomNumber 30, (b) 20
-    (recurse!) as (just kidding), (outer {(inner 1), (inner 2)})
+    (testslug) as { call replaceWithRandomNumber 30, (b) 20 }
+    (recurse!) as { (just kidding), (outer {(inner 1), (inner 2)}) }
 }
 
 mode literal {

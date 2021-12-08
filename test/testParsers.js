@@ -138,10 +138,10 @@ describe('parseMode', function() {
     let testString =
         `mode test {
              // some comments
-             (bml) as (BML)
+             (bml) as {(BML)}
              // more comments
-             /javascript/ as (Javascript) 30, (JS) 10,
-                 (js) 10
+             /javascript/ as {(Javascript) 30, (JS) 10,
+                 (js) 10}
              // more comments
         }`;
     let lexer = new Lexer(testString);
@@ -201,15 +201,15 @@ describe('parsePrelude', function() {
 
 describe('parseRule', function() {
   it('can parse a one-to-one rule', function() {
-    let testString = '(x) as (y)\n}';
+    let testString = '(x) as {(y)}\n}';
     let lexer = new Lexer(testString);
     let rule = parseRule(lexer);
-    expect(lexer.index).to.equal(testString.length - 1);
+    expect(lexer.index).to.equal(testString.length - 2);
     expect(rule.matchers.length).to.equal(1);
   });
 
   it('does not allow identifiers in replacers', function() {
-    let testString = '(x) as MisplacedTestIdentifier: (y)\n}';
+    let testString = '(x) as {MisplacedTestIdentifier: (y)}\n}';
     let lexer = new Lexer(testString);
     expect(() => parseRule(lexer)).to.throw(
       BMLSyntaxError, 'Choice identifiers are not allowed in rules');
@@ -412,7 +412,7 @@ describe('parseReplacements', function() {
     expect(result.weights[0]).to.be.an.instanceof(WeightedChoice);
     expect(result.weights[0].choice).to.equal('test');
     expect(result.weights[0].weight).to.equal(100);
-    expect(lexer.index).to.equal(testString.length - 1);
+    expect(lexer.index).to.equal(testString.length);
   });
 
   it('parses a call replacer', function() {
@@ -424,7 +424,7 @@ describe('parseReplacements', function() {
     expect(result.weights[0].choice).to.be.an.instanceof(FunctionCall);
     expect(result.weights[0].choice.functionName).to.equal('test');
     expect(result.weights[0].weight).to.equal(100);
-    expect(lexer.index).to.equal(testString.length - 1);
+    expect(lexer.index).to.equal(testString.length);
   });
 
   it('parses strings with weights', function() {
@@ -435,7 +435,7 @@ describe('parseReplacements', function() {
     expect(result.weights[0]).to.be.an.instanceof(WeightedChoice);
     expect(result.weights[0].choice).to.equal('test');
     expect(result.weights[0].weight).to.equal(5);
-    expect(lexer.index).to.equal(testString.length - 1);
+    expect(lexer.index).to.equal(testString.length);
   });
 
   it('parses call replacers with weights', function() {
@@ -447,7 +447,7 @@ describe('parseReplacements', function() {
     expect(result.weights[0].choice).to.be.an.instanceof(FunctionCall);
     expect(result.weights[0].choice.functionName).to.equal('test');
     expect(result.weights[0].weight).to.equal(5);
-    expect(lexer.index).to.equal(testString.length - 1);
+    expect(lexer.index).to.equal(testString.length);
   });
 
   it('parses many replacers with and without weights', function() {
@@ -469,18 +469,16 @@ describe('parseReplacements', function() {
     expect(result.weights[2].choice).to.equal('test3');
     expect(result.weights[2].weight).to.equal(3);
 
-    expect(lexer.index).to.equal(testString.length - 1);
+    expect(lexer.index).to.equal(testString.length);
   });
 
-  it('treats a new replacement not after a comma as the end of the replacer', function() {
+  it('fails when two choices are not separated by a comma', function() {
     let testString = '(test) (part of next rule)';
     let lexer = new Lexer(testString);
-    let result = parseReplacements(lexer, false);
-    expect(result.weights.length).to.equal(1);
-    expect(result.weights[0]).to.be.an.instanceof(WeightedChoice);
-    expect(result.weights[0].choice).to.equal('test');
-    expect(result.weights[0].weight).to.equal(100);
-    expect(lexer.index).to.equal(testString.indexOf('(part'));
+    expect(() => {
+      let result = parseReplacements(lexer, false);
+      console.log(result);
+    }).to.throw(BMLSyntaxError);
   });
 });
 

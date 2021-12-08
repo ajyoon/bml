@@ -1,6 +1,18 @@
 # Changelog
 
-### 0.0.25-dev:
+### 0.0.25: BREAKING CHANGE
+* Rule replacers must now be surrounded by curly braces
+
+  Rule replacers are now defined using the same syntax as anonymous
+  inline choices, harmonizing the syntax.
+
+  ```
+  mode example {
+      (foo) as (bar), (biz)
+      // is now
+      (foo) as {(bar), (biz)}
+  }
+  ```
 
 ### 0.0.24:
 * No real library or language changes. This is a stub release to start
