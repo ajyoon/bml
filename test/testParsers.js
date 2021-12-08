@@ -13,6 +13,7 @@ const Token = require('../src/token.js').Token;
 const TokenType = require('../src/tokenType.js').TokenType;
 const WeightedChoice = require('../src/weightedChoice.js').WeightedChoice;
 const BackReference = require('../src/backReference.js').BackReference;
+const noOp = require('../src/noOp.js');
 
 const JavascriptSyntaxError = errors.JavascriptSyntaxError;
 const UnknownTransformError = errors.UnknownTransformError;
@@ -138,10 +139,10 @@ describe('parseMode', function() {
     let testString =
         `mode test {
              // some comments
-             (bml) as {(BML)}
+             (bml) as {(BML), match}
              // more comments
              /javascript/ as {(Javascript) 30, (JS) 10,
-                 (js) 10}
+                 (js) 10, match}
              // more comments
         }`;
     let lexer = new Lexer(testString);
@@ -152,14 +153,18 @@ describe('parseMode', function() {
     expect(mode.rules).to.have.lengthOf(2);
     expect(mode.rules[0]).to.be.deep.equal(
       new Rule([/bml/y], new Replacer(
-        [new WeightedChoice('BML', null)], true, null, false))
+        [new WeightedChoice('BML', null),
+         new WeightedChoice(noOp, null)
+        ], null, false))
     );
     expect(mode.rules[1]).to.be.deep.equal(
       new Rule([/javascript/y], new Replacer(
         [new WeightedChoice('Javascript', 30),
          new WeightedChoice('JS', 10),
-         new WeightedChoice('js', 10)],
-        true, null, false))
+         new WeightedChoice('js', 10),
+         new WeightedChoice(noOp, null)
+        ],
+        null, false))
     );
   });
 });
@@ -201,18 +206,38 @@ describe('parsePrelude', function() {
 
 describe('parseRule', function() {
   it('can parse a one-to-one rule', function() {
-    let testString = '(x) as {(y)}\n}';
+    let testString = '(x) as {(y)}';
     let lexer = new Lexer(testString);
     let rule = parseRule(lexer);
-    expect(lexer.index).to.equal(testString.length - 2);
+    expect(lexer.index).to.equal(testString.length);
     expect(rule.matchers.length).to.equal(1);
   });
 
   it('does not allow identifiers in replacers', function() {
-    let testString = '(x) as {MisplacedTestIdentifier: (y)}\n}';
+    let testString = '(x) as {MisplacedTestIdentifier: (y)}';
     let lexer = new Lexer(testString);
     expect(() => parseRule(lexer)).to.throw(
       BMLSyntaxError, 'Choice identifiers are not allowed in rules');
+  });
+  
+  it('maps `match` keyword replacers to no-ops', function() {
+    let testString = '(a) as {(b), match 40}';
+    let lexer = new Lexer(testString);
+    let rule = parseRule(lexer);
+    expect(lexer.index).to.equal(testString.length);
+    expect(rule).to.be.deep.equal(
+      new Rule([/a/y], new Replacer(
+        [new WeightedChoice('b', null),
+         new WeightedChoice(noOp, 40)],
+        null, false))
+    );
+  });
+  
+  it('Errors if multiple `match` replacers are used', function() {
+    let testString = '(x) as {match, match 50}';
+    let lexer = new Lexer(testString);
+    expect(() => parseRule(lexer)).to.throw(
+      BMLSyntaxError, 'Rules may have at most one special `match` choice');
   });
 });
 

@@ -1,18 +1,11 @@
 const WeightedChoice = require('./weightedChoice.js').WeightedChoice;
-const noOp = require('./noOp.js');
 const _rand = require('./rand.js');
 const normalizeWeights = _rand.normalizeWeights;
 const weightedChoose = _rand.weightedChoose;
 
 class Replacer {
-  constructor(choices, includeNoOp, identifier, isSilent) {
-    if (includeNoOp) {
-      let choicesWithNoOp = choices.slice();
-      choicesWithNoOp.push(new WeightedChoice(noOp, null));
-      this.weights = normalizeWeights(choicesWithNoOp);
-    } else {
-      this.weights = normalizeWeights(choices);
-    }
+  constructor(choices, identifier, isSilent) {
+    this.weights = normalizeWeights(choices);
     this.identifier = identifier;
     this.isSilent = isSilent;
   }

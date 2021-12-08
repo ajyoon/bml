@@ -10,6 +10,7 @@ const TokenType = require('./tokenType.js').TokenType;
 const Rule = require('./rule.js').Rule;
 const Replacer = require('./replacer').Replacer;
 const BackReference = require('./backReference.js').BackReference;
+const noOp = require('./noOp.js');
 
 const UnknownTransformError = _errors.UnknownTransformError;
 const UnknownModeError = _errors.UnknownModeError;
@@ -215,6 +216,7 @@ function parseReplacements(lexer, forRule) {
   let acceptWeight = false;
   let acceptComma = false;
   let acceptReplacerEnd = false;
+  let matchReplacementFound = false;
   
   // I think this will fail if there is a linebreak or
   // comments after open brace but before identifier
@@ -249,23 +251,35 @@ function parseReplacements(lexer, forRule) {
         inComment = true;
         break;
       case TokenType.OPEN_PAREN:
+      case TokenType.KW_MATCH:
         if (acceptReplacement) {
           acceptReplacement = false;
           acceptWeight = true;
           acceptComma = true;
           acceptReplacerEnd = true;
-          choices.push(new WeightedChoice(
-            parseReplacementWithLexer(lexer), null));
-          continue;
+          if (token.tokenType == TokenType.KW_MATCH) {
+            if (matchReplacementFound) {
+              throw new BMLSyntaxError('Rules may have at most one special `match` choice',
+                                       lexer.string, token.index);
+            }
+            matchReplacementFound = true;
+            choices.push(new WeightedChoice(noOp, null));
+          } else {
+            choices.push(new WeightedChoice(
+              parseReplacementWithLexer(lexer), null));
+            // Replacement parser consumes tokens, so skip that in
+            // this loop
+            continue;
+          }
         } else {
-          throw new BMLSyntaxError('unexpected open paren',
+          throw new BMLSyntaxError('unexpected token',
                                    lexer.string, token.index);
         }
         break;
       case TokenType.CLOSE_BRACE:
         if (acceptReplacerEnd) {
           lexer.next(); // Consume close brace
-          return new Replacer(choices, forRule, identifier, isSilent);
+          return new Replacer(choices, identifier, isSilent);
         } else {
           throw new BMLSyntaxError(
             `unexpected end of replacer: ${token.tokenType}`,

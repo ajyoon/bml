@@ -165,6 +165,12 @@ describe('Lexer', function() {
     expect(lexer.next()).to.equal(null);
   });
 
+  it('tokenizes the keyword "match"', function() {
+    let lexer = new Lexer('match');
+    expect(lexer.next()).to.deep.equal(new Token(TokenType.KW_MATCH, 0, 'match'));
+    expect(lexer.next()).to.equal(null);
+  });
+
   it('tokenizes misc characters as individual text tokens', function() {
     let lexer = new Lexer('ab%');
     expect(lexer.next()).to.deep.equal(new Token(TokenType.TEXT, 0, 'a'));

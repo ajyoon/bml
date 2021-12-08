@@ -23,6 +23,7 @@ const TokenType = Object.freeze({
   KW_EVAL: Symbol('KW_EVAL'),
   KW_MODE: Symbol('KW_MODE'),
   KW_USE: Symbol('KW_USE'),
+  KW_MATCH: Symbol('KW_MATCH'),
   NUMBER: Symbol('NUMBER'),
   TEXT: Symbol('TEXT')
 });

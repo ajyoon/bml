@@ -110,6 +110,9 @@ class Lexer {
     } else if (this.string.slice(this.index, this.index + 3) === 'use') {
       tokenType = TokenType.KW_USE;
       tokenString = 'use';
+    } else if (this.string.slice(this.index, this.index + 5) === 'match') {
+      tokenType = TokenType.KW_MATCH;
+      tokenString = 'match';
     } else {
       tokenType = TokenType.TEXT;
       if (this.string[this.index] === '\\') {

@@ -13,6 +13,14 @@
       (foo) as {(bar), (biz)}
   }
   ```
+* Rules no longer automatically insert an implicit no-op replacement
+  branch. Users must now specify no-op replacement branches explicitly
+  using the new `match` keyword.
+
+  Where `(foo) as {(bar)}` used to be interpreted as "`foo` 50% of the
+  time and `bar` 50% of the time," this code is now interpreted as
+  "`bar` 100% of the time." To replicate the old behavior, use the new
+  `match` explicitly like so: `(foo) as {(bar), match}`.
 
 ### 0.0.24:
 * No real library or language changes. This is a stub release to start
