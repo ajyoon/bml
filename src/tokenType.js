@@ -13,6 +13,8 @@ const TokenType = Object.freeze({
   CLOSE_PAREN: Symbol('CLOSE_PAREN'),
   OPEN_BRACE: Symbol('OPEN_BRACE'),
   CLOSE_BRACE: Symbol('CLOSE_BRACE'),
+  OPEN_DOUBLE_BRACKET: Symbol('OPEN_DOUBLE_BRACKET'),
+  CLOSE_DOUBLE_BRACKET: Symbol('CLOSE_DOUBLE_BRACKET'),
   COMMA: Symbol('COMMA'),
   COLON: Symbol('COLON'),
   AT: Symbol('AT'),

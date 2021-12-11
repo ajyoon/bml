@@ -132,56 +132,46 @@ function parseMatchers(lexer) {
   let startIndex = lexer.index;
   let token;
   let acceptMatcher = true;
-  let inComment = false;
   let matchers = [];
   while ((token = lexer.peek()) !== null) {
-    if (inComment) {
-      if (token.tokenType === TokenType.NEW_LINE) {
-        inComment = false;
-      }
-    } else {
-      switch (token.tokenType) {
-      case TokenType.WHITESPACE:
-      case TokenType.NEW_LINE:
-        break;
-      case TokenType.COMMENT:
-        inComment = true;
-        break;
-      case TokenType.KW_AS:
-        return matchers;
-      case TokenType.SLASH:
-        if (acceptMatcher) {
-          matchers.push(parseRegexMatcher(lexer));
-          acceptMatcher = false;
-          // break out of loop since the string literal token
-          // stream has already been consumed.
-          continue;
-        } else {
-          throw new BMLSyntaxError('unexpected regex literal.',
-                                   lexer.string, token.index);
-        }
-        break;
-      case TokenType.OPEN_PAREN:
-        if (acceptMatcher) {
-          let strMatcher = parseReplacementWithLexer(lexer);
-          let matcher = new RegExp(escapeRegExp(strMatcher), 'y');
-          matchers.push(matcher);
-          acceptMatcher = false;
-          // break out of loop since the string literal token
-          // stream has already been consumed.
-          continue;
-        } else {
-          throw new BMLSyntaxError('unexpected string literal.',
-                                   lexer.string, token.index);
-        }
-        break;
-      case TokenType.COMMA:
-        acceptMatcher = true;
-        break;
-      default:
-        throw new BMLSyntaxError(`Unexpected token ${token}`,
+    switch (token.tokenType) {
+    case TokenType.WHITESPACE:
+    case TokenType.NEW_LINE:
+      break;
+    case TokenType.KW_AS:
+      return matchers;
+    case TokenType.SLASH:
+      if (acceptMatcher) {
+        matchers.push(parseRegexMatcher(lexer));
+        acceptMatcher = false;
+        // break out of loop since the string literal token
+        // stream has already been consumed.
+        continue;
+      } else {
+        throw new BMLSyntaxError('unexpected regex literal.',
                                  lexer.string, token.index);
       }
+      break;
+    case TokenType.OPEN_PAREN:
+      if (acceptMatcher) {
+        let strMatcher = parseReplacementWithLexer(lexer);
+        let matcher = new RegExp(escapeRegExp(strMatcher), 'y');
+        matchers.push(matcher);
+        acceptMatcher = false;
+        // break out of loop since the string literal token
+        // stream has already been consumed.
+        continue;
+      } else {
+        throw new BMLSyntaxError('unexpected string literal.',
+                                 lexer.string, token.index);
+      }
+      break;
+    case TokenType.COMMA:
+      acceptMatcher = true;
+      break;
+    default:
+      throw new BMLSyntaxError(`Unexpected token ${token}`,
+                               lexer.string, token.index);
     }
     // If we haven't broken out or thrown an error by now, consume this token.
     lexer.next();
@@ -207,7 +197,6 @@ function parseCall(lexer) {
 function parseReplacements(lexer, forRule) {
   let startIndex = lexer.index;
   let token;
-  let inComment = false;
   let choices = [];
   let acceptReplacement = true;
   let acceptWeight = false;
@@ -235,92 +224,84 @@ function parseReplacements(lexer, forRule) {
   }
 
   while ((token = lexer.peek()) !== null) {
-    if (inComment) {
-      if (token.tokenType === TokenType.NEW_LINE) {
-        inComment = false;
-      }
-    } else {
-      switch (token.tokenType) {
-      case TokenType.WHITESPACE:
-      case TokenType.NEW_LINE:
-        break;
-      case TokenType.COMMENT:
-        inComment = true;
-        break;
-      case TokenType.OPEN_PAREN:
-      case TokenType.KW_MATCH:
-        if (acceptReplacement) {
-          acceptReplacement = false;
-          acceptWeight = true;
-          acceptComma = true;
-          acceptReplacerEnd = true;
-          if (token.tokenType == TokenType.KW_MATCH) {
-            if (matchReplacementFound) {
-              throw new BMLSyntaxError('Rules may have at most one special `match` choice',
-                                       lexer.string, token.index);
-            }
-            matchReplacementFound = true;
-            choices.push(new WeightedChoice(noOp, null));
-          } else {
-            choices.push(new WeightedChoice(
-              parseReplacementWithLexer(lexer), null));
-            // Replacement parser consumes tokens, so skip that in
-            // this loop
-            continue;
+    switch (token.tokenType) {
+    case TokenType.WHITESPACE:
+    case TokenType.NEW_LINE:
+      break;
+    case TokenType.OPEN_PAREN:
+    case TokenType.KW_MATCH:
+      if (acceptReplacement) {
+        acceptReplacement = false;
+        acceptWeight = true;
+        acceptComma = true;
+        acceptReplacerEnd = true;
+        if (token.tokenType == TokenType.KW_MATCH) {
+          if (matchReplacementFound) {
+            throw new BMLSyntaxError('Rules may have at most one special `match` choice',
+                                     lexer.string, token.index);
           }
+          matchReplacementFound = true;
+          choices.push(new WeightedChoice(noOp, null));
         } else {
-          throw new BMLSyntaxError('unexpected token',
-                                   lexer.string, token.index);
+          choices.push(new WeightedChoice(
+            parseReplacementWithLexer(lexer), null));
+          // Replacement parser consumes tokens, so skip that in
+          // this loop
+          continue;
         }
-        break;
-      case TokenType.CLOSE_BRACE:
-        if (acceptReplacerEnd) {
-          lexer.next(); // Consume close brace
-          return new Replacer(choices, identifier, isSilent);
-        } else {
-          throw new BMLSyntaxError(
-            `unexpected end of replacer: ${token.tokenType}`,
-            lexer.string, token.index);
-        }
-      case TokenType.KW_CALL:
-        if (acceptReplacement) {
-          acceptReplacement = false;
-          acceptWeight = true;
-          acceptComma = true;
-          acceptReplacerEnd = true;
-          choices.push(new WeightedChoice(parseCall(lexer), null));
-        } else {
-          throw new BMLSyntaxError('unexpected call statement.',
-                                   lexer.string, token.index);
-        }
-        continue;
-      case TokenType.NUMBER:
-        if (acceptWeight) {
-          acceptWeight = false;
-          acceptComma = true;
-          acceptReplacerEnd = true;
-          choices[choices.length - 1].weight = Number(token.string);
-        } else {
-          throw new BMLSyntaxError('unexpected number literal.',
-                                   lexer.string, token.index);
-        }
-        break;
-      case TokenType.COMMA:
-        if (acceptComma) {
-          acceptComma = false;
-          acceptReplacement = true;
-          acceptWeight = false;
-          acceptReplacerEnd = true;
-        } else {
-          throw new BMLSyntaxError('unexpected comma.',
-                                   lexer.string, token.index);
-        }
-        break;
-      default:
-        throw new BMLSyntaxError(`Unexpected token ${token}`,
+      } else {
+        throw new BMLSyntaxError('unexpected token',
                                  lexer.string, token.index);
       }
+      break;
+    case TokenType.CLOSE_BRACE:
+      if (acceptReplacerEnd) {
+        lexer.next(); // Consume close brace
+        return new Replacer(choices, identifier, isSilent);
+      } else {
+        throw new BMLSyntaxError(
+          `unexpected end of replacer: ${token.tokenType}`,
+          lexer.string, token.index);
+      }
+    case TokenType.KW_CALL:
+      if (acceptReplacement) {
+        acceptReplacement = false;
+        acceptWeight = true;
+        acceptComma = true;
+        acceptReplacerEnd = true;
+        choices.push(new WeightedChoice(parseCall(lexer), null));
+      } else {
+        throw new BMLSyntaxError('unexpected call statement.',
+                                 lexer.string, token.index);
+      }
+      continue;
+    case TokenType.NUMBER:
+      if (acceptWeight) {
+        acceptWeight = false;
+        acceptComma = true;
+        acceptReplacerEnd = true;
+        choices[choices.length - 1].weight = Number(token.string);
+      } else {
+        throw new BMLSyntaxError('unexpected number literal.',
+                                 lexer.string, token.index);
+      }
+      break;
+    case TokenType.COMMA:
+      if (acceptComma) {
+        acceptComma = false;
+        acceptReplacement = true;
+        acceptWeight = false;
+        acceptReplacerEnd = true;
+      } else {
+        throw new BMLSyntaxError('unexpected comma.',
+                                 lexer.string, token.index);
+      }
+      break;
+    default:
+      throw new BMLSyntaxError(`Unexpected token ${token}`,
+                               lexer.string, token.index);
     }
+    
     // If we haven't broken out or thrown an error by now, consume this token.
     lexer.next();
   }
@@ -362,32 +343,22 @@ function parseMode(lexer) {
   }
   lexer.next();  // consume open brace
 
-  let inComment = false;
   while ((token = lexer.peek()) !== null) {
-    if (inComment) {
-      if (token.tokenType === TokenType.NEW_LINE) {
-        inComment = false;
-      }
-    } else {
-      switch (token.tokenType) {
-      case TokenType.WHITESPACE:
-      case TokenType.NEW_LINE:
-        break;
-      case TokenType.COMMENT:
-        inComment = true;
-        break;
-      case TokenType.OPEN_PAREN:
-      case TokenType.SLASH:
-        mode.rules.push(parseRule(lexer));
-        continue;
-      case TokenType.CLOSE_BRACE:
-        // consume closing brace
-        lexer.next();
-        return mode;
-      default:
-        throw new BMLSyntaxError(`Unexpected token ${token}`,
-                                 lexer.string, token.index);
-      }
+    switch (token.tokenType) {
+    case TokenType.WHITESPACE:
+    case TokenType.NEW_LINE:
+      break;
+    case TokenType.OPEN_PAREN:
+    case TokenType.SLASH:
+      mode.rules.push(parseRule(lexer));
+      continue;
+    case TokenType.CLOSE_BRACE:
+      // consume closing brace
+      lexer.next();
+      return mode;
+    default:
+      throw new BMLSyntaxError(`Unexpected token ${token}`,
+                               lexer.string, token.index);
     }
     // Accept and consume the token
     lexer.next();
@@ -399,37 +370,27 @@ function parseMode(lexer) {
 
 function parsePrelude(string) {
   let lexer = new Lexer(string);
-  let inComment = false;
   let evalString = '';
   let modes = {};
   let token;
   while ((token = lexer.peek()) !== null) {
-    if (inComment) {
-      if (token.tokenType === TokenType.NEW_LINE) {
-        inComment = false;
-      }
-    } else {
-      switch (token.tokenType) {
-      case TokenType.WHITESPACE:
-      case TokenType.NEW_LINE:
-        break;
-      case TokenType.COMMENT:
-        inComment = true;
-        break;
-      case TokenType.KW_EVAL:
-        evalString += parseEval(lexer) + '\n';
-        continue;
-      case TokenType.KW_MODE:
-        var newMode = parseMode(lexer);
-        modes[newMode.name] = newMode;
-        continue;
-      default:
-        return {
-          preludeEndIndex: lexer.index,
-          evalBlock: new EvalBlock(evalString),
-          modes: modes,
-        };
-      }
+    switch (token.tokenType) {
+    case TokenType.WHITESPACE:
+    case TokenType.NEW_LINE:
+      break;
+    case TokenType.KW_EVAL:
+      evalString += parseEval(lexer) + '\n';
+      continue;
+    case TokenType.KW_MODE:
+      var newMode = parseMode(lexer);
+      modes[newMode.name] = newMode;
+      continue;
+    default:
+      return {
+        preludeEndIndex: lexer.index,
+        evalBlock: new EvalBlock(evalString),
+        modes: modes,
+      };
     }
     lexer.next();
   }
@@ -568,116 +529,106 @@ function parseBackReference(lexer) {
   let acceptReplacement = false;
   let acceptComma = false;
   let acceptBlockEnd = true;
-  let inComment = false;
 
   let currentChoiceIndexes = [];
   let currentReplacement = null;
   let token;
   
   while ((token = lexer.peek()) !== null) {
-    if (inComment) {
-      if (token.tokenType === TokenType.NEW_LINE) {
-        inComment = false;
-      }
-    } else {
-      switch (token.tokenType) {
-      case TokenType.WHITESPACE:
-      case TokenType.NEW_LINE:
-        break;
-      case TokenType.COMMENT:
-        inComment = true;
-        break;
-      case TokenType.COLON:
-        if (acceptColon) {
-          acceptColon = false;
-          acceptChoiceIndex = true;
-          acceptBlockEnd = false;
-        } else {
-          throw new BMLSyntaxError('Unexpected colon in back reference block',
-                                   lexer.string, token.index);
-        }
-        break;
-      case TokenType.NUMBER:
-        if (acceptChoiceIndex) {
-          acceptChoiceIndex = false;
-          acceptArrow = true;
-          acceptComma = true;
-          currentChoiceIndexes.push(Number(token.string));
-        } else {
-          throw new BMLSyntaxError('Unexpected number in back reference block',
-                                   lexer.string, token.index);
-        }
-        break;
-      case TokenType.ARROW:
-        if (acceptArrow) {
-          acceptArrow = false;
-          acceptReplacement = true;
-          acceptComma = false;
-        } else {
-          throw new BMLSyntaxError('Unexpected arrow in back reference block', 
-                                   lexer.string, token.index);
-        }
-        break;
-      case TokenType.OPEN_PAREN:
-      case TokenType.KW_CALL:
-        if (acceptReplacement) {
-          if (token.tokenType === TokenType.OPEN_PAREN) {
-            currentReplacement = parseReplacementWithLexer(lexer);
-          } else {
-            currentReplacement = parseCall(lexer);
-          }
-          if (currentChoiceIndexes.length) {
-            for (let choiceIndex of currentChoiceIndexes) {
-              if (choiceMap.has(choiceIndex)) {
-                // it's not ideal to validate this here, but with the way it's currently
-                // built, if we don't it will just silently overwrite the key
-                throw new BMLDuplicatedRefIndexError(
-                  referredIdentifier, choiceIndex, lexer.string, token.index);
-              }
-              choiceMap.set(choiceIndex, currentReplacement);
-            }
-            // Reset state for next choice
-            acceptReplacement = false;
-            acceptComma = true;
-            acceptBlockEnd = true;
-            currentChoiceIndexes = [];
-            currentReplacement = null;
-          } else {
-            // Since there is no current choice index, this must be a fallback choice
-            fallback = currentReplacement;
-            // Set state so the block must end here.
-            acceptReplacement = false;
-            acceptComma = false;
-            acceptBlockEnd = true;
-          }
-        } else {
-          throw new BMLSyntaxError('Unexpected replacement in back reference block', 
-                                   lexer.string, token.index);
-        }
-        continue;
-      case TokenType.COMMA:
-        if (acceptComma) {
-          acceptComma = false;
-          acceptChoiceIndex = true;
-          // Replacements can directly follow commas if they are fallbacks
-          acceptReplacement = true;
-        } else {
-          throw new BMLSyntaxError('Unexpected comma in back reference block', 
-                                   lexer.string, token.index);
-        }
-        break;
-      case TokenType.CLOSE_BRACE:
-        if (acceptBlockEnd) {
-          lexer.next();  // consume close brace
-          return new BackReference(referredIdentifier, choiceMap, fallback);
-        } else {
-          throw new BMLSyntaxError('Unexpected close brace in back reference block', 
-                                   lexer.string, token.index);
-        }
-      default:
-        throw new BMLSyntaxError(`Unexpected token ${token}`,
+    switch (token.tokenType) {
+    case TokenType.WHITESPACE:
+    case TokenType.NEW_LINE:
+      break;
+    case TokenType.COLON:
+      if (acceptColon) {
+        acceptColon = false;
+        acceptChoiceIndex = true;
+        acceptBlockEnd = false;
+      } else {
+        throw new BMLSyntaxError('Unexpected colon in back reference block',
                                  lexer.string, token.index);
       }
+      break;
+    case TokenType.NUMBER:
+      if (acceptChoiceIndex) {
+        acceptChoiceIndex = false;
+        acceptArrow = true;
+        acceptComma = true;
+        currentChoiceIndexes.push(Number(token.string));
+      } else {
+        throw new BMLSyntaxError('Unexpected number in back reference block',
+                                 lexer.string, token.index);
+      }
+      break;
+    case TokenType.ARROW:
+      if (acceptArrow) {
+        acceptArrow = false;
+        acceptReplacement = true;
+        acceptComma = false;
+      } else {
+        throw new BMLSyntaxError('Unexpected arrow in back reference block', 
+                                 lexer.string, token.index);
+      }
+      break;
+    case TokenType.OPEN_PAREN:
+    case TokenType.KW_CALL:
+      if (acceptReplacement) {
+        if (token.tokenType === TokenType.OPEN_PAREN) {
+          currentReplacement = parseReplacementWithLexer(lexer);
+        } else {
+          currentReplacement = parseCall(lexer);
+        }
+        if (currentChoiceIndexes.length) {
+          for (let choiceIndex of currentChoiceIndexes) {
+            if (choiceMap.has(choiceIndex)) {
+              // it's not ideal to validate this here, but with the way it's currently
+              // built, if we don't it will just silently overwrite the key
+              throw new BMLDuplicatedRefIndexError(
+                referredIdentifier, choiceIndex, lexer.string, token.index);
+            }
+            choiceMap.set(choiceIndex, currentReplacement);
+          }
+          // Reset state for next choice
+          acceptReplacement = false;
+          acceptComma = true;
+          acceptBlockEnd = true;
+          currentChoiceIndexes = [];
+          currentReplacement = null;
+        } else {
+          // Since there is no current choice index, this must be a fallback choice
+          fallback = currentReplacement;
+          // Set state so the block must end here.
+          acceptReplacement = false;
+          acceptComma = false;
+          acceptBlockEnd = true;
+        }
+      } else {
+        throw new BMLSyntaxError('Unexpected replacement in back reference block', 
+                                 lexer.string, token.index);
+      }
+      continue;
+    case TokenType.COMMA:
+      if (acceptComma) {
+        acceptComma = false;
+        acceptChoiceIndex = true;
+        // Replacements can directly follow commas if they are fallbacks
+        acceptReplacement = true;
+      } else {
+        throw new BMLSyntaxError('Unexpected comma in back reference block', 
+                                 lexer.string, token.index);
+      }
+      break;
+    case TokenType.CLOSE_BRACE:
+      if (acceptBlockEnd) {
+        lexer.next();  // consume close brace
+        return new BackReference(referredIdentifier, choiceMap, fallback);
+      } else {
+        throw new BMLSyntaxError('Unexpected close brace in back reference block', 
+                                 lexer.string, token.index);
+      }
+    default:
+      throw new BMLSyntaxError(`Unexpected token ${token}`,
+                               lexer.string, token.index);
     }
     // If we haven't broken out or thrown an error by now, consume this token.
     lexer.next();

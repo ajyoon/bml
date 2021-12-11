@@ -12,9 +12,12 @@ const parseUse = _parsers.parseUse;
 const parseInlineCommand = _parsers.parseInlineCommand;
 const EvalBlock = require('./evalBlock.js').EvalBlock;
 const FunctionCall = require('./functionCall.js').FunctionCall;
+const Lexer = require('./lexer.js').Lexer;
+const TokenType = require('./tokenType.js').TokenType;
 const noOp = require('./noOp.js');
 const UnknownModeError = _errors.UnknownModeError;
 const BMLDuplicatedRefError = _errors.BMLDuplicatedRefError;
+const IllegalStateError = _errors.IllegalStateError;
 const BML_VERSION = require('../package.json')['version'];
 
 /**
@@ -76,53 +79,58 @@ function renderText(string, startIndex, modes, activeMode,
   let inVisualLineBreak = false;
   let inLiteralBlock = false;
   let out = '';
-  let index = startIndex;
   let currentRule = null;
   let foundMatch = false;
   let replacement = null;
   let chooseRe = /\s*(\(|call|#?\w+:|@\w+)/y;
   let useRe = /\s*(use|using)/y;
-  let nonNewlineWhitespaceRe = /[^\S\r\n]/;
-  
+  let token;
+  let lexer = new Lexer(string);
+  lexer.overrideIndex(startIndex);
+
   if (stackDepth > 1000) {
     throw new Error(
       'render stack depth exceeded 1000, aborting likely infinite recursion.');
   }
 
-  while (index < string.length) {
-    if (isEscaped) {
-      isEscaped = false;
-      if (string[index] === '\n') {
-        // escaped line breaks are treated as visual line breaks which
-        // turn the newline and any following whitespace into a single
-        // whitespace.
-        inVisualLineBreak = true;
-        out += ' ';
-      } else {
-        out += string[index];
-      }
-    } else if (inVisualLineBreak) {
-      if (!nonNewlineWhitespaceRe.test(string[index])) {
-        // A gross hack, but make sure we process this character again
-        // normally now        
-        index -= 1;
-        inVisualLineBreak = false;
-      }
-    } else if (inLiteralBlock) {
-      if (string[index] === '\\') {
-        isEscaped = true;
-      } else if (string.slice(index, index + 2) === ']]') {
+  while ((token = lexer.peek()) !== null) {
+
+    if (inLiteralBlock) {
+      if (token.tokenType === TokenType.CLOSE_DOUBLE_BRACKET) {
         inLiteralBlock = false;
-        index += 2;
+        lexer.next();
+        continue;
+      }
+    }
+
+    if (inVisualLineBreak) {
+      if (token.tokenType === TokenType.WHITESPACE) {
+        lexer.next();
         continue;
       } else {
-        out += string[index];
+        inVisualLineBreak = false;
       }
-    } else if (string.slice(index, index + 1) === '{') {
-      chooseRe.lastIndex = index + 1;
-      useRe.lastIndex = index + 1;
+    }
+
+    switch (token.tokenType) {
+    case TokenType.OPEN_DOUBLE_BRACKET:
+      inLiteralBlock = true;
+      break;
+    case TokenType.NEW_LINE:
+      if (out.endsWith('\\')) {
+        inVisualLineBreak = true;
+        // hackily overwrite the backslash to a space since it's for a
+        // visual line break.
+        out = out.substring(0, out.length - 1) + ' ';
+      } else {
+        out += token.string;
+      }
+      break;
+    case TokenType.OPEN_BRACE:
+      chooseRe.lastIndex = token.index + 1;
+      useRe.lastIndex = token.index + 1;
       if (chooseRe.test(string)) {
-        let parseInlineCommandResult = parseInlineCommand(string, index, false);
+        let parseInlineCommandResult = parseInlineCommand(string, token.index, false);
         let replacer = parseInlineCommandResult.replacer;
         let backReference = parseInlineCommandResult.backReference;
         let replacerCallResult;
@@ -130,20 +138,20 @@ function renderText(string, startIndex, modes, activeMode,
           replacerCallResult = replacer.call();
           if (replacer.identifier) {
             if (choiceResultMap.has(replacer.identifier)) {
-              throw new BMLDuplicatedRefError(replacer.identifier, string, index);
+              throw new BMLDuplicatedRefError(replacer.identifier, string, token.index);
             }
           }
           replacement = replacerCallResult.replacement;
         } else {
           // sanity check
           if (!backReference) {
-            throw new Error('Illegal state - no replacer or backref from inline choose');
+            throw new IllegalStateError('No replacer or backref from inline choose');
           }
           replacement = resolveBackReference(choiceResultMap, backReference);
         }
         let renderedReplacement;
         if (replacement instanceof FunctionCall) {
-          renderedReplacement = replacement.execute(userDefs, null, string, index);
+          renderedReplacement = replacement.execute(userDefs, null, string, token.index);
         } else {
           // To handle nested choices and to run rules over chosen text,
           // we recursively render the chosen text.
@@ -158,60 +166,57 @@ function renderText(string, startIndex, modes, activeMode,
             replacer.identifier,
             { choiceIndex: replacerCallResult.choiceIndex, renderedOutput: renderedReplacement});
         }
-        index = parseInlineCommandResult.blockEndIndex;
+        lexer.overrideIndex(parseInlineCommandResult.blockEndIndex);
         continue;
       } else if (useRe.test(string)) {
-        let parseUseResult = parseUse(string, index);
-        index = parseUseResult.blockEndIndex;
+        let parseUseResult = parseUse(string, token.index);
+        lexer.overrideIndex(parseUseResult.blockEndIndex);
         if (modes.hasOwnProperty(parseUseResult.modeName)) {
           activeMode = modes[parseUseResult.modeName];
         } else {
-          throw new UnknownModeError(string, index, parseUseResult.modeName);
+          throw new UnknownModeError(string, token.index, parseUseResult.modeName);
         }
       }
-    } else {
-      if (string[index] === '\\') {
-        isEscaped = true;
-      } else if (string.slice(index, index + 2) === '[[') {
-        index++;
-        inLiteralBlock = true;
-      } else {
-        if (activeMode !== null) {
-          ruleLoop:
-          for (let r = 0; r < activeMode.rules.length; r++) {
-            currentRule = activeMode.rules[r];
-            for (let m = 0; m < currentRule.matchers.length; m++) {
-              currentRule.matchers[m].lastIndex = index;
-              let currentMatch = currentRule.matchers[m].exec(string);
-              if (currentMatch !== null) {
-                replacement = currentRule.replacer.call().replacement;
-                if (replacement instanceof FunctionCall) {
-                  out += replacement.execute(userDefs, currentMatch, string, index);
-                } else if (replacement === noOp) {
-                  out += currentMatch[0];
-                } else {
-                  // To handle nested choices and to run rules over replaced text,
-                  // we recursively render the chosen text.
-                  let renderedReplacement = renderText(
-                    replacement, 0, modes, activeMode, userDefs, choiceResultMap, stackDepth + 1);
-                  out += renderedReplacement;
-                }
-                index += currentMatch[0].length;
-                foundMatch = true;
-                break ruleLoop;
+      break;
+    default:
+      if (activeMode !== null) {
+        ruleLoop:
+        for (let r = 0; r < activeMode.rules.length; r++) {
+          currentRule = activeMode.rules[r];
+          for (let m = 0; m < currentRule.matchers.length; m++) {
+            currentRule.matchers[m].lastIndex = token.index;
+            let currentMatch = currentRule.matchers[m].exec(string);
+            if (currentMatch !== null) {
+              replacement = currentRule.replacer.call().replacement;
+              if (replacement instanceof FunctionCall) {
+                out += replacement.execute(userDefs, currentMatch, string, token.index);
+              } else if (replacement === noOp) {
+                out += currentMatch[0];
+              } else {
+                // To handle nested choices and to run rules over replaced text,
+                // we recursively render the chosen text.
+                let renderedReplacement = renderText(
+                  replacement, 0, modes, activeMode, userDefs, choiceResultMap, stackDepth + 1);
+                out += renderedReplacement;
               }
+              lexer.overrideIndex(lexer.index + currentMatch[0].length);
+              foundMatch = true;
+              break ruleLoop;
             }
           }
         }
-        if (foundMatch) {
-          foundMatch = false;
-          continue;
-        } else {
-          out += string[index];
-        }
       }
+      if (foundMatch) {
+        foundMatch = false;
+        continue;
+      } else {
+        out += token.string;
+      }
+
+      break;  // Break from `switch (token.tokenType)`
     }
-    index++;
+
+    lexer.next();  // Consume token
   }
 
   return out;
@@ -250,7 +255,7 @@ function render(bmlDocumentString, renderSettings) {
     evalBlock,
     modes,
   } = parsePrelude(bmlDocumentString);
-  
+
   let userDefs = {};
   if (evalBlock && renderSettings.allowEval) {
     userDefs = evalBlock.execute();
@@ -261,7 +266,7 @@ function render(bmlDocumentString, renderSettings) {
   // Main render pass
   let output = renderText(
     bmlDocumentString, preludeEndIndex, modes, null, userDefs, null, 0);
-  
+
   // Post-processing
   if (renderSettings.renderMarkdown) {
     output = postprocessing.renderMarkdown(output, userDefs.settings.markdownSettings);

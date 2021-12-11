@@ -156,6 +156,7 @@ describe('bml', function() {
 /* a block comment
    spanning multiple lines */
 outer text
+// another line comment
 {(// a line comment inside a choice
 // Comments can include string/command delimiters too )}
 inner text /* a block comment inside a choice */

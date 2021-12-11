@@ -92,6 +92,12 @@ class Lexer {
     } else if (this.string[this.index] === '|') {
       tokenType = TokenType.PIPE;
       tokenString = '|';
+    } else if (this.string.slice(this.index, this.index + 2) === '[[') {
+      tokenType = TokenType.OPEN_DOUBLE_BRACKET;
+      tokenString = '[[';
+    } else if (this.string.slice(this.index, this.index + 2) === ']]') {
+      tokenType = TokenType.CLOSE_DOUBLE_BRACKET;
+      tokenString = ']]';
     } else if (this.string.slice(this.index, this.index + 2) === '->') {
       tokenType = TokenType.ARROW;
       tokenString = '->';

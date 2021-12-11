@@ -78,7 +78,7 @@ describe('Lexer', function() {
     expect(lexer.next()).to.deep.equal(new Token(TokenType.BACKTICK, 0, '`'));
     expect(lexer.next()).to.equal(null);
   });
-  
+
   it('tokenizes open paren', function() {
     let lexer = new Lexer('(');
     expect(lexer.next()).to.deep.equal(new Token(TokenType.OPEN_PAREN, 0, '('));
@@ -130,6 +130,18 @@ describe('Lexer', function() {
   it('tokenizes arrow', function() {
     let lexer = new Lexer('->');
     expect(lexer.next()).to.deep.equal(new Token(TokenType.ARROW, 0, '->'));
+    expect(lexer.next()).to.equal(null);
+  });
+
+  it('tokenizes open double bracket', function() {
+    let lexer = new Lexer('[[');
+    expect(lexer.next()).to.deep.equal(new Token(TokenType.OPEN_DOUBLE_BRACKET, 0, '[['));
+    expect(lexer.next()).to.equal(null);
+  });
+
+  it('tokenizes close double bracket', function() {
+    let lexer = new Lexer(']]');
+    expect(lexer.next()).to.deep.equal(new Token(TokenType.CLOSE_DOUBLE_BRACKET, 0, ']]'));
     expect(lexer.next()).to.equal(null);
   });
 
@@ -256,19 +268,19 @@ describe('Lexer', function() {
     expect(lexer.peek()).to.equal(null);
     expect(lexer.next()).to.equal(null);
   });
-  
+
   it('automatically skips line comments', function() {
     let lexer = new Lexer('//foo\ntest');
     expect(lexer.peek()).to.deep.equal(new Token(TokenType.TEXT, 6, 't'));
     expect(lexer.next()).to.deep.equal(new Token(TokenType.TEXT, 6, 't'));
   });
-  
+
   it('skips over sequential line comments', function() {
     let lexer = new Lexer('//foo\n//bar\ntest');
     expect(lexer.peek()).to.deep.equal(new Token(TokenType.TEXT, 12, 't'));
     expect(lexer.next()).to.deep.equal(new Token(TokenType.TEXT, 12, 't'));
   });
-  
+
   it('converts block comments into a single white space', function() {
     let lexer = new Lexer('/* foo \n\n  bar    */test');
     expect(lexer.peek()).to.deep.equal(new Token(TokenType.WHITESPACE, 19, ' '));
@@ -276,13 +288,13 @@ describe('Lexer', function() {
     expect(lexer.peek()).to.deep.equal(new Token(TokenType.TEXT, 20, 't'));
     expect(lexer.next()).to.deep.equal(new Token(TokenType.TEXT, 20, 't'));
   });
-  
+
   it('can skip to the next token satisfying a predicate', function() {
     let lexer = new Lexer('abc');
     expect(lexer.nextSatisfying((t) => t.string === 'b'))
       .to.deep.equal(new Token(TokenType.TEXT, 1, 'b'));
   });
-  
+
   it('can skip to the next non-whitespace (or comment) token', function() {
     let lexer = new Lexer('   \n\n test');
     expect(lexer.nextNonWhitespace())

@@ -1,5 +1,8 @@
 # Changelog
 
+### 0.0.27:
+* Fix bug causing comments to not be stripped out in many situations
+
 ### 0.0.26: BREAKING CHANGE
 * Line and block comments are now supported in plain body text,
   including text in choice branches. Line comments emit no output
