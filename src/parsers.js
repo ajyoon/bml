@@ -12,6 +12,7 @@ const Replacer = require('./replacer').Replacer;
 const BackReference = require('./backReference.js').BackReference;
 const noOp = require('./noOp.js');
 
+const IllegalStateError = _errors.IllegalStateError;
 const UnknownTransformError = _errors.UnknownTransformError;
 const UnknownModeError = _errors.UnknownModeError;
 const JavascriptSyntaxError = _errors.JavascriptSyntaxError;
@@ -32,19 +33,15 @@ const escapeRegExp = _stringUtils.escapeRegExp;
  *     block contains a syntax error which makes parsing it impossible.
  */
 function parseEval(lexer) {
-  if (lexer.peek().tokenType !== TokenType.KW_EVAL) {
-    throw new BMLSyntaxError(
-      'eval blocks must start with keyword "eval"',
-      lexer.string, lexer.index);
+  if (lexer.next().tokenType !== TokenType.KW_EVAL) {
+    throw new IllegalStateError('parseEval started with non-KW_EVAL');
   }
-  lexer.next(); // consume KW_EVAL
-  lexer.skipWhitespaceAndComments();
-  if (lexer.peek().tokenType !== TokenType.OPEN_BRACE) {
+
+  if (lexer.nextNonWhitespace().tokenType !== TokenType.OPEN_BRACE) {
     throw new BMLSyntaxError(
       'eval blocks must be opened with a curly brace ("{")',
       lexer.string, lexer.index);
   }
-  lexer.next(); // consume OPEN_BRACE
 
   let state = 'code';
   let index = lexer.index;
@@ -334,18 +331,14 @@ function parseReplacements(lexer, forRule) {
 
 function parseRule(lexer) {
   let matchers = parseMatchers(lexer);
-  if (lexer.peek().tokenType !== TokenType.KW_AS) {
+  if (lexer.nextNonWhitespace().tokenType !== TokenType.KW_AS) {
     throw new BMLSyntaxError('matchers must be followed with keyword "as"',
                              lexer.string, lexer.index);
   }
-  lexer.next();  // consume KW_AS
-
-  lexer.skipWhitespaceAndComments();
-  if (lexer.peek().tokenType !== TokenType.OPEN_BRACE) {
+  if (lexer.nextNonWhitespace().tokenType !== TokenType.OPEN_BRACE) {
     throw new BMLSyntaxError('rule replacers must be surrounded by braces',
                              lexer.string, lexer.index);
   }
-  lexer.next();  // consume OPEN_BRACE
   let replacements = parseReplacements(lexer, true);
   return new Rule(matchers, replacements);
 }

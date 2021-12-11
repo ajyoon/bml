@@ -149,6 +149,19 @@ describe('bml', function() {
     expect(bml("foo\\\n      bar")).to.equal('foo bar\n');
     expect(bml("foo\\\n      {(bar)}")).to.equal('foo bar\n');
   });
+  
+  it('supports comments in text', function() {
+    let testString = `// a line comment
+// another line comment
+/* a block comment
+   spanning multiple lines */
+outer text
+{(// a line comment inside a choice
+// Comments can include string/command delimiters too )}
+inner text /* a block comment inside a choice */
+)}`;
+    expect(bml(testString)).to.equal('outer text\ninner text\n');
+  });
 
   it('produces the exact same document when using a fixed random seed', function() {
     const testString = '' + fs.readFileSync(require.resolve('./randomSmokeTest.bml'));

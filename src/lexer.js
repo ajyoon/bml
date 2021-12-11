@@ -22,7 +22,7 @@ class Lexer {
   /**
    * Determine the next item in the token stream
    */
-  _determineNext() {
+  _determineNextRaw() {
     if (this.index >= this.string.length) {
       return null;
     }
@@ -154,14 +154,45 @@ class Lexer {
     let token = new Token(tokenType, tokenIndex, tokenString);
     return token;
   }
+  
+  _determineNextReal() {
+    let inLineComment = false;
+    let inBlockComment = false;
+    let token;
+    while ((token = this._determineNextRaw()) !== null) {
+      if (inLineComment) {
+        if (token.tokenType === TokenType.NEW_LINE) {
+          inLineComment = false;
+        }
+      } else if (inBlockComment) {
+        if (token.tokenType === TokenType.CLOSE_BLOCK_COMMENT) {
+          // Block comments output a single whitespace positioned at
+          // the closing slash of the `*/`
+          let virtualWhitespaceTokenIdx = token.index + 1;
+          this.index = virtualWhitespaceTokenIdx;
+          return new Token(TokenType.WHITESPACE, virtualWhitespaceTokenIdx, ' ');
+        }
+      } else {
+        if (token.tokenType === TokenType.COMMENT) {
+          inLineComment = true;
+        } else if (token.tokenType === TokenType.OPEN_BLOCK_COMMENT) {
+          inBlockComment = true;
+        } else {
+          return token;
+        }
+      }
+      this.index = token.index + token.string.length;
+    }
+    return null;
+  }
 
   next() {
     let token;
-    if (this._cachedNext != null) {
+    if (this._cachedNext !== null) {
       token = this._cachedNext;
       this._cachedNext = null;
     } else {
-      token = this._determineNext();
+      token = this._determineNextReal();
     }
     if (token !== null) {
       this.index += token.string.length;
@@ -170,37 +201,28 @@ class Lexer {
   }
 
   peek() {
-    let token = this._determineNext();
+    if (this._cachedNext !== null) {
+      return this._cachedNext;
+    }
+    let token = this._determineNextReal();
     this._cachedNext = token;
     return token;
   }
-
-  skipWhitespaceAndComments() {
-    let whitespaceTokenTypes = [TokenType.WHITESPACE, TokenType.NEW_LINE];
-    let inComment = false;
+  
+  nextSatisfying(predicate) {
     let token;
-    while ((token = this.peek()) !== null) {
-      if (inComment) {
-        if (token.tokenType === TokenType.NEW_LINE) {
-          inComment = false;
-        }
-      } else {
-        switch (token.tokenType) {
-        case TokenType.NEW_LINE:
-        case TokenType.WHITESPACE:
-          break;
-        case TokenType.COMMENT:
-          inComment = true;
-          break;
-        default:
-          return;
-        }
+    while ((token = this.next()) !== null) {
+      if (predicate(token)) {
+        return token;
       }
-      // consume whitespace-or-comment token
-      this.next();
     }
+    return null;
   }
-
+  
+  nextNonWhitespace() {
+    return this.nextSatisfying((t) =>
+      (t.tokenType !== TokenType.WHITESPACE && t.tokenType !== TokenType.NEW_LINE));
+  }
 }
 
 exports.Lexer = Lexer;

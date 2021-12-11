@@ -1,5 +1,15 @@
 const stringUtils = require('./stringUtils.js');
 
+function IllegalStateError(message) {
+  this.name = 'IllegalStateError';
+  this.message = message;
+  this.message = message + ' This is a bug. Please report at https://github.com/ajyoon/bml/issues';
+  let error = new Error(this.message);
+  error.name = this.name;
+  this.stack = error.stack;
+}
+IllegalStateError.prototype = Object.create(Error.prototype);
+
 function JavascriptSyntaxError(string, charIndex) {
   this.name = 'JavascriptSyntaxError';
   this.message = 'Syntax error found while parsing bml javascript at '
@@ -106,7 +116,7 @@ function NotAFunctionError(functionName, string, charIndex) {
 }
 NotAFunctionError.prototype = Object.create(Error.prototype);
 
-
+exports.IllegalStateError = IllegalStateError;
 exports.JavascriptSyntaxError = JavascriptSyntaxError;
 exports.BMLSyntaxError = BMLSyntaxError;
 exports.BMLDuplicatedRefIndexError = BMLDuplicatedRefIndexError;

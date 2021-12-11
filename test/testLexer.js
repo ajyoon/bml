@@ -35,14 +35,12 @@ describe('Lexer', function() {
 
   it('tokenizes comments', function() {
     let lexer = new Lexer('//');
-    expect(lexer.next()).to.deep.equal(new Token(TokenType.COMMENT, 0, '//'));
-    expect(lexer.next()).to.equal(null);
+    expect(lexer._determineNextRaw()).to.deep.equal(new Token(TokenType.COMMENT, 0, '//'));
   });
 
   it('tokenizes block comment openings', function() {
     let lexer = new Lexer('/*');
-    expect(lexer.next()).to.deep.equal(new Token(TokenType.OPEN_BLOCK_COMMENT, 0, '/*'));
-    expect(lexer.next()).to.equal(null);
+    expect(lexer._determineNextRaw()).to.deep.equal(new Token(TokenType.OPEN_BLOCK_COMMENT, 0, '/*'));
   });
 
   it('tokenizes block comment closings', function() {
@@ -258,23 +256,36 @@ describe('Lexer', function() {
     expect(lexer.peek()).to.equal(null);
     expect(lexer.next()).to.equal(null);
   });
-
-  it('can pass over whitespace and comments', function() {
-    let testString = `test
-
-        test2
-        // comment
-        test3`;
-    let lexer = new Lexer(testString);
-    lexer.skipWhitespaceAndComments();
-    expect(lexer.index).to.equal(0);
-
-    lexer.overrideIndex(testString.indexOf('test') + 'test'.length);
-    lexer.skipWhitespaceAndComments();
-    expect(lexer.index).to.equal(testString.indexOf('test2'));
-
-    lexer.overrideIndex(testString.indexOf('test2') + 'test2'.length);
-    lexer.skipWhitespaceAndComments();
-    expect(lexer.index).to.equal(testString.indexOf('test3'));
+  
+  it('automatically skips line comments', function() {
+    let lexer = new Lexer('//foo\ntest');
+    expect(lexer.peek()).to.deep.equal(new Token(TokenType.TEXT, 6, 't'));
+    expect(lexer.next()).to.deep.equal(new Token(TokenType.TEXT, 6, 't'));
+  });
+  
+  it('skips over sequential line comments', function() {
+    let lexer = new Lexer('//foo\n//bar\ntest');
+    expect(lexer.peek()).to.deep.equal(new Token(TokenType.TEXT, 12, 't'));
+    expect(lexer.next()).to.deep.equal(new Token(TokenType.TEXT, 12, 't'));
+  });
+  
+  it('converts block comments into a single white space', function() {
+    let lexer = new Lexer('/* foo \n\n  bar    */test');
+    expect(lexer.peek()).to.deep.equal(new Token(TokenType.WHITESPACE, 19, ' '));
+    expect(lexer.next()).to.deep.equal(new Token(TokenType.WHITESPACE, 19, ' '));
+    expect(lexer.peek()).to.deep.equal(new Token(TokenType.TEXT, 20, 't'));
+    expect(lexer.next()).to.deep.equal(new Token(TokenType.TEXT, 20, 't'));
+  });
+  
+  it('can skip to the next token satisfying a predicate', function() {
+    let lexer = new Lexer('abc');
+    expect(lexer.nextSatisfying((t) => t.string === 'b'))
+      .to.deep.equal(new Token(TokenType.TEXT, 1, 'b'));
+  });
+  
+  it('can skip to the next non-whitespace (or comment) token', function() {
+    let lexer = new Lexer('   \n\n test');
+    expect(lexer.nextNonWhitespace())
+      .to.deep.equal(new Token(TokenType.TEXT, 6, 't'));
   });
 });

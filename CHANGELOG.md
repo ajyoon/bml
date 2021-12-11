@@ -1,5 +1,11 @@
 # Changelog
 
+### 0.0.26: BREAKING CHANGE
+* Line and block comments are now supported in plain body text,
+  including text in choice branches. Line comments emit no output
+  (including their terminating newlines), while block comments emit a
+  single whitespace.
+
 ### 0.0.25: BREAKING CHANGE
 * Rule replacers must now be surrounded by curly braces
 
