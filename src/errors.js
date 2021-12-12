@@ -74,7 +74,7 @@ BMLNameError.prototype = Object.create(Error.prototype);
 
 
 function UnknownModeError(string, charIndex, modeName) {
-  this.name = 'JavascriptSyntaxError';
+  this.name = 'UnknownModeError';
   this.message = 'Unknown mode \'' + modeName + '\' at '
     + stringUtils.lineColumnString(string, charIndex);
   let error = new Error(this.message);

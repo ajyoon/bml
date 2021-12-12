@@ -1,5 +1,9 @@
 # Changelog
 
+### 0.0.28:
+* Fix bug where `UnknownModeError` incorrectly called itself a
+  `JavascriptSyntaxError`.
+
 ### 0.0.27:
 * Fix bug causing comments to not be stripped out in many situations
 
