@@ -1,6 +1,4 @@
-const chai = require('chai');
-const expect = chai.expect;
-chai.use(require('chai-string'));
+const expect = require('expect');
 const fs = require('fs');
 
 const bml = require('../bml.js');
@@ -13,7 +11,7 @@ describe('bml', function() {
       'hello beautiful world!\n',
       'hello wonderful world!\n',
     ];
-    expect(result).to.be.oneOf(possibleOutcomes);
+    expect(possibleOutcomes).toEqual(expect.arrayContaining([result]));
   });
 
   it('can execute user-defined functions', function() {
@@ -26,7 +24,7 @@ describe('bml', function() {
         {call foo}
     `;
     let result = bml(testString);
-    expect(result).to.equal('foo!\n');
+    expect(result).toBe('foo!\n');
   });
 
   it('can process recursive rule choices', function() {
@@ -43,7 +41,7 @@ describe('bml', function() {
       'outer inner 1\n',
       'outer inner 2\n',
     ];
-    expect(result).to.be.oneOf(possibleOutcomes);
+    expect(possibleOutcomes).toEqual(expect.arrayContaining([result]));
   });
 
   it('respects the active mode on recursively rendered text', function() {
@@ -55,7 +53,7 @@ describe('bml', function() {
         {(foo)}
         `;
     let result = bml(testString);
-    expect(result).to.equal('bar\n');
+    expect(result).toBe('bar\n');
   });
 
   it('can process recursive inline choices', function() {
@@ -66,7 +64,7 @@ describe('bml', function() {
       'hello recursive world!\n',
       'hello very recursive world!\n',
     ];
-    expect(result).to.be.oneOf(possibleOutcomes);
+    expect(possibleOutcomes).toEqual(expect.arrayContaining([result]));
   });
 
   it('can process refs, backrefs, and unused fallbacks', function() {
@@ -77,7 +75,7 @@ describe('bml', function() {
       'Alice went to the store. She bought some tofu.\n',
       'Bob went to the store. He bought some tofu.\n'
     ];
-    expect(result).to.be.oneOf(possibleOutcomes);
+    expect(possibleOutcomes).toEqual(expect.arrayContaining([result]));
   });
 
   it('can process refs and backrefs with used fallbacks', function() {
@@ -88,16 +86,16 @@ describe('bml', function() {
       'Alice went to the store. She bought some tofu.\n',
       'Bob went to the store. USED FALLBACK bought some tofu.\n'
     ];
-    expect(result).to.be.oneOf(possibleOutcomes);
+    expect(possibleOutcomes).toEqual(expect.arrayContaining([result]));
   });
 
   it('allows refs and backrefs with empty strings', function() {
     // backref mapping is empty string
-    expect(bml('{t: (a) 100, (b)} => {@t: 0 -> (), (not a)}')).to.equal('a =>\n');
+    expect(bml('{t: (a) 100, (b)} => {@t: 0 -> (), (not a)}')).toBe('a =>\n');
     // backref mapping with empty string does not interfere with fallback
-    expect(bml('{t: (a), (b) 100} => {@t: 0 -> (), (not a)}')).to.equal('b => not a\n');
+    expect(bml('{t: (a), (b) 100} => {@t: 0 -> (), (not a)}')).toBe('b => not a\n');
     // fallback with empty string works too
-    expect(bml('{t: (a), (b) 100} => {@t: 0 -> (not b), ()}')).to.equal('b =>\n');
+    expect(bml('{t: (a), (b) 100} => {@t: 0 -> (not b), ()}')).toBe('b =>\n');
   });
 
   it('correctly executes copy-backrefs', function() {
@@ -107,7 +105,7 @@ describe('bml', function() {
       'Alice Alice\n',
       'Bob Bob\n'
     ];
-    expect(result).to.be.oneOf(possibleOutcomes);
+    expect(possibleOutcomes).toEqual(expect.arrayContaining([result]));
   });
 
   it('outputs nothing for silent replacers, but tracks their results', function() {
@@ -117,7 +115,7 @@ describe('bml', function() {
       'silent  then referenced Alice\n',
       'silent  then referenced Bob\n'
     ];
-    expect(result).to.be.oneOf(possibleOutcomes);
+    expect(possibleOutcomes).toEqual(expect.arrayContaining([result]));
   });
 
   /*
@@ -133,7 +131,7 @@ describe('bml', function() {
     // comment
     (foo)}`;
     let result = bml(testString);
-    expect(result).to.equal('foo\n');
+    expect(result).toBe('foo\n');
   });
 
   it('tracks named choices made inside recursively rendered text', function() {
@@ -141,13 +139,13 @@ describe('bml', function() {
       {({TestChoice: (foo)})} {@TestChoice}
     `;
     let result = bml(testString);
-    expect(result).to.equal('foo foo\n');
+    expect(result).toBe('foo foo\n');
   });
   
   it('supports visual linebreaks', function() {
-    expect(bml("foo\\\nbar")).to.equal('foo bar\n');
-    expect(bml("foo\\\n      bar")).to.equal('foo bar\n');
-    expect(bml("foo\\\n      {(bar)}")).to.equal('foo bar\n');
+    expect(bml("foo\\\nbar")).toBe('foo bar\n');
+    expect(bml("foo\\\n      bar")).toBe('foo bar\n');
+    expect(bml("foo\\\n      {(bar)}")).toBe('foo bar\n');
   });
   
   it('supports comments in text', function() {
@@ -161,21 +159,21 @@ outer text
 // Comments can include string/command delimiters too )}
 inner text /* a block comment inside a choice */
 )}`;
-    expect(bml(testString)).to.equal('outer text\ninner text\n');
+    expect(bml(testString)).toBe('outer text\ninner text\n');
   });
 
   it('produces the exact same document when using a fixed random seed', function() {
     const testString = '' + fs.readFileSync(require.resolve('./randomSmokeTest.bml'));
     let firstResult = bml(testString, { randomSeed: 1234 });
     let secondResult = bml(testString, { randomSeed: 1234 });
-    expect(firstResult).to.equal(secondResult);
+    expect(firstResult).toBe(secondResult);
   });
 
   it('only renders markdown when set to', function() {
     let src = '# foo';
     expect(bml(src, {renderMarkdown: true}))
-      .to.equal('<h1 id="foo">foo</h1>\n');
-    expect(bml(src)).to.equal('# foo\n');
+      .toBe('<h1 id="foo">foo</h1>\n');
+    expect(bml(src)).toBe('# foo\n');
   });
 
   it('respects markdown settings provided by user', function() {
@@ -192,13 +190,13 @@ inner text /* a block comment inside a choice */
         "testing"---
     `;
     let result = bml(testString, {renderMarkdown: true});
-    expect(result).to.equal('<p>“testing”—</p>\n');
+    expect(result).toBe('<p>“testing”—</p>\n');
   });
 
   it('cleans whitespace by default but allows disabling', function() {
     let src = 'foo';
-    expect(bml(src, {whitespaceCleanup: false})).to.equal('foo');
-    expect(bml(src)).to.equal('foo\n');
+    expect(bml(src, {whitespaceCleanup: false})).toBe('foo');
+    expect(bml(src)).toBe('foo\n');
   });
 });
 
@@ -220,14 +218,27 @@ function captureStream(stream){
   };
 }
 
+function spyConsole() {
+  let spy = {};
+
+  beforeEach(() => {
+    spy.consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
+    spy.consoleWarn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    spy.consoleError.mockClear();
+  });
+
+  afterAll(() => {
+    spy.consoleError.mockRestore();
+  });
+
+  return spy;
+}
+
 describe('bml logging', function() {
-  var hook;
-  beforeEach(function(){
-    hook = captureStream(process.stderr);
-  });
-  afterEach(function(){
-    hook.unhook();
-  });
+  let spy = spyConsole();
 
   it('warns on version mismatch', function() {
     let testString = `
@@ -239,14 +250,16 @@ describe('bml logging', function() {
         testing 123
     `;
     bml(testString);
-    expect(hook.captured()).to.startsWith(
+    expect(console.warn).toHaveBeenCalledTimes(1);
+    expect(spy.consoleWarn.mock.calls[0][0]).toContain(
       'BML VERSION MISMATCH. bml source file specifies version nonsense');
+
   });
 
   it('does not warn on version when no version is present', function() {
     let testString = `testing 123`;
     bml(testString);
-    expect(hook.captured()).to.equal('');
+    expect(console.error).not.toHaveBeenCalled();
   });
 
   it('does not warn on recursive renders when top level has version', function() {
@@ -258,6 +271,6 @@ describe('bml logging', function() {
         testing 123 {(sub-rendered text)}
     `;
     bml(testString);
-    expect(hook.captured()).to.equal('');
+    expect(console.error).not.toHaveBeenCalled();
   });
 });

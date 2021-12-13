@@ -1,6 +1,5 @@
+const expect = require('expect');
 const fs = require('fs');
-var decache = require('decache');
-const expect = require('chai').expect;
 const sha = require('sha.js');
 
 const WeightedChoice = require('../src/weightedChoice.js').WeightedChoice;
@@ -11,20 +10,20 @@ let rand = require('../src/rand.js');
 function testGeneratorFunctionTypeAndRange(randomFunction, typeValidationFunction, min, max) {
   for (let i = 0; i < 100; i++) {
     let value = randomFunction(min, max);
-    expect(value).to.satisfy((v) => typeValidationFunction(v));
-    expect(value).to.be.at.least(min);
-    expect(value).to.be.at.most(max);
+    expect(value).toSatisfy((v) => typeValidationFunction(v));
+    expect(value).toBeGreaterThanOrEqual(min);
+    expect(value).toBeLessThanOrEqual(max);
   }
 }
 
 function testGeneratorFunctionOutputMean(randomFunction, min, max) {
-  sum = 0;
+  let sum = 0;
   for (let i = 0; i < 1000; i++) {
     sum += randomFunction(min, max);
   }
-  mean = sum / 1000;
-  tolerance = (max - min) / 4;
-  expect(mean).to.be.closeTo((min + max) / 2, tolerance);
+  let mean = sum / 1000;
+  let diff = Math.abs(mean - ((min + max) / 2));
+  expect(diff).toBeLessThan((min + max) / 4);
 }
 
 describe('randomFloat', function() {
@@ -61,60 +60,47 @@ describe('normalizeWeights', function() {
       new WeightedChoice(1, 40),
       new WeightedChoice(1, 60),
     ];
-    expect(rand.normalizeWeights(weights)).to.deep.equal(weights);
+    expect(rand.normalizeWeights(weights)).toEqual(weights);
   });
 });
 
 describe('setRandomSeed', function() {
-  function reloadRandModule() {
-    // Remove the rand module from the require cache so we can import a
-    // fresh copy of the module. This prevents random seed settings from
-    // test runs from interfering with each other.
-    decache('../src/rand.js');
-    rand = require('../src/rand.js');
-  }
-
-  before(function () {
-    reloadRandModule();
-  });
-
-  after(function () {
-    reloadRandModule();
-  });
-
   it('should make the output of randomFloat predictable', function() {
+    jest.isolateModules(() => rand = require('../src/rand.js'));
     rand.setRandomSeed(1234);
     let firstResult = rand.randomFloat(0, 1);
     rand.setRandomSeed(1234);
-    expect(rand.randomFloat(0, 1)).to.be.closeTo(firstResult, 0.0001);
+    expect(rand.randomFloat(0, 1)).toBeCloseTo(firstResult);
   });
 
   it('should make the output of randomInt predictable', function() {
+    jest.isolateModules(() => rand = require('../src/rand.js'));
     rand.setRandomSeed(1234);
     let firstResult = rand.randomInt(0, 1000);
     rand.setRandomSeed(1234);
-    expect(rand.randomInt(0, 1000)).to.be.equal(firstResult);
+    expect(rand.randomInt(0, 1000)).toBe(firstResult);
   });
 
   it('when not called, should produce different outputs on program runs', function() {
+    jest.isolateModules(() => rand = require('../src/rand.js'));
     let firstResult = rand.randomFloat(0, 1);
-    reloadRandModule();
-    expect(rand.randomFloat(0, 1)).to.not.be.closeTo(firstResult, 0.0001);
+    expect(rand.randomFloat(0, 1)).not.toBeCloseTo(firstResult);
   });
   
   it('produces stable results forever', function() {
+    jest.isolateModules(() => rand = require('../src/rand.js'));
     rand.setRandomSeed(1234);
     let results = [];
     for (let i = 0; i < 100000; i++) {
       results.push(rand.randomInt());
     }
     let hash = sha('sha256').update(results).digest('hex');
-    expect(hash).to.be.equal('9192c25b734fcbadbe32dadc28089c60db0e39f90cc20ce2e5733f57261acc0c');
+    expect(hash).toBe('9192c25b734fcbadbe32dadc28089c60db0e39f90cc20ce2e5733f57261acc0c');
   });
 });
 
 describe('weightedChoose', function() {
-  before(function() {
+  beforeEach(function() {
     rand.setRandomSeed(0); // pin seed for reproducibility
   });
   it('behaves on well-formed weights', function() {
@@ -123,15 +109,15 @@ describe('weightedChoose', function() {
       new WeightedChoice('bar', 60),
     ];
     let result = rand.weightedChoose(weights);
-    expect(result.choice).to.be.equal('foo');
-    expect(result.choiceIndex).to.be.equal(0);
+    expect(result.choice).toBe('foo');
+    expect(result.choiceIndex).toBe(0);
     
     result = rand.weightedChoose(weights);
-    expect(result.choice).to.be.equal('foo');
-    expect(result.choiceIndex).to.be.equal(0);
+    expect(result.choice).toBe('foo');
+    expect(result.choiceIndex).toBe(0);
 
     result = rand.weightedChoose(weights);
-    expect(result.choice).to.be.equal('bar');
-    expect(result.choiceIndex).to.be.equal(1);
+    expect(result.choice).toBe('bar');
+    expect(result.choiceIndex).toBe(1);
   });
 });

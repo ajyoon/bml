@@ -20,26 +20,20 @@
     "bml": "./cli.js"
   },
   "scripts": {
-    "test": "./node_modules/.bin/mocha",
+    "test": "jest",
     "build": "./node_modules/.bin/webpack --config ./webpack.config.bml.js",
     "lint": "./node_modules/.bin/eslint .",
-    "test-with-coverage": "./node_modules/.bin/nyc npm test",
-    "test-with-coverage-html": "./node_modules/.bin/nyc --reporter=html npm test",
     "preversion": "npm test",
     "version": "npm run build && git add -A dist"
   },
   "devDependencies": {
     "babel-core": "^6.26.3",
     "babel-loader": "^8.1.0",
-    "chai": "^4.3",
-    "chai-string": "^1.5.0",
-    "decache": "^4.5.1",
     "eslint": "^8.2.0",
     "eslint-config-google": "^0.8.0",
     "expose-loader": "^0.7.5",
     "jest": "^27.4.4",
-    "mocha": "^9.1.3",
-    "nyc": "^15.1.0",
+    "jest-extended": "^1.2.0",
     "sha.js": "2.4.11",
     "webpack": "^5.62.1",
     "webpack-cli": "^4.9.1"

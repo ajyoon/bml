@@ -1,4 +1,4 @@
-const expect = require('chai').expect;
+const expect = require('expect');
 const fs = require('fs');
 
 const mergeSettings = require('../src/settings.js').mergeSettings;
@@ -16,7 +16,7 @@ describe('mergeSettings', function() {
         renderMarkdown: true,
         contextSize: 1000,
       });
-    expect(true).to.equal(merged.renderMarkdown);
-    expect(1000).to.equal(merged.contextSize);
+    expect(true).toBe(merged.renderMarkdown);
+    expect(1000).toBe(merged.contextSize);
   });
 });

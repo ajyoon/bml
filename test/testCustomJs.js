@@ -1,4 +1,4 @@
-const expect = require('chai').expect;
+const expect = require('expect');
 
 const EvalBlock = require('../src/evalBlock.js').EvalBlock;
 const FunctionCall = require('../src/functionCall.js').FunctionCall;
@@ -15,11 +15,11 @@ describe('Custom JS (EvalBlock & FunctionCall)', function() {
     `;
     let evalBlock = new EvalBlock(src);
     let userDefs = evalBlock.execute();
-    expect(userDefs).to.have.key('testFunc');
-    expect(userDefs.testFunc).to.be.an.instanceof(Function);
+    expect(userDefs).toContainKey('testFunc');
+    expect(userDefs.testFunc).toBeInstanceOf(Function);
     let functionCall = new FunctionCall('testFunc');
     let result = functionCall.execute(userDefs, null, '', 0);
-    expect(result).to.equal('testFunc result');
+    expect(result).toBe('testFunc result');
   });
   
   it('propagates errors inside custom functions', function() {
@@ -35,7 +35,7 @@ describe('Custom JS (EvalBlock & FunctionCall)', function() {
     let functionCall = new FunctionCall('testFunc');
     expect(() => {
       functionCall.execute(userDefs, null, '', 0);
-    }).to.throw('test');
+    }).toThrowError('test');
   });
   
   it('allows custom functions to access the eval api', function() {
@@ -68,7 +68,7 @@ describe('Custom JS (EvalBlock & FunctionCall)', function() {
     let functionCall = new FunctionCall('nonExistentFunc');
     expect(() => {
       functionCall.execute(userDefs, null, 'stub source', 0);
-    }).to.throw(FunctionNotFoundError);
+    }).toThrowError(FunctionNotFoundError);
   });
   
   it('Gives error when calling non-function', function() {
@@ -82,7 +82,7 @@ describe('Custom JS (EvalBlock & FunctionCall)', function() {
     let functionCall = new FunctionCall('notAFunc');
     expect(() => {
       functionCall.execute(userDefs, null, 'stub source', 0);
-    }).to.throw(NotAFunctionError);
+    }).toThrowError(NotAFunctionError);
   });
   
 

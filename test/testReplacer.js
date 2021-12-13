@@ -1,12 +1,12 @@
+const expect = require('expect');
 const rand = require('../src/rand.js');
 const WeightedChoice = require('../src/weightedChoice.js').WeightedChoice;
 const Replacer = require('../src/replacer.js').Replacer;
-const expect = require('chai').expect;
 const noOp = require('../src/noOp.js');
 
 describe('Replacer', function() {
 
-  before(function() {
+  beforeEach(function() {
     rand.setRandomSeed(0); // pin seed for reproducibility
   });
   
@@ -17,7 +17,7 @@ describe('Replacer', function() {
     ];
     let replacer = new Replacer(weights, false, null);
     let result = replacer.call();
-    expect(result.replacement).to.equal('foo');
-    expect(result.choiceIndex).to.equal(0);
+    expect(result.replacement).toBe('foo');
+    expect(result.choiceIndex).toBe(0);
   });
 });

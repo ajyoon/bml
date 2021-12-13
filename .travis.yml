@@ -2,7 +2,4 @@ language: node_js
 node_js:
   - "16"
 script:
-  - npm install -g coveralls
-  - nyc npm test && nyc report --reporter=text-lcov > coverage.lcov
-after_success:
-  - cat coverage.lcov | coveralls
+  - npm test
