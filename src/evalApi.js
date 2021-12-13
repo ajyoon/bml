@@ -1,4 +1,4 @@
-const rand = require('./rand.js');
+const rand = require('./rand.ts');
 const WeightedChoice = require('./weightedChoice.js').WeightedChoice;
 
 /**

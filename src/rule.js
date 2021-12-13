@@ -1,4 +1,4 @@
-const rand = require('./rand.js');
+const rand = require('./rand.ts');
 const Replacer = require('./replacer.js').Replacer;
 
 

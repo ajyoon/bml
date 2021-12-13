@@ -1,7 +1,7 @@
 const _parsers = require('./parsers.js');
 const _settings = require('./settings.js');
 const _errors = require('./errors.js');
-const rand = require('./rand.js');
+const rand = require('./rand.ts');
 const postprocessing = require('./postprocessing.js');
 
 const defaultBMLSettings = _settings.defaultBMLSettings;

@@ -1,4 +1,4 @@
-const _rand = require('./rand.js');
+const _rand = require('./rand.ts');
 const _errors = require('./errors.js');
 const _stringUtils = require('./stringUtils.js');
 const EvalBlock = require('./evalBlock.js').EvalBlock;

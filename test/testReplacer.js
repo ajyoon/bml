@@ -1,5 +1,5 @@
 const expect = require('expect');
-const rand = require('../src/rand.js');
+const rand = require('../src/rand.ts');
 const WeightedChoice = require('../src/weightedChoice.js').WeightedChoice;
 const Replacer = require('../src/replacer.js').Replacer;
 const noOp = require('../src/noOp.js');

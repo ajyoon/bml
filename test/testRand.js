@@ -5,7 +5,7 @@ const sha = require('sha.js');
 const WeightedChoice = require('../src/weightedChoice.js').WeightedChoice;
 
 // this import is made mutable for test purposes
-let rand = require('../src/rand.js');
+let rand = require('../src/rand.ts');
 
 function testGeneratorFunctionTypeAndRange(randomFunction, typeValidationFunction, min, max) {
   for (let i = 0; i < 100; i++) {
@@ -66,7 +66,7 @@ describe('normalizeWeights', function() {
 
 describe('setRandomSeed', function() {
   it('should make the output of randomFloat predictable', function() {
-    jest.isolateModules(() => rand = require('../src/rand.js'));
+    jest.isolateModules(() => rand = require('../src/rand.ts'));
     rand.setRandomSeed(1234);
     let firstResult = rand.randomFloat(0, 1);
     rand.setRandomSeed(1234);
@@ -74,7 +74,7 @@ describe('setRandomSeed', function() {
   });
 
   it('should make the output of randomInt predictable', function() {
-    jest.isolateModules(() => rand = require('../src/rand.js'));
+    jest.isolateModules(() => rand = require('../src/rand.ts'));
     rand.setRandomSeed(1234);
     let firstResult = rand.randomInt(0, 1000);
     rand.setRandomSeed(1234);
@@ -82,13 +82,13 @@ describe('setRandomSeed', function() {
   });
 
   it('when not called, should produce different outputs on program runs', function() {
-    jest.isolateModules(() => rand = require('../src/rand.js'));
+    jest.isolateModules(() => rand = require('../src/rand.ts'));
     let firstResult = rand.randomFloat(0, 1);
     expect(rand.randomFloat(0, 1)).not.toBeCloseTo(firstResult);
   });
   
   it('produces stable results forever', function() {
-    jest.isolateModules(() => rand = require('../src/rand.js'));
+    jest.isolateModules(() => rand = require('../src/rand.ts'));
     rand.setRandomSeed(1234);
     let results = [];
     for (let i = 0; i < 100000; i++) {

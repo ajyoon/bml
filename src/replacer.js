@@ -1,5 +1,5 @@
 const WeightedChoice = require('./weightedChoice.js').WeightedChoice;
-const _rand = require('./rand.js');
+const _rand = require('./rand.ts');
 const normalizeWeights = _rand.normalizeWeights;
 const weightedChoose = _rand.weightedChoose;
 
