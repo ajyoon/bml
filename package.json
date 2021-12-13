@@ -27,14 +27,15 @@
     "version": "npm run build && git add -A dist"
   },
   "devDependencies": {
-    "babel-core": "^6.26.3",
-    "babel-loader": "^8.1.0",
+    "@swc/core": "^1.2.119",
+    "@swc/jest": "^0.2.14",
     "eslint": "^8.2.0",
     "eslint-config-google": "^0.8.0",
     "expose-loader": "^0.7.5",
     "jest": "^27.4.4",
     "jest-extended": "^1.2.0",
     "sha.js": "2.4.11",
+    "swc-loader": "^0.1.15",
     "webpack": "^5.62.1",
     "webpack-cli": "^4.9.1"
   },

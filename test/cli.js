@@ -29,13 +29,13 @@ describe('cli', function() {
 
   it('reads from a path when given an argument', function() {
     let path = 'some path';
-    action = cli.determineAction([path]);
+    let action = cli.determineAction([path]);
     expect(action.function).toBe(cli.readFromPath);
     expect(action.args).toEqual([path, defaultSettings]);
   });
 
   it('reads from stdin when not given any arguments', function() {
-    action = cli.determineAction([]);
+    let action = cli.determineAction([]);
     expect(action.function).toBe(cli.readFromStdin);
     expect(action.args).toEqual([defaultSettings]);
   });
@@ -51,7 +51,7 @@ describe('cli', function() {
   });
   
   it('fails when seed flag is used but no seed is provided', function() {
-    action = cli.determineAction(['--seed']);
+    let action = cli.determineAction(['--seed']);
     expect(action.function).toBe(cli.printHelpForError);
   });
 
@@ -62,29 +62,29 @@ describe('cli', function() {
       '--foo'
     ];
     for (let seed of badSeeds) {
-      action = cli.determineAction(['--seed', seed]);
+      let action = cli.determineAction(['--seed', seed]);
       expect(action.function).toBe(cli.printHelpForError);
     }
   });
   
   it('supports negative seeds', function() {
-      action = cli.determineAction(['--seed', '-123']);
+      let action = cli.determineAction(['--seed', '-123']);
       expect(action.function).toBe(cli.readFromStdin);
   });
   
   it('fails on unknown flags', function() {
-      action = cli.determineAction(['--foo']);
+      let action = cli.determineAction(['--foo']);
       expect(action.function).toBe(cli.printHelpForError);
   });
   
   it('fails when more than one path is provided', function() {
-    action = cli.determineAction(['1.bml', '2.bml']);
+    let action = cli.determineAction(['1.bml', '2.bml']);
     expect(action.function).toBe(cli.printHelpForError);
   });
   
   it('supports all settings', function() {
     let path = 'foo.bml';
-    action = cli.determineAction([
+    let action = cli.determineAction([
       '--seed', '123', '--no-eval', '--render-markdown',
       '--no-whitespace-cleanup', path]);
     let expectedSettings = {
