@@ -2,5 +2,4 @@
 const renderer = require('./renderer.ts');
 const settings = require('./settings.ts');
 
-exports.default = renderer.render;
-exports.defaultSettings = settings.defaultSettings;
+module.exports = renderer.render;

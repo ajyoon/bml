@@ -220,9 +220,8 @@ function main() {
   }
 }
 
-
 // Execute when run as main module
-if (typeof require != 'undefined' && require.main == module) {
+if (!module.parent) {
   main();
 }
 

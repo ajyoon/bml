@@ -15,32 +15,44 @@
   "bugs": {
     "url": "https://github.com/ajyoon/bml/issues"
   },
+  "source": "src/bml.ts",
   "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "browser": "dist/bml.bundle.js",
+  "cli": "dist/cli.js",
+  "targets": {
+    "main": {
+      "optimize": true
+    },
+    "browser": {
+      "optimize": true
+    },
+    "cli": {
+      "source": "src/cli.ts",
+      "optimize": true,
+      "sourceMap": false,
+      "context": "node",
+      "isLibrary": false
+    }
+  },
   "bin": {
     "bml": "dist/cli.js"
   },
   "scripts": {
     "test": "jest",
-    "buildWeb": "./node_modules/.bin/webpack --config ./webpack.config.web.js",
-    "buildLibrary": "./node_modules/.bin/webpack --config ./webpack.config.library.js",
-    "build": "npm run buildWeb && npm run buildLibrary",
+    "build": "./node_modules/.bin/parcel build",
     "lint": "./node_modules/.bin/eslint .",
     "preversion": "npm test",
     "version": "npm run build && git add -A dist"
   },
   "devDependencies": {
-    "@swc/core": "^1.2.119",
-    "@swc/jest": "^0.2.14",
+    "@parcel/transformer-typescript-types": "^2.0.1",
     "eslint": "^8.2.0",
     "eslint-config-google": "^0.8.0",
-    "expose-loader": "^0.7.5",
     "jest": "^27.4.4",
     "jest-extended": "^1.2.0",
+    "parcel": "^2.0.1",
     "sha.js": "2.4.11",
-    "swc-loader": "^0.1.15",
-    "webpack": "^5.62.1",
-    "webpack-cli": "^4.9.1"
+    "typescript": "^4.5.4"
   },
   "dependencies": {
     "marked": "^0.3.19",
