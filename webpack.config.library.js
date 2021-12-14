@@ -3,40 +3,41 @@ const TerserPlugin = require("terser-webpack-plugin");
 
 const config = {
   entry: [
-    './bml.js',
+    './src/bml.ts',
   ],
   output: {
     path: path.resolve(__dirname, 'dist'),
-    filename: 'bml.bundle.min.js',
+    filename: 'index.js',
+  },
+  resolve: {
+    extensions: [ '.ts', '.js' ],
   },
   module: {
     rules: [
       {
-        test: /\.m?js$/,
+        test: /\.ts$/,
         exclude: /(node_modules)/,
         use: {
           // `.swcrc` can be used to configure swc
-          loader: "swc-loader"
+          loader: "swc-loader",
+          options: {
+            "module": {
+              "type": "commonjs"
+            }
+          }
         }
-      },
-      {
-        test: require.resolve('./bml.js'),
-        use: [{
-          loader: 'expose-loader',
-          options: 'bml',
-        }],
-      },
+      }
     ],
   },
   optimization: {
     minimize: true,
     minimizer: [new TerserPlugin({
-        terserOptions: {
-          format: {
-            comments: /@license/i,
-          },
+      terserOptions: {
+        format: {
+          comments: /@license/i,
         },
-        extractComments: false,
+      },
+      extractComments: false,
     })]
   }
 };

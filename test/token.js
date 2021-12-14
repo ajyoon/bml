@@ -1,7 +1,7 @@
 const expect = require('expect');
 
-const TokenType = require('../src/tokenType.js').TokenType;
-const Token = require('../src/token.js').Token;
+const TokenType = require('../src/tokenType.ts').TokenType;
+const Token = require('../src/token.ts').Token;
 
 describe('Token', function() {
   it('has a useful toString', function() {

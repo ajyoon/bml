@@ -1,4 +1,4 @@
-import { WeightedChoice } from './weightedChoice.js';
+import { WeightedChoice } from './weightedChoice.ts';
 import seedrandom from 'seedrandom';
 
 // A module-local seedable random number generator

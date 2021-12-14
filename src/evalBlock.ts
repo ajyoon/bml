@@ -1,4 +1,4 @@
-const evalApi = require('./evalApi.js');
+const evalApi = require('./evalApi.ts');
 
 
 // TODO run some basic checks against provided code,

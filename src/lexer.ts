@@ -1,5 +1,5 @@
-const Token = require('./token.js').Token;
-const TokenType = require('./tokenType.js').TokenType;
+const Token = require('./token.ts').Token;
+const TokenType = require('./tokenType.ts').TokenType;
 
 class Lexer {
   constructor(string) {
@@ -123,35 +123,35 @@ class Lexer {
       tokenType = TokenType.TEXT;
       if (this.string[this.index] === '\\') {
         switch (this.string[this.index + 1]) {
-        case '\\':
-          tokenString = '\\\\';
-          break;
-        case '/':
-          tokenString = '/';
-          this.index++;
-          break;
-        case 'n':
-          tokenString = '\n';
-          this.index++;
-          break;
-        case 't':
-          tokenString = '\t';
-          this.index++;
-          break;
-        case 'r':
-          tokenString = '\r';
-          this.index++;
-          break;
-        case '\'':
-          tokenString = '\'';
-          this.index++;
-          break;
-        case '\"':
-          tokenString = '\"';
-          this.index++;
-          break;
-        default:
-          tokenString = '\\';
+          case '\\':
+            tokenString = '\\\\';
+            break;
+          case '/':
+            tokenString = '/';
+            this.index++;
+            break;
+          case 'n':
+            tokenString = '\n';
+            this.index++;
+            break;
+          case 't':
+            tokenString = '\t';
+            this.index++;
+            break;
+          case 'r':
+            tokenString = '\r';
+            this.index++;
+            break;
+          case '\'':
+            tokenString = '\'';
+            this.index++;
+            break;
+          case '\"':
+            tokenString = '\"';
+            this.index++;
+            break;
+          default:
+            tokenString = '\\';
         }
       } else {
         tokenString = this.string[this.index];
@@ -160,7 +160,7 @@ class Lexer {
     let token = new Token(tokenType, tokenIndex, tokenString);
     return token;
   }
-  
+
   _determineNextReal() {
     let inLineComment = false;
     let inBlockComment = false;
@@ -214,7 +214,7 @@ class Lexer {
     this._cachedNext = token;
     return token;
   }
-  
+
   nextSatisfying(predicate) {
     let token;
     while ((token = this.next()) !== null) {
@@ -224,7 +224,7 @@ class Lexer {
     }
     return null;
   }
-  
+
   nextNonWhitespace() {
     return this.nextSatisfying((t) =>
       (t.tokenType !== TokenType.WHITESPACE && t.tokenType !== TokenType.NEW_LINE));

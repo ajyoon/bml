@@ -3,8 +3,8 @@
 
 const fs = require('fs');
 const process = require('process');
-const packageJson = require('./package.json');
-const bml = require('./bml.js');
+const packageJson = require('../package.json');
+const bml = require('./bml.ts');
 
 const SEED_RE = /^-?\d+$/;
 

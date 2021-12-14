@@ -2,7 +2,7 @@ const expect = require('expect');
 const fs = require('fs');
 const sha = require('sha.js');
 
-const WeightedChoice = require('../src/weightedChoice.js').WeightedChoice;
+const WeightedChoice = require('../src/weightedChoice.ts').WeightedChoice;
 
 // this import is made mutable for test purposes
 let rand = require('../src/rand.ts');

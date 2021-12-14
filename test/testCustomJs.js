@@ -1,8 +1,8 @@
 const expect = require('expect');
 
-const EvalBlock = require('../src/evalBlock.js').EvalBlock;
-const FunctionCall = require('../src/functionCall.js').FunctionCall;
-const _errors = require('../src/errors.js');
+const EvalBlock = require('../src/evalBlock.ts').EvalBlock;
+const FunctionCall = require('../src/functionCall.ts').FunctionCall;
+const _errors = require('../src/errors.ts');
 const FunctionNotFoundError = _errors.FunctionNotFoundError;
 const NotAFunctionError = _errors.NotAFunctionError;
 

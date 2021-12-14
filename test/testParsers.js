@@ -1,19 +1,19 @@
 const expect = require('expect');
 const fs = require('fs');
 
-const parsers = require('../src/parsers.js');
-const errors = require('../src/errors.js');
-const EvalBlock = require('../src/evalBlock.js').EvalBlock;
-const FunctionCall = require('../src/functionCall.js').FunctionCall;
-const Mode = require('../src/mode.js').Mode;
-const Rule = require('../src/rule.js').Rule;
-const Replacer = require('../src/replacer.js').Replacer;
-const Lexer = require('../src/lexer.js').Lexer;
-const Token = require('../src/token.js').Token;
-const TokenType = require('../src/tokenType.js').TokenType;
-const WeightedChoice = require('../src/weightedChoice.js').WeightedChoice;
-const BackReference = require('../src/backReference.js').BackReference;
-const noOp = require('../src/noOp.js');
+const parsers = require('../src/parsers.ts');
+const errors = require('../src/errors.ts');
+const EvalBlock = require('../src/evalBlock.ts').EvalBlock;
+const FunctionCall = require('../src/functionCall.ts').FunctionCall;
+const Mode = require('../src/mode.ts').Mode;
+const Rule = require('../src/rule.ts').Rule;
+const Replacer = require('../src/replacer.ts').Replacer;
+const Lexer = require('../src/lexer.ts').Lexer;
+const Token = require('../src/token.ts').Token;
+const TokenType = require('../src/tokenType.ts').TokenType;
+const WeightedChoice = require('../src/weightedChoice.ts').WeightedChoice;
+const BackReference = require('../src/backReference.ts').BackReference;
+const noOp = require('../src/noOp.ts');
 
 const JavascriptSyntaxError = errors.JavascriptSyntaxError;
 const UnknownTransformError = errors.UnknownTransformError;
@@ -102,7 +102,7 @@ describe('parseEval', function() {
   });
 
   it('should be able to read itself (very meta)', function() {
-    const parsersFilePath = require.resolve('../src/parsers.js');
+    const parsersFilePath = require.resolve('../src/parsers.ts');
     let parsersFileContents = ('' + fs.readFileSync(parsersFilePath));
     let testString = 'eval {' + parsersFileContents + '}';
     let lexer = new Lexer(testString);

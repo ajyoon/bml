@@ -1,8 +1,8 @@
 const expect = require('expect');
 
-const Lexer = require('../src/lexer.js').Lexer;
-const Token = require('../src/token.js').Token;
-const TokenType = require('../src/tokenType.js').TokenType;
+const Lexer = require('../src/lexer.ts').Lexer;
+const Token = require('../src/token.ts').Token;
+const TokenType = require('../src/tokenType.ts').TokenType;
 
 
 describe('Lexer', function() {

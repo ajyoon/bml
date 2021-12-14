@@ -1,4 +1,4 @@
-const stringUtils = require('./stringUtils.js');
+const stringUtils = require('./stringUtils.ts');
 
 function IllegalStateError(message) {
   this.name = 'IllegalStateError';

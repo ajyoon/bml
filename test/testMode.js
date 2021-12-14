@@ -1,6 +1,6 @@
 const expect = require('expect');
 
-const Mode = require('../src/mode.js').Mode;
+const Mode = require('../src/mode.ts').Mode;
 
 
 describe('Mode', function() {

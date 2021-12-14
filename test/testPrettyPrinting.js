@@ -1,6 +1,6 @@
 const expect = require('expect');
 
-const prettyPrinting = require('../src/prettyPrinting.js');
+const prettyPrinting = require('../src/prettyPrinting.ts');
 
 
 describe('prettyPrintArray', function() {

@@ -15,13 +15,16 @@
   "bugs": {
     "url": "https://github.com/ajyoon/bml/issues"
   },
-  "main": "bml.js",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "bin": {
-    "bml": "./cli.js"
+    "bml": "dist/cli.js"
   },
   "scripts": {
     "test": "jest",
-    "build": "./node_modules/.bin/webpack --config ./webpack.config.bml.js",
+    "buildWeb": "./node_modules/.bin/webpack --config ./webpack.config.web.js",
+    "buildLibrary": "./node_modules/.bin/webpack --config ./webpack.config.library.js",
+    "build": "npm run buildWeb && npm run buildLibrary",
     "lint": "./node_modules/.bin/eslint .",
     "preversion": "npm test",
     "version": "npm run build && git add -A dist"

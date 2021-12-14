@@ -1,7 +1,7 @@
 const expect = require('expect');
 
-const cli = require('../cli.js');
-const defaultSettings = require('../src/settings.js').defaultRenderSettings;
+const cli = require('../src/cli.ts');
+const defaultSettings = require('../src/settings.ts').defaultRenderSettings;
 
 
 describe('cli', function() {

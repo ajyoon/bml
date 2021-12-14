@@ -1,6 +1,6 @@
 const expect = require('expect');
 
-const postprocessing = require('../src/postprocessing.js');
+const postprocessing = require('../src/postprocessing.ts');
 
 describe('cleanWhitespace', function() {
   it('removes blank lines at start and end of string', function() {

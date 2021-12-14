@@ -1,4 +1,4 @@
-const _errors = require('./errors.js');
+const _errors = require('./errors.ts');
 const FunctionNotFoundError = _errors.FunctionNotFoundError;
 const NotAFunctionError = _errors.NotAFunctionError;
 
@@ -11,7 +11,7 @@ class FunctionCall {
   toString() {
     return `functionCall('${this.functionName}')`;
   }
-  
+
   execute(userDefs, match, documentString, charIndex) {
     let func = userDefs[this.functionName];
     if (typeof func === 'undefined') {

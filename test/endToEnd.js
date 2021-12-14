@@ -1,7 +1,7 @@
 const expect = require('expect');
 const fs = require('fs');
 
-const bml = require('../bml.js');
+const bml = require('../src/bml.ts');
 
 describe('bml', function() {
   it('can process a document without a prelude', function() {

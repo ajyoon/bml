@@ -1,7 +1,7 @@
 const expect = require('expect');
 const fs = require('fs');
 
-const _stringUtils = require('../src/stringUtils.js');
+const _stringUtils = require('../src/stringUtils.ts');
 const lineAndColumnOf = _stringUtils.lineAndColumnOf;
 
 

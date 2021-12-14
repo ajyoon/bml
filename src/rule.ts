@@ -1,5 +1,5 @@
 const rand = require('./rand.ts');
-const Replacer = require('./replacer.js').Replacer;
+const Replacer = require('./replacer.ts').Replacer;
 
 
 class Rule {

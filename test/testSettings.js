@@ -1,7 +1,7 @@
 const expect = require('expect');
 const fs = require('fs');
 
-const mergeSettings = require('../src/settings.js').mergeSettings;
+const mergeSettings = require('../src/settings.ts').mergeSettings;
 
 
 describe('mergeSettings', function() {
