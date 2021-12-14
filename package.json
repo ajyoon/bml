@@ -40,16 +40,15 @@
   "scripts": {
     "test": "jest",
     "build": "./node_modules/.bin/parcel build",
-    "lint": "./node_modules/.bin/eslint .",
     "preversion": "npm test",
     "version": "npm run build && git add -A dist"
   },
   "devDependencies": {
     "@parcel/transformer-typescript-types": "^2.0.1",
-    "eslint": "^8.2.0",
-    "eslint-config-google": "^0.8.0",
     "jest": "^27.4.4",
     "jest-extended": "^1.2.0",
+    "@swc/core": "^1.2.119",
+    "@swc/jest": "^0.2.14",
     "parcel": "^2.0.1",
     "sha.js": "2.4.11",
     "typescript": "^4.5.4"
