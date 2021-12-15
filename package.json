@@ -39,7 +39,8 @@
   },
   "scripts": {
     "test": "jest",
-    "build": "./node_modules/.bin/parcel build",
+    "releaseTest": "node test/releaseTest.js",
+    "build": "./node_modules/.bin/parcel build && npm run releaseTest",
     "preversion": "npm test",
     "version": "npm run build && git add -A dist"
   },
