@@ -4,4 +4,4 @@
  *
  * This value should be used read-only.
  */
-exports = Symbol('noOp');
+export const noOp: unique symbol = Symbol('noOp');

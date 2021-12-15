@@ -1,24 +1,22 @@
-const _rand = require('./rand.ts');
-const _errors = require('./errors.ts');
-const _stringUtils = require('./stringUtils.ts');
-const EvalBlock = require('./evalBlock.ts').EvalBlock;
-const FunctionCall = require('./functionCall.ts').FunctionCall;
-const Mode = require('./mode.ts').Mode;
-const WeightedChoice = require('./weightedChoice.ts').WeightedChoice;
-const Lexer = require('./lexer.ts').Lexer;
-const TokenType = require('./tokenType.ts').TokenType;
-const Rule = require('./rule.ts').Rule;
-const Replacer = require('./replacer.ts').Replacer;
-const BackReference = require('./backReference.ts').BackReference;
-const noOp = require('./noOp.ts');
+import { EvalBlock } from './evalBlock.ts';
+import { FunctionCall } from './functionCall.ts';
+import { Mode } from './mode.ts';
+import { WeightedChoice } from './weightedChoice.ts';
+import { Lexer } from './lexer.ts';
+import { TokenType } from './tokenType.ts';
+import { Rule } from './rule.ts';
+import { Replacer } from './replacer.ts';
+import { BackReference } from './backReference.ts';
+import { noOp } from './noOp.ts';
+import {
+  IllegalStateError,
+  UnknownTransformError,
+  JavascriptSyntaxError,
+  BMLSyntaxError,
+  BMLDuplicatedRefIndexError,
+} from './errors.ts';
+import { escapeRegExp } from './stringUtils';
 
-const IllegalStateError = _errors.IllegalStateError;
-const UnknownTransformError = _errors.UnknownTransformError;
-const UnknownModeError = _errors.UnknownModeError;
-const JavascriptSyntaxError = _errors.JavascriptSyntaxError;
-const BMLSyntaxError = _errors.BMLSyntaxError;
-const BMLDuplicatedRefIndexError = _errors.BMLDuplicatedRefIndexError;
-const escapeRegExp = _stringUtils.escapeRegExp;
 
 
 /**

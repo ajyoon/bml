@@ -1,9 +1,12 @@
-const rand = require('./rand.ts');
-const Replacer = require('./replacer.ts').Replacer;
+import rand from './rand.ts';
+import { Replacer } from './replacer.ts';
 
 
-class Rule {
-  constructor(matchers, replacer) {
+export class Rule {
+  matchers: RegExp[];
+  replacer: Replacer;
+
+  constructor(matchers: RegExp[], replacer: Replacer) {
     this.matchers = matchers;
     this.replacer = replacer;
   }
@@ -11,5 +14,3 @@ class Rule {
     return `Rule{matchers: ${this.matchers}, replacer: ${this.replacer}}`;
   }
 }
-
-exports.Rule = Rule;

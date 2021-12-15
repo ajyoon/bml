@@ -1,16 +1,19 @@
-const prettyPrinting = require('./prettyPrinting.ts');
+import { prettyPrintArray } from './prettyPrinting.ts';
+import { Rule } from './rule.ts';
 
 
-class Mode {
-  constructor(name) {
+export class Mode {
+  name: string;
+  rules: Rule[] = [];
+
+  constructor(name: string) {
     this.name = name;
-    this.rules = [];
   }
 
   toString() {
     return `Mode{name: '${this.name}', `
-      + `rules: ${prettyPrinting.prettyPrintArray(this.rules)}}`;
+      + `rules: ${prettyPrintArray(this.rules)}}`;
   }
 }
 
-exports.Mode = Mode;
+export type ModeMap = { [index: string]: Mode };

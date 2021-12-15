@@ -1,20 +1,24 @@
-const Token = require('./token.ts').Token;
-const TokenType = require('./tokenType.ts').TokenType;
+import { Token } from './token.ts';
+import { TokenType } from './tokenType.ts';
 
 class Lexer {
-  constructor(string) {
+
+  string: string;
+  index: number;
+  private _cachedNext: Token | null = null;
+  private _newLineRe: RegExp = /\r?\n/y;
+  private _whitespaceRe: RegExp = /\s+/y;
+  private _numberRe: RegExp = /(\d+(\.\d+)?)|(\.\d+)/y;
+
+  constructor(string: string) {
     this.string = string;
     this.index = 0;
-    this._cachedNext = null;
-    this._newLineRe = /\r?\n/y;
-    this._whitespaceRe = /\s+/y;
-    this._numberRe = /(\d+(\.\d+)?)|(\.\d+)/y;
   }
 
   /**
    * Set this.index and invalidate the next-token cache
    */
-  overrideIndex(newIndex) {
+  overrideIndex(newIndex: number) {
     this._cachedNext = null;
     this.index = newIndex;
   }
@@ -22,7 +26,7 @@ class Lexer {
   /**
    * Determine the next item in the token stream
    */
-  _determineNextRaw() {
+  _determineNextRaw(): Token | null {
     if (this.index >= this.string.length) {
       return null;
     }
@@ -161,7 +165,7 @@ class Lexer {
     return token;
   }
 
-  _determineNextReal() {
+  _determineNextReal(): Token | null {
     let inLineComment = false;
     let inBlockComment = false;
     let token;
@@ -192,7 +196,7 @@ class Lexer {
     return null;
   }
 
-  next() {
+  next(): Token | null {
     let token;
     if (this._cachedNext !== null) {
       token = this._cachedNext;
@@ -206,7 +210,7 @@ class Lexer {
     return token;
   }
 
-  peek() {
+  peek(): Token | null {
     if (this._cachedNext !== null) {
       return this._cachedNext;
     }
@@ -215,7 +219,7 @@ class Lexer {
     return token;
   }
 
-  nextSatisfying(predicate) {
+  nextSatisfying(predicate: (a: Token) => boolean): Token | null {
     let token;
     while ((token = this.next()) !== null) {
       if (predicate(token)) {
@@ -225,7 +229,7 @@ class Lexer {
     return null;
   }
 
-  nextNonWhitespace() {
+  nextNonWhitespace(): Token | null {
     return this.nextSatisfying((t) =>
       (t.tokenType !== TokenType.WHITESPACE && t.tokenType !== TokenType.NEW_LINE));
   }

@@ -6,39 +6,39 @@ import seedrandom from 'seedrandom';
 let rng = seedrandom();
 
 function setRandomSeed(seed: number) {
-    rng = seedrandom(seed);
+  rng = seedrandom(seed);
 }
 
 function normalizeWeights(weightedChoices: WeightedChoice[]): WeightedChoice[] {
-    let normalized = [];
-    let sum = 0;
-    let nullWeightCount = 0;
-    for (let w = 0; w < weightedChoices.length; w++) {
-        let weightedChoice = weightedChoices[w];
-        normalized.push(weightedChoice.clone());
-        if (weightedChoice.weight === null) {
-            nullWeightCount++;
-        } else {
-            sum += weightedChoice.weight;
-        }
+  let normalized = [];
+  let sum = 0;
+  let nullWeightCount = 0;
+  for (let w = 0; w < weightedChoices.length; w++) {
+    let weightedChoice = weightedChoices[w];
+    normalized.push(weightedChoice.clone());
+    if (weightedChoice.weight === null) {
+      nullWeightCount++;
+    } else {
+      sum += weightedChoice.weight;
     }
-    let nullWeight = (100 - sum) / nullWeightCount;
-    for (let n = 0; n < normalized.length; n++) {
-        if (normalized[n].weight === null) {
-            normalized[n].weight = nullWeight;
-        }
+  }
+  let nullWeight = (100 - sum) / nullWeightCount;
+  for (let n = 0; n < normalized.length; n++) {
+    if (normalized[n].weight === null) {
+      normalized[n].weight = nullWeight;
     }
-    return normalized;
+  }
+  return normalized;
 }
 
 function randomFloat(min: number, max: number): number {
-    return (rng() * (max - min)) + min;
+  return (rng() * (max - min)) + min;
 }
 
 function randomInt(min: number, max: number): number {
-    min = Math.ceil(min);
-    max = Math.floor(max);
-    return Math.floor(rng() * (max - min)) + min;
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(rng() * (max - min)) + min;
 }
 
 /**
@@ -51,23 +51,23 @@ function randomInt(min: number, max: number): number {
  * Returns an object of the form {choice, choiceIndex}
  */
 function weightedChoose(weights: WeightedChoice[]): { choice: object, choiceIndex: number } {
-    let sum = 0;
-    for (let i = 0; i < weights.length; i++) {
-        sum += weights[i].weight;
+  let sum = 0;
+  for (let i = 0; i < weights.length; i++) {
+    sum += weights[i].weight;
+  }
+  let progress = 0;
+  let pickedValue = randomFloat(0, sum);
+  for (let w = 0; w < weights.length; w++) {
+    progress += weights[w].weight;
+    if (progress >= pickedValue) {
+      return { choice: weights[w].choice, choiceIndex: w };
     }
-    let progress = 0;
-    let pickedValue = randomFloat(0, sum);
-    for (let w = 0; w < weights.length; w++) {
-        progress += weights[w].weight;
-        if (progress >= pickedValue) {
-            return { choice: weights[w].choice, choiceIndex: w };
-        }
-    }
-    // If we're still here, something went wrong.
-    // Log a warning but try to return a random value anyways.
-    console.warn('Unable to pick weighted choice for weights: ' + weights);
-    let fallbackIndex = randomInt(0, weights.length);
-    return { choice: weights[fallbackIndex].choice, choiceIndex: fallbackIndex };
+  }
+  // If we're still here, something went wrong.
+  // Log a warning but try to return a random value anyways.
+  console.warn('Unable to pick weighted choice for weights: ' + weights);
+  let fallbackIndex = randomInt(0, weights.length);
+  return { choice: weights[fallbackIndex].choice, choiceIndex: fallbackIndex };
 }
 
 exports.setRandomSeed = setRandomSeed;

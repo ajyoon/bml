@@ -1,12 +1,19 @@
-class Token {
-  constructor(tokenType, index, string) {
+import { TokenType } from './tokenType.ts';
+
+export class Token {
+
+  tokenType: TokenType;
+  index: number;
+  string: string;
+
+  constructor(tokenType: TokenType, index: number, string: string) {
     this.tokenType = tokenType;
     this.index = index;
     this.string = string;
   }
 
   toString() {
-    return `Token{tokenType: ${this.tokenType.toString().slice(7, -1)}, index: ${this.index}, `
+    return `Token{tokenType: ${this.tokenType}, index: ${this.index}, `
       + `string: '${this.string}'}`;
   }
 }

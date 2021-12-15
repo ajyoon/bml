@@ -1,12 +1,14 @@
-class BackReference {
-  /**
-   * choiceMap is a *Map* (not simply object) of int choice indexes to bound results.
-   */
-  constructor(referredIdentifier, choiceMap, fallback) {
+export type BackReferenceMap = Map<number, string>;
+
+export class BackReference {
+
+  referredIdentifier: string;
+  choiceMap: BackReferenceMap;
+  fallback: string | null;
+
+  constructor(referredIdentifier: string, choiceMap: BackReferenceMap, fallback: string | null) {
     this.referredIdentifier = referredIdentifier;
     this.choiceMap = choiceMap;
     this.fallback = fallback;
   }
 }
-
-exports.BackReference = BackReference;

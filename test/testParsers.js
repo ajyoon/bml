@@ -13,7 +13,7 @@ const Token = require('../src/token.ts').Token;
 const TokenType = require('../src/tokenType.ts').TokenType;
 const WeightedChoice = require('../src/weightedChoice.ts').WeightedChoice;
 const BackReference = require('../src/backReference.ts').BackReference;
-const noOp = require('../src/noOp.ts');
+const { noOp } = require('../src/noOp.ts');
 
 const JavascriptSyntaxError = errors.JavascriptSyntaxError;
 const UnknownTransformError = errors.UnknownTransformError;
