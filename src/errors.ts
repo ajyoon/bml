@@ -1,126 +1,108 @@
-const stringUtils = require('./stringUtils.ts');
+import stringUtils from './stringUtils.ts';
 
-function IllegalStateError(message) {
-  this.name = 'IllegalStateError';
-  this.message = message;
-  this.message = message + ' This is a bug. Please report at https://github.com/ajyoon/bml/issues';
-  let error = new Error(this.message);
-  error.name = this.name;
-  this.stack = error.stack;
-}
-IllegalStateError.prototype = Object.create(Error.prototype);
-
-function JavascriptSyntaxError(string, charIndex) {
-  this.name = 'JavascriptSyntaxError';
-  this.message = 'Syntax error found while parsing bml javascript at '
-                 + stringUtils.lineColumnString(string, charIndex);
-  let error = new Error(this.message);
-  error.name = this.name;
-  this.stack = error.stack;
-}
-JavascriptSyntaxError.prototype = Object.create(Error.prototype);
-
-function BMLSyntaxError(message, string, charIndex) {
-  this.name = 'BMLSyntaxError';
-  if (message) {
-    this.message = message;
-    if (charIndex) {
-      this.message += ' at ' + stringUtils.lineColumnString(string, charIndex);
-    }
-  } else {
-    this.message = 'Syntax error found while parsing bml';
-    if (charIndex) {
-      this.message += ' at ' + stringUtils.lineColumnString(string, charIndex);
-    }
+class IllegalStateError extends Error {
+  constructor(message: string) {
+    super(message + ' This is a bug. Please report at https://github.com/ajyoon/bml/issues');
+    this.name = 'IllegalStateError';
+    Object.setPrototypeOf(this, IllegalStateError.prototype);
   }
-  let error = new Error(this.message);
-  error.name = this.name;
-  this.stack = error.stack;
 }
-BMLSyntaxError.prototype = Object.create(Error.prototype);
 
-
-function BMLDuplicatedRefIndexError(refIdentifier, choiceIndex, string, charIndex) {
-  this.name = 'BMLDuplicatedRefIndexError';
-  this.message = `Duplicated reference index ${choiceIndex} for reference ${refIdentifier} `
-    + `at ${stringUtils.lineColumnString(string, charIndex)}`;
-  let error = new Error(this.message);
-  error.name = this.name;
-  this.stack = error.stack;
+class JavascriptSyntaxError extends Error {
+  constructor(bmlDoc: string, errorIndex: number) {
+    let message = 'Syntax error found while parsing bml javascript at '
+      + stringUtils.lineColumnString(bmlDoc, errorIndex);
+    super(message);
+    this.name = 'JavascriptSyntaxError';
+    Object.setPrototypeOf(this, JavascriptSyntaxError.prototype);
+  }
 }
-BMLDuplicatedRefIndexError.prototype = Object.create(Error.prototype);
 
-
-function BMLDuplicatedRefError(refIdentifier, string, charIndex) {
-  this.name = 'BMLDuplicatedRefError';
-  this.message = `Duplicated reference ${refIdentifier} `
-    + `at ${stringUtils.lineColumnString(string, charIndex)}`;
-  let error = new Error(this.message);
-  error.name = this.name;
-  this.stack = error.stack;
+class BMLSyntaxError extends Error {
+  constructor(message: string | null, bmlDoc: string, errorIndex: number) {
+    let resolvedMsg = (message || 'Syntax error found while parsing bml') +
+      ' at ' + stringUtils.lineColumnString(bmlDoc, errorIndex);
+    super(resolvedMsg);
+    this.name = 'BMLSyntaxError';
+    Object.setPrototypeOf(this, BMLSyntaxError.prototype);
+  }
 }
-BMLDuplicatedRefError.prototype = Object.create(Error.prototype);
 
-
-function BMLNameError(name, string, charIndex) {
-  this.name = 'BMLNameError';
-  this.message = 'Unknown name: "' + name + '" at '
-    + stringUtils.lineColumnString(string, charIndex);
-  let error = new Error(this.message);
-  error.name = this.name;
-  this.stack = error.stack;
+class BMLDuplicatedRefIndexError extends Error {
+  constructor(refIdentifier: string, choiceIndex: number, bmlDoc: string, errorIndex: number) {
+    let msg = `Duplicated reference index ${choiceIndex} for reference ${refIdentifier} `
+      + `at ${stringUtils.lineColumnString(bmlDoc, errorIndex)}`;
+    super(msg);
+    this.name = 'BMLDuplicatedRefIndexError';
+    Object.setPrototypeOf(this, BMLDuplicatedRefIndexError.prototype);
+  }
 }
-BMLNameError.prototype = Object.create(Error.prototype);
 
-
-function UnknownModeError(string, charIndex, modeName) {
-  this.name = 'UnknownModeError';
-  this.message = 'Unknown mode \'' + modeName + '\' at '
-    + stringUtils.lineColumnString(string, charIndex);
-  let error = new Error(this.message);
-  error.name = this.name;
-  this.stack = error.stack;
+class BMLDuplicatedRefError extends Error {
+  constructor(refIdentifier: string, bmlDoc: string, errorIndex: number) {
+    let msg = `Duplicated reference ${refIdentifier} `
+      + `at ${stringUtils.lineColumnString(bmlDoc, errorIndex)}`;
+    super(msg);
+    this.name = 'BMLDuplicatedRefError';
+    Object.setPrototypeOf(this, BMLDuplicatedRefError.prototype);
+  }
 }
-UnknownModeError.prototype = Object.create(Error.prototype);
 
-
-function UnknownTransformError(string, charIndex) {
-  this.name = 'UnknownTransformError';
-  this.message = 'Unknown transform at '
-    + stringUtils.lineColumnString(string, charIndex);
-  let error = new Error(this.message);
-  error.name = this.name;
-  this.stack = error.stack;
+class BMLNameError extends Error {
+  constructor(name: string, bmlDoc: string, errorIndex: number) {
+    let msg = 'Unknown name: "' + name + '" at '
+      + stringUtils.lineColumnString(bmlDoc, errorIndex);
+    super(msg);
+    this.name = 'BMLNameError';
+    Object.setPrototypeOf(this, BMLNameError.prototype);
+  }
 }
-UnknownTransformError.prototype = Object.create(Error.prototype);
 
-
-function FunctionNotFoundError(functionName, string, charIndex) {
-  this.name = 'FunctionNotFoundError';
-  this.message = 'Attempted to call unknown function "' + functionName + '" at '
-    + stringUtils.lineColumnString(string, charIndex);
-  let error = new Error(this.message);
-  error.name = this.name;
-  this.stack = error.stack;
+class UnknownModeError extends Error {
+  constructor(modeName: string, bmlDoc: string, errorIndex: number) {
+    let msg = 'Unknown mode \'' + modeName + '\' at '
+      + stringUtils.lineColumnString(bmlDoc, errorIndex);
+    super(msg);
+    this.name = 'UnknownModeError';
+    Object.setPrototypeOf(this, UnknownModeError.prototype);
+  }
 }
-FunctionNotFoundError.prototype = Object.create(Error.prototype);
 
-
-function NotAFunctionError(functionName, string, charIndex) {
-  this.name = 'NotAFunctionError';
-  this.message = 'Attempted to call non-function "' + functionName + '" at '
-    + stringUtils.lineColumnString(string, charIndex);
-  let error = new Error(this.message);
-  error.name = this.name;
-  this.stack = error.stack;
+class UnknownTransformError extends Error {
+  constructor(bmlDoc: string, errorIndex: number) {
+    let msg = 'Unknown transform at '
+      + stringUtils.lineColumnString(bmlDoc, errorIndex);
+    super(msg);
+    this.name = 'UnknownTransformError';
+    Object.setPrototypeOf(this, UnknownTransformError.prototype);
+  }
 }
-NotAFunctionError.prototype = Object.create(Error.prototype);
+
+class FunctionNotFoundError extends Error {
+  constructor(functionName: string, bmlDoc: string, errorIndex: number) {
+    let msg = 'Attempted to call unknown function "' + functionName + '" at '
+      + stringUtils.lineColumnString(bmlDoc, errorIndex);
+    super(msg);
+    this.name = 'FunctionNotFoundError';
+    Object.setPrototypeOf(this, FunctionNotFoundError.prototype);
+  }
+}
+
+class NotAFunctionError extends Error {
+  constructor(functionName: string, bmlDoc: string, errorIndex: number) {
+    let msg = 'Attempted to call non-function "' + functionName + '" at '
+      + stringUtils.lineColumnString(bmlDoc, errorIndex);
+    super(msg);
+    this.name = 'NotAFunctionError';
+    Object.setPrototypeOf(this, NotAFunctionError.prototype);
+  }
+}
 
 exports.IllegalStateError = IllegalStateError;
 exports.JavascriptSyntaxError = JavascriptSyntaxError;
 exports.BMLSyntaxError = BMLSyntaxError;
 exports.BMLDuplicatedRefIndexError = BMLDuplicatedRefIndexError;
-exports.BMLDuplicatedRefError = BMLDuplicatedRefIndexError;
+exports.BMLDuplicatedRefError = BMLDuplicatedRefError;
 exports.BMLNameError = BMLNameError;
 exports.UnknownModeError = UnknownModeError;
 exports.UnknownTransformError = UnknownTransformError;

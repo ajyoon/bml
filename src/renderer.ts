@@ -32,9 +32,9 @@ function checkVersion(bmlVersion, specifiedInSettings) {
   if (specifiedInSettings !== null) {
     if (specifiedInSettings !== bmlVersion) {
       console.warn('BML VERSION MISMATCH.' +
-                   ' bml source file specifies version ' + specifiedInSettings +
-                   ' but running version is ' + BML_VERSION + '.' +
-                   ' unexpected behavior may occur.');
+        ' bml source file specifies version ' + specifiedInSettings +
+        ' but running version is ' + BML_VERSION + '.' +
+        ' unexpected behavior may occur.');
     }
   }
 }
@@ -71,7 +71,7 @@ function resolveBackReference(choiceResultMap, backReference) {
  * @returns {String} the rendered text.
  */
 function renderText(string, startIndex, modes, activeMode,
-                    userDefs, choiceResultMap, stackDepth) {
+  userDefs, choiceResultMap, stackDepth) {
   // TODO this function is way too complex and badly needs refactor
   choiceResultMap = choiceResultMap || new Map();
   activeMode = activeMode || null;
@@ -113,107 +113,107 @@ function renderText(string, startIndex, modes, activeMode,
     }
 
     switch (token.tokenType) {
-    case TokenType.OPEN_DOUBLE_BRACKET:
-      inLiteralBlock = true;
-      break;
-    case TokenType.NEW_LINE:
-      if (out.endsWith('\\')) {
-        inVisualLineBreak = true;
-        // hackily overwrite the backslash to a space since it's for a
-        // visual line break.
-        out = out.substring(0, out.length - 1) + ' ';
-      } else {
-        out += token.string;
-      }
-      break;
-    case TokenType.OPEN_BRACE:
-      chooseRe.lastIndex = token.index + 1;
-      useRe.lastIndex = token.index + 1;
-      if (chooseRe.test(string)) {
-        let parseInlineCommandResult = parseInlineCommand(string, token.index, false);
-        let replacer = parseInlineCommandResult.replacer;
-        let backReference = parseInlineCommandResult.backReference;
-        let replacerCallResult;
-        if (replacer) {
-          replacerCallResult = replacer.call();
-          if (replacer.identifier) {
-            if (choiceResultMap.has(replacer.identifier)) {
-              throw new BMLDuplicatedRefError(replacer.identifier, string, token.index);
-            }
-          }
-          replacement = replacerCallResult.replacement;
+      case TokenType.OPEN_DOUBLE_BRACKET:
+        inLiteralBlock = true;
+        break;
+      case TokenType.NEW_LINE:
+        if (out.endsWith('\\')) {
+          inVisualLineBreak = true;
+          // hackily overwrite the backslash to a space since it's for a
+          // visual line break.
+          out = out.substring(0, out.length - 1) + ' ';
         } else {
-          // sanity check
-          if (!backReference) {
-            throw new IllegalStateError('No replacer or backref from inline choose');
-          }
-          replacement = resolveBackReference(choiceResultMap, backReference);
+          out += token.string;
         }
-        let renderedReplacement;
-        if (replacement instanceof FunctionCall) {
-          renderedReplacement = replacement.execute(userDefs, null, string, token.index);
-        } else {
-          // To handle nested choices and to run rules over chosen text,
-          // we recursively render the chosen text.
-          renderedReplacement = renderText(
-            replacement, 0, modes, activeMode, userDefs, choiceResultMap, stackDepth + 1);
-        }
-        if (!(replacer && replacer.isSilent)) {
-          out += renderedReplacement;
-        }
-        if (replacerCallResult) {
-          choiceResultMap.set(
-            replacer.identifier,
-            { choiceIndex: replacerCallResult.choiceIndex, renderedOutput: renderedReplacement});
-        }
-        lexer.overrideIndex(parseInlineCommandResult.blockEndIndex);
-        continue;
-      } else if (useRe.test(string)) {
-        let parseUseResult = parseUse(string, token.index);
-        lexer.overrideIndex(parseUseResult.blockEndIndex);
-        if (modes.hasOwnProperty(parseUseResult.modeName)) {
-          activeMode = modes[parseUseResult.modeName];
-        } else {
-          throw new UnknownModeError(string, token.index, parseUseResult.modeName);
-        }
-      }
-      break;
-    default:
-      if (activeMode !== null) {
-        ruleLoop:
-        for (let r = 0; r < activeMode.rules.length; r++) {
-          currentRule = activeMode.rules[r];
-          for (let m = 0; m < currentRule.matchers.length; m++) {
-            currentRule.matchers[m].lastIndex = token.index;
-            let currentMatch = currentRule.matchers[m].exec(string);
-            if (currentMatch !== null) {
-              replacement = currentRule.replacer.call().replacement;
-              if (replacement instanceof FunctionCall) {
-                out += replacement.execute(userDefs, currentMatch, string, token.index);
-              } else if (replacement === noOp) {
-                out += currentMatch[0];
-              } else {
-                // To handle nested choices and to run rules over replaced text,
-                // we recursively render the chosen text.
-                let renderedReplacement = renderText(
-                  replacement, 0, modes, activeMode, userDefs, choiceResultMap, stackDepth + 1);
-                out += renderedReplacement;
+        break;
+      case TokenType.OPEN_BRACE:
+        chooseRe.lastIndex = token.index + 1;
+        useRe.lastIndex = token.index + 1;
+        if (chooseRe.test(string)) {
+          let parseInlineCommandResult = parseInlineCommand(string, token.index, false);
+          let replacer = parseInlineCommandResult.replacer;
+          let backReference = parseInlineCommandResult.backReference;
+          let replacerCallResult;
+          if (replacer) {
+            replacerCallResult = replacer.call();
+            if (replacer.identifier) {
+              if (choiceResultMap.has(replacer.identifier)) {
+                throw new BMLDuplicatedRefError(replacer.identifier, string, token.index);
               }
-              lexer.overrideIndex(lexer.index + currentMatch[0].length);
-              foundMatch = true;
-              break ruleLoop;
+            }
+            replacement = replacerCallResult.replacement;
+          } else {
+            // sanity check
+            if (!backReference) {
+              throw new IllegalStateError('No replacer or backref from inline choose');
+            }
+            replacement = resolveBackReference(choiceResultMap, backReference);
+          }
+          let renderedReplacement;
+          if (replacement instanceof FunctionCall) {
+            renderedReplacement = replacement.execute(userDefs, null, string, token.index);
+          } else {
+            // To handle nested choices and to run rules over chosen text,
+            // we recursively render the chosen text.
+            renderedReplacement = renderText(
+              replacement, 0, modes, activeMode, userDefs, choiceResultMap, stackDepth + 1);
+          }
+          if (!(replacer && replacer.isSilent)) {
+            out += renderedReplacement;
+          }
+          if (replacerCallResult) {
+            choiceResultMap.set(
+              replacer.identifier,
+              { choiceIndex: replacerCallResult.choiceIndex, renderedOutput: renderedReplacement });
+          }
+          lexer.overrideIndex(parseInlineCommandResult.blockEndIndex);
+          continue;
+        } else if (useRe.test(string)) {
+          let parseUseResult = parseUse(string, token.index);
+          lexer.overrideIndex(parseUseResult.blockEndIndex);
+          if (modes.hasOwnProperty(parseUseResult.modeName)) {
+            activeMode = modes[parseUseResult.modeName];
+          } else {
+            throw new UnknownModeError(string, token.index, parseUseResult.modeName);
+          }
+        }
+        break;
+      default:
+        if (activeMode !== null) {
+          ruleLoop:
+          for (let r = 0; r < activeMode.rules.length; r++) {
+            currentRule = activeMode.rules[r];
+            for (let m = 0; m < currentRule.matchers.length; m++) {
+              currentRule.matchers[m].lastIndex = token.index;
+              let currentMatch = currentRule.matchers[m].exec(string);
+              if (currentMatch !== null) {
+                replacement = currentRule.replacer.call().replacement;
+                if (replacement instanceof FunctionCall) {
+                  out += replacement.execute(userDefs, currentMatch, string, token.index);
+                } else if (replacement === noOp) {
+                  out += currentMatch[0];
+                } else {
+                  // To handle nested choices and to run rules over replaced text,
+                  // we recursively render the chosen text.
+                  let renderedReplacement = renderText(
+                    replacement, 0, modes, activeMode, userDefs, choiceResultMap, stackDepth + 1);
+                  out += renderedReplacement;
+                }
+                lexer.overrideIndex(lexer.index + currentMatch[0].length);
+                foundMatch = true;
+                break ruleLoop;
+              }
             }
           }
         }
-      }
-      if (foundMatch) {
-        foundMatch = false;
-        continue;
-      } else {
-        out += token.string;
-      }
+        if (foundMatch) {
+          foundMatch = false;
+          continue;
+        } else {
+          out += token.string;
+        }
 
-      break;  // Break from `switch (token.tokenType)`
+        break;  // Break from `switch (token.tokenType)`
     }
 
     lexer.next();  // Consume token
@@ -246,7 +246,7 @@ function render(bmlDocumentString, renderSettings) {
   // Resolve render settings
   renderSettings = mergeSettings(defaultRenderSettings, renderSettings);
   if (renderSettings.randomSeed) {
-      rand.setRandomSeed(renderSettings.randomSeed);
+    rand.setRandomSeed(renderSettings.randomSeed);
   }
 
   // Parse prelude

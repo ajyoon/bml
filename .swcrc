@@ -9,5 +9,6 @@
   },
   "module": {
     "type": "umd"
-  }
+  },
+  "sourceMaps": true
 }

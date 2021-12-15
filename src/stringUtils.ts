@@ -1,11 +1,11 @@
-function lineAndColumnOf(string, charIndex) {
-  if (charIndex > string.length) {
+function lineAndColumnOf(str: string, index: number): { line: number, column: number } {
+  if (index > str.length) {
     throw new Error('charIndex > string.length');
   }
   let line = 1;
   let column = -1;
   let newLine = false;
-  for (let i = 0; i <= charIndex; i++) {
+  for (let i = 0; i <= index; i++) {
     if (newLine) {
       line++;
       column = 0;
@@ -13,25 +13,25 @@ function lineAndColumnOf(string, charIndex) {
     } else {
       column++;
     }
-    if (string[i] === '\n') {
+    if (str[i] === '\n') {
       newLine = true;
     }
   }
-  return {line: line, column: column};
+  return { line: line, column: column };
 }
 
-function lineColumnString(string, charIndex) {
-  let lineAndColumn = lineAndColumnOf(string, charIndex);
+function lineColumnString(str: string, index: number): string {
+  let lineAndColumn = lineAndColumnOf(str, index);
   return 'line: ' + lineAndColumn.line + ', column: ' + lineAndColumn.column;
 }
 
-function isWhitespace(string) {
-  return string.trim() === '';
+function isWhitespace(str: string): boolean {
+  return str.trim() === '';
 }
 
 /* Escape all regex-special characters in a string */
-function escapeRegExp(string) {
-  return string.replace(/([.*+?^${}()|\[\]\/\\])/g, '\\$1');
+function escapeRegExp(str: string): string {
+  return str.replace(/([.*+?^${}()|\[\]\/\\])/g, '\\$1');
 }
 
 exports.lineAndColumnOf = lineAndColumnOf;
