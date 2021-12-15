@@ -1,4 +1,5 @@
-const evalApi = require('./evalApi.ts');
+import * as evalApi from './evalApi.ts';
+import { DocumentSettings } from './settings.ts';
 
 
 // TODO run some basic checks against provided code,
@@ -43,4 +44,9 @@ export class EvalBlock {
   execute(): string {
     return this.toFunc()();
   }
+}
+
+export type UserDefs = {
+  settings?: DocumentSettings,
+  [index: string]: Function
 }

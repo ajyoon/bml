@@ -1,4 +1,4 @@
-const marked = require('marked');
+import marked from 'marked';
 
 /**
  * Cleans whitespace in the given text by:
@@ -7,7 +7,7 @@ const marked = require('marked');
  * 3. Removing blank lines at the start of the text
  * 4. Ensuring the text ends with a single line break
  */
-function whitespaceCleanup(text) {
+export function whitespaceCleanup(text: string): string {
   let out = text;
   // Append a line break (if this is redundant it will be cleaned up)
   out += '\n';
@@ -22,9 +22,6 @@ function whitespaceCleanup(text) {
   return out;
 }
 
-function renderMarkdown(text, markedSettings) {
+export function renderMarkdown(text: string, markedSettings: object) {
   return marked(text, markedSettings);
 }
-
-exports.whitespaceCleanup = whitespaceCleanup;
-exports.renderMarkdown = renderMarkdown;

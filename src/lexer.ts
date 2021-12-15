@@ -1,7 +1,7 @@
 import { Token } from './token.ts';
 import { TokenType } from './tokenType.ts';
 
-class Lexer {
+export class Lexer {
 
   string: string;
   index: number;
@@ -234,5 +234,3 @@ class Lexer {
       (t.tokenType !== TokenType.WHITESPACE && t.tokenType !== TokenType.NEW_LINE));
   }
 }
-
-exports.Lexer = Lexer;

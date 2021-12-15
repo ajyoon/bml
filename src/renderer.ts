@@ -11,7 +11,7 @@ import {
   parseUse,
   parseInlineCommand,
 } from './parsers.ts';
-import { EvalBlock } from './evalBlock.ts';
+import { EvalBlock, UserDefs } from './evalBlock.ts';
 import { FunctionCall } from './functionCall.ts';
 import { Lexer } from './lexer.ts';
 import { TokenType } from './tokenType.ts';
@@ -71,11 +71,10 @@ function resolveBackReference(choiceResultMap: ChoiceResultMap, backReference: B
  * the order they are listed in the active mode's declaration.
  */
 export function renderText(str: string, startIndex: number, modes: ModeMap, activeMode: Mode,
-  userDefs: object, choiceResultMap: ChoiceResultMap, stackDepth: number): string {
+  userDefs: object, choiceResultMap: ChoiceResultMap | null, stackDepth: number): string {
   // TODO this function is way too complex and badly needs refactor
   choiceResultMap = choiceResultMap || new Map();
   activeMode = activeMode || null;
-  let isEscaped = false;
   let inVisualLineBreak = false;
   let inLiteralBlock = false;
   let out = '';
@@ -238,7 +237,7 @@ export function render(bmlDocumentString: string, renderSettings: RenderSettings
     modes,
   } = parsePrelude(bmlDocumentString);
 
-  let userDefs: { settings?: DocumentSettings, [index: string]: any } = {};
+  let userDefs: UserDefs = {};
   if (evalBlock && renderSettings.allowEval) {
     userDefs = evalBlock.execute();
     userDefs.settings = mergeSettings(defaultBMLSettings, userDefs.settings);
