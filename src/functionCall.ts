@@ -1,17 +1,21 @@
-const _errors = require('./errors.ts');
-const FunctionNotFoundError = _errors.FunctionNotFoundError;
-const NotAFunctionError = _errors.NotAFunctionError;
+import {
+  FunctionNotFoundError,
+  NotAFunctionError
+} from './errors.ts';
 
 
-class FunctionCall {
-  constructor(functionName) {
+export class FunctionCall {
+  functionName: string;
+
+  constructor(functionName: string) {
     this.functionName = functionName;
   }
 
-  toString() {
+  toString(): string {
     return `functionCall('${this.functionName}')`;
   }
 
+  // TODO work out these types
   execute(userDefs, match, documentString, charIndex) {
     let func = userDefs[this.functionName];
     if (typeof func === 'undefined') {
@@ -22,5 +26,3 @@ class FunctionCall {
     return func(match || [''], documentString, charIndex);
   }
 }
-
-exports.FunctionCall = FunctionCall;

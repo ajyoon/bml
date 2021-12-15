@@ -1,6 +1,6 @@
 import { EvalBlock } from './evalBlock.ts';
 import { FunctionCall } from './functionCall.ts';
-import { Mode } from './mode.ts';
+import { Mode, ModeMap } from './mode.ts';
 import { WeightedChoice } from './weightedChoice.ts';
 import { Lexer } from './lexer.ts';
 import { TokenType } from './tokenType.ts';
@@ -18,19 +18,21 @@ import {
 import { escapeRegExp } from './stringUtils';
 
 
-
 /**
  * Parse an `eval` block
  *
- * @param {Lexer} lexer - A lexer whose next token is KW_EVAL. This will be
- *     mutated in place such that when the method returns, the lexer's next
- *     token will be after the closing brace of the block.
- * @return {EvalBlock} An EvalBlock extracted from the block
+ * @param lexer - A lexer whose next token is KW_EVAL. This will be
+ *     mutated in place such that when the method returns, the lexer's
+ *     next token will be after the closing brace of the block.
+ *
+ * @return The string of Javascript code extracted from the eval block
+ *
  * @throws {BMLSyntaxError} If the lexer is not at an eval block
+ *
  * @throws {JavascriptSyntaxError} If the javascript snippet inside the eval
  *     block contains a syntax error which makes parsing it impossible.
  */
-function parseEval(lexer) {
+export function parseEval(lexer: Lexer): string {
   if (lexer.next().tokenType !== TokenType.KW_EVAL) {
     throw new IllegalStateError('parseEval started with non-KW_EVAL');
   }
@@ -123,10 +125,7 @@ function parseEval(lexer) {
     lexer.string, startIndex);
 }
 
-/**
- * @returns {[RegExp]}
- */
-function parseMatchers(lexer) {
+export function parseMatchers(lexer: Lexer): RegExp[] {
   let startIndex = lexer.index;
   let token;
   let acceptMatcher = true;
@@ -149,7 +148,6 @@ function parseMatchers(lexer) {
           throw new BMLSyntaxError('unexpected regex literal.',
             lexer.string, token.index);
         }
-        break;
       case TokenType.OPEN_PAREN:
         if (acceptMatcher) {
           let strMatcher = parseReplacementWithLexer(lexer);
@@ -163,7 +161,6 @@ function parseMatchers(lexer) {
           throw new BMLSyntaxError('unexpected string literal.',
             lexer.string, token.index);
         }
-        break;
       case TokenType.COMMA:
         acceptMatcher = true;
         break;
@@ -178,7 +175,7 @@ function parseMatchers(lexer) {
     lexer.string, startIndex);
 }
 
-function parseCall(lexer) {
+export function parseCall(lexer: Lexer): FunctionCall {
   let callRe = /call\s+([_$a-zA-Z\xA0-\uFFFF][_$a-zA-Z0-9\xA0-\uFFFF]*)/y;
   callRe.lastIndex = lexer.index;
   let callMatch = callRe.exec(lexer.string);
@@ -192,7 +189,7 @@ function parseCall(lexer) {
 
 // Expects the lexer's current token immediately follows the
 // replacement list open braace.
-function parseReplacements(lexer, forRule) {
+export function parseReplacements(lexer: Lexer, forRule: boolean): Replacer {
   let startIndex = lexer.index;
   let token;
   let choices = [];
@@ -308,7 +305,7 @@ function parseReplacements(lexer, forRule) {
 }
 
 
-function parseRule(lexer) {
+export function parseRule(lexer: Lexer): Rule {
   let matchers = parseMatchers(lexer);
   if (lexer.nextNonWhitespace().tokenType !== TokenType.KW_AS) {
     throw new BMLSyntaxError('matchers must be followed with keyword "as"',
@@ -322,7 +319,7 @@ function parseRule(lexer) {
   return new Rule(matchers, replacements);
 }
 
-function parseMode(lexer) {
+export function parseMode(lexer: Lexer): Mode {
   let startIndex = lexer.index;
   if (lexer.peek().tokenType !== TokenType.KW_MODE) {
     throw new BMLSyntaxError('modes must begin with keyword "mode"',
@@ -332,6 +329,10 @@ function parseMode(lexer) {
   let modeNameRe = /(\s*(\w+)\s*)/y;
   modeNameRe.lastIndex = lexer.index;
   let modeNameMatch = modeNameRe.exec(lexer.string);
+  if (!modeNameMatch) {
+    throw new BMLSyntaxError('mode name is absent or invalid',
+      lexer.string, lexer.index);
+  }
   let mode = new Mode(modeNameMatch[2]);
   lexer.overrideIndex(lexer.index + modeNameMatch[1].length);
 
@@ -365,11 +366,20 @@ function parseMode(lexer) {
     lexer.string, startIndex);
 }
 
+/*
+    preludeEndIndex: lexer.index,
+    evalBlock: new EvalBlock(evalString),
+    modes: modes,
 
-function parsePrelude(string) {
+*/
+type ParsePreludeResult = {
+  preludeEndIndex: number, evalBlock: EvalBlock, modes: ModeMap
+};
+
+export function parsePrelude(string: string): ParsePreludeResult {
   let lexer = new Lexer(string);
   let evalString = '';
-  let modes = {};
+  let modes: ModeMap = {};
   let token;
   while ((token = lexer.peek()) !== null) {
     switch (token.tokenType) {
@@ -400,13 +410,19 @@ function parsePrelude(string) {
   };
 }
 
+type ParseUseResult = {
+  blockEndIndex: number,
+  modeName: string
+};
+
 /**
  * Parse a `use` block of the form `{use|using modeName}`
  *
- * @returns {blockEndIndex, modeName} The returned index is the index immediately
+ * @returns The returned index is the index immediately
  * after the closing brace.
  */
-function parseUse(string, openBraceIndex) {
+export function parseUse(string: string, openBraceIndex: number): ParseUseResult {
+  // TODO "using" syntax has been deprecated for a while and can be removed
   let useRe = /{(use|using)\s+(\w[\w\d]*)\s*}/y;
   useRe.lastIndex = openBraceIndex;
   let match = useRe.exec(string);
@@ -420,11 +436,11 @@ function parseUse(string, openBraceIndex) {
 }
 
 /**
- * @param lexer {Lexer} a lexer whose next token is TokenType.OPEN_PAREN
+ * @param lexer a lexer whose next token is TokenType.OPEN_PAREN
  *
- * @return {String} the parsed string literal replacement body
+ * @return the parsed string literal replacement body
  */
-function parseReplacementWithLexer(lexer) {
+export function parseReplacementWithLexer(lexer: Lexer): string {
   lexer.next();
   let startIndex = lexer.index;
   let stringLiteral = '';
@@ -449,11 +465,9 @@ function parseReplacementWithLexer(lexer) {
 }
 
 /**
- * @param lexer {Lexer} a lexer whose next token is TokenType.SLASH
- *
- * @return {RegExp}
+ * @param lexer a lexer whose next token is TokenType.SLASH
  */
-function parseRegexMatcher(lexer) {
+export function parseRegexMatcher(lexer: Lexer): RegExp {
   lexer.next();
   let startIndex = lexer.index;
   let stringLiteral = '';
@@ -469,42 +483,33 @@ function parseRegexMatcher(lexer) {
     lexer.string, startIndex);
 }
 
-
-// {lastDigitIndex, extractedNumber}
-function extractNumberLiteral(string, numberIndex) {
-  let numberRe = /(\d+(\.\d+)?)|(\.\d+)/y;
-  numberRe.lastIndex = numberIndex;
-  let match = numberRe.exec(string);
-  if (match === null) {
-    return null;
-  }
-  return {
-    lastDigitIndex: numberIndex + match[0].length,
-    extractedNumber: Number(match[0]),
-  };
+type ParseInlineCommandResult = {
+  blockEndIndex: number,
+  backReference: BackReference | null,
+  replacer: Replacer | null
 }
 
 // TODO turns out actually this name doesnt fully make sense.
 // the renderer uses an ahead-of-time regex before going into parsing
 // since it will parse a 'use' command differently from replacers/backrefs.
 // maybe refactor to combine these into one brace-command parser here?
-function parseInlineCommand(string, openBraceIndex) {
+export function parseInlineCommand(string: string, openBraceIndex: number): ParseInlineCommandResult {
   let lexer = new Lexer(string);
   lexer.overrideIndex(openBraceIndex + 1);
   let backReference = parseBackReference(lexer);
-  let replacements = null;
+  let replacer = null;
   if (backReference == null) {
-    replacements = parseReplacements(lexer, false);
+    replacer = parseReplacements(lexer, false);
   }
   return {
     blockEndIndex: lexer.index,
     backReference: backReference,
-    replacer: replacements,
+    replacer: replacer,
   };
 }
 
 // Returns null if there is no backref slug at the beginning of the block
-function parseBackReference(lexer) {
+export function parseBackReference(lexer: Lexer): BackReference | null {
   let startIndex = lexer.index;
 
   // TODO I think this doesn't work if there's a comment or linebreak
@@ -635,13 +640,3 @@ function parseBackReference(lexer) {
     lexer.string, startIndex);
 }
 
-exports.parseEval = parseEval;
-exports.parseRule = parseRule;
-exports.parseMode = parseMode;
-exports.parsePrelude = parsePrelude;
-exports.parseUse = parseUse;
-exports.parseInlineCommand = parseInlineCommand;
-exports.parseMatchers = parseMatchers;
-exports.parseCall = parseCall;
-exports.parseReplacements = parseReplacements;
-exports.parseBackReference = parseBackReference;

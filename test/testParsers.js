@@ -134,6 +134,16 @@ describe('parseMode', function() {
     expect(mode).toBeInstanceOf(Mode);
     expect(mode.name).toBe('test');
   });
+  
+  it('fails when mode name is absent', function() {
+    let lexer = new Lexer('mode {}');
+    expect(() => parseMode(lexer)).toThrowError(BMLSyntaxError);
+  });
+
+  it('fails when mode name is malformed', function() {
+    let lexer = new Lexer('mode ??? {}');
+    expect(() => parseMode(lexer)).toThrowError(BMLSyntaxError);
+  });
 
   it('can parse a mixture of literal and regex matcher rules', function() {
     let testString =

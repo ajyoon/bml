@@ -12,9 +12,8 @@ export class Token {
     this.string = string;
   }
 
-  toString() {
+  toString(): string {
     return `Token{tokenType: ${this.tokenType}, index: ${this.index}, `
       + `string: '${this.string}'}`;
   }
 }
-exports.Token = Token;

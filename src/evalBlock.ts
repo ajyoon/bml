@@ -24,23 +24,23 @@ const evalFuncTemplate = `
 `;
 
 
-class EvalBlock {
-  constructor(string) {
+export class EvalBlock {
+  string: string;
+
+  constructor(string: string) {
     this.string = string;
   }
 
-  toString() {
+  toString(): string {
     return `EvalBlock('${this.string}')`;
   }
-  
-  toFunc() {
+
+  toFunc(): Function {
     let funcSrc = evalFuncTemplate.replace('***USER CODE SLOT***', this.string);
     return new Function(funcSrc).bind(evalApi.api);
   }
-  
-  execute() {
+
+  execute(): string {
     return this.toFunc()();
   }
 }
-
-exports.EvalBlock = EvalBlock;

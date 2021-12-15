@@ -70,7 +70,7 @@ function resolveBackReference(choiceResultMap: ChoiceResultMap, backReference: B
  * whenever a matching string is encountered. Rules are processed in
  * the order they are listed in the active mode's declaration.
  */
-function renderText(str: string, startIndex: number, modes: ModeMap, activeMode: Mode,
+export function renderText(str: string, startIndex: number, modes: ModeMap, activeMode: Mode,
   userDefs: object, choiceResultMap: ChoiceResultMap, stackDepth: number): string {
   // TODO this function is way too complex and badly needs refactor
   choiceResultMap = choiceResultMap || new Map();
@@ -224,7 +224,7 @@ function renderText(str: string, startIndex: number, modes: ModeMap, activeMode:
   return out;
 }
 
-function render(bmlDocumentString: string, renderSettings: RenderSettings): string {
+export function render(bmlDocumentString: string, renderSettings: RenderSettings): string {
   // Resolve render settings
   renderSettings = mergeSettings(defaultRenderSettings, renderSettings);
   if (renderSettings.randomSeed) {
@@ -259,6 +259,3 @@ function render(bmlDocumentString: string, renderSettings: RenderSettings): stri
 
   return output;
 }
-
-exports.renderText = renderText;
-exports.render = render;
