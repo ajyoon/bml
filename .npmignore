@@ -8,5 +8,3 @@ todo.org
 **/.venv/
 **/build/
 **/.parcel-cache/
-
-dist
