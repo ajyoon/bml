@@ -3,6 +3,7 @@
 ### 0.0.28:
 * Fix bug where `UnknownModeError` incorrectly called itself a
   `JavascriptSyntaxError`.
+* Fix bug causing literal blocks to not be properly treated literally
 
 ### 0.0.27:
 * Fix bug causing comments to not be stripped out in many situations

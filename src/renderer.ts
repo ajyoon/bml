@@ -98,9 +98,11 @@ function renderText(string, startIndex, modes, activeMode,
     if (inLiteralBlock) {
       if (token.tokenType === TokenType.CLOSE_DOUBLE_BRACKET) {
         inLiteralBlock = false;
-        lexer.next();
-        continue;
+      } else {
+        out += token.string;
       }
+      lexer.next();
+      continue;
     }
 
     if (inVisualLineBreak) {

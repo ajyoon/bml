@@ -161,6 +161,17 @@ inner text /* a block comment inside a choice */
 )}`;
     expect(bml(testString)).toBe('outer text\ninner text\n');
   });
+  
+  it('respects literal blocks', function() {
+    let testString = `
+        mode testMode {
+            (foo) as {(bar)}
+        }
+        {use testMode}
+        [[foo {(literal text should not interpreted)}]]
+    `;
+    expect(bml(testString)).toBe('foo {(literal text should not interpreted)}\n');
+  });
 
   it('produces the exact same document when using a fixed random seed', function() {
     const testString = '' + fs.readFileSync(require.resolve('./randomSmokeTest.bml'));
