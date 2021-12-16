@@ -40,7 +40,8 @@
   "scripts": {
     "test": "jest",
     "releaseTest": "node test/releaseTest.js",
-    "build": "./node_modules/.bin/parcel build && npm run releaseTest",
+    "checkTypes": "./node_modules/.bin/tsc --noEmit",
+    "build": "npm run checkTypes && ./node_modules/.bin/parcel build && npm run releaseTest",
     "preversion": "npm test",
     "version": "npm run build && git add -A dist"
   },
