@@ -1,15 +1,15 @@
-import { WeightedChoice } from './weightedChoice.ts';
+import { WeightedChoice, Choice } from './weightedChoice';
 import seedrandom from 'seedrandom';
 
 // A module-local seedable random number generator
 // The selected seed will be random unless `setRandomSeed()` is called.
 let rng = seedrandom();
 
-function setRandomSeed(seed: number) {
+export function setRandomSeed(seed: number) {
   rng = seedrandom(seed);
 }
 
-function normalizeWeights(weightedChoices: WeightedChoice[]): WeightedChoice[] {
+export function normalizeWeights(weightedChoices: WeightedChoice[]): WeightedChoice[] {
   let normalized = [];
   let sum = 0;
   let nullWeightCount = 0;
@@ -31,11 +31,11 @@ function normalizeWeights(weightedChoices: WeightedChoice[]): WeightedChoice[] {
   return normalized;
 }
 
-function randomFloat(min: number, max: number): number {
+export function randomFloat(min: number, max: number): number {
   return (rng() * (max - min)) + min;
 }
 
-function randomInt(min: number, max: number): number {
+export function randomInt(min: number, max: number): number {
   min = Math.ceil(min);
   max = Math.floor(max);
   return Math.floor(rng() * (max - min)) + min;
@@ -50,7 +50,7 @@ function randomInt(min: number, max: number): number {
  *
  * Returns an object of the form {choice, choiceIndex}
  */
-function weightedChoose(weights: WeightedChoice[]): { choice: object, choiceIndex: number } {
+export function weightedChoose(weights: WeightedChoice[]): { choice: Choice, choiceIndex: number } {
   let sum = 0;
   for (let i = 0; i < weights.length; i++) {
     sum += weights[i].weight;
@@ -70,8 +70,3 @@ function weightedChoose(weights: WeightedChoice[]): { choice: object, choiceInde
   return { choice: weights[fallbackIndex].choice, choiceIndex: fallbackIndex };
 }
 
-exports.setRandomSeed = setRandomSeed;
-exports.randomFloat = randomFloat;
-exports.randomInt = randomInt;
-exports.normalizeWeights = normalizeWeights;
-exports.weightedChoose = weightedChoose;

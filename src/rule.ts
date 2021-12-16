@@ -1,5 +1,4 @@
-import rand from './rand.ts';
-import { Replacer } from './replacer.ts';
+import { Replacer } from './replacer';
 
 
 export class Rule {

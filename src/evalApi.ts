@@ -1,5 +1,5 @@
-import * as rand from './rand.ts';
-import { WeightedChoice } from './weightedChoice.ts';
+import * as rand from './rand';
+import { WeightedChoice } from './weightedChoice';
 
 /**
  * This module is exposed to BML script `eval` blocks in a `bml` object namespace.

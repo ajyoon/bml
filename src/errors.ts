@@ -1,6 +1,6 @@
-import stringUtils from './stringUtils.ts';
+import * as stringUtils from './stringUtils';
 
-class IllegalStateError extends Error {
+export class IllegalStateError extends Error {
   constructor(message: string) {
     super(message + ' This is a bug. Please report at https://github.com/ajyoon/bml/issues');
     this.name = 'IllegalStateError';
@@ -8,7 +8,7 @@ class IllegalStateError extends Error {
   }
 }
 
-class JavascriptSyntaxError extends Error {
+export class JavascriptSyntaxError extends Error {
   constructor(bmlDoc: string, errorIndex: number) {
     let message = 'Syntax error found while parsing bml javascript at '
       + stringUtils.lineColumnString(bmlDoc, errorIndex);
@@ -18,7 +18,7 @@ class JavascriptSyntaxError extends Error {
   }
 }
 
-class BMLSyntaxError extends Error {
+export class BMLSyntaxError extends Error {
   constructor(message: string | null, bmlDoc: string, errorIndex: number) {
     let resolvedMsg = (message || 'Syntax error found while parsing bml') +
       ' at ' + stringUtils.lineColumnString(bmlDoc, errorIndex);
@@ -28,7 +28,7 @@ class BMLSyntaxError extends Error {
   }
 }
 
-class BMLDuplicatedRefIndexError extends Error {
+export class BMLDuplicatedRefIndexError extends Error {
   constructor(refIdentifier: string, choiceIndex: number, bmlDoc: string, errorIndex: number) {
     let msg = `Duplicated reference index ${choiceIndex} for reference ${refIdentifier} `
       + `at ${stringUtils.lineColumnString(bmlDoc, errorIndex)}`;
@@ -38,7 +38,7 @@ class BMLDuplicatedRefIndexError extends Error {
   }
 }
 
-class BMLDuplicatedRefError extends Error {
+export class BMLDuplicatedRefError extends Error {
   constructor(refIdentifier: string, bmlDoc: string, errorIndex: number) {
     let msg = `Duplicated reference ${refIdentifier} `
       + `at ${stringUtils.lineColumnString(bmlDoc, errorIndex)}`;
@@ -48,7 +48,7 @@ class BMLDuplicatedRefError extends Error {
   }
 }
 
-class BMLNameError extends Error {
+export class BMLNameError extends Error {
   constructor(name: string, bmlDoc: string, errorIndex: number) {
     let msg = 'Unknown name: "' + name + '" at '
       + stringUtils.lineColumnString(bmlDoc, errorIndex);
@@ -58,7 +58,7 @@ class BMLNameError extends Error {
   }
 }
 
-class UnknownModeError extends Error {
+export class UnknownModeError extends Error {
   constructor(modeName: string, bmlDoc: string, errorIndex: number) {
     let msg = 'Unknown mode \'' + modeName + '\' at '
       + stringUtils.lineColumnString(bmlDoc, errorIndex);
@@ -68,7 +68,7 @@ class UnknownModeError extends Error {
   }
 }
 
-class UnknownTransformError extends Error {
+export class UnknownTransformError extends Error {
   constructor(bmlDoc: string, errorIndex: number) {
     let msg = 'Unknown transform at '
       + stringUtils.lineColumnString(bmlDoc, errorIndex);
@@ -78,7 +78,7 @@ class UnknownTransformError extends Error {
   }
 }
 
-class FunctionNotFoundError extends Error {
+export class FunctionNotFoundError extends Error {
   constructor(functionName: string, bmlDoc: string, errorIndex: number) {
     let msg = 'Attempted to call unknown function "' + functionName + '" at '
       + stringUtils.lineColumnString(bmlDoc, errorIndex);
@@ -88,7 +88,7 @@ class FunctionNotFoundError extends Error {
   }
 }
 
-class NotAFunctionError extends Error {
+export class NotAFunctionError extends Error {
   constructor(functionName: string, bmlDoc: string, errorIndex: number) {
     let msg = 'Attempted to call non-function "' + functionName + '" at '
       + stringUtils.lineColumnString(bmlDoc, errorIndex);
@@ -97,14 +97,3 @@ class NotAFunctionError extends Error {
     Object.setPrototypeOf(this, NotAFunctionError.prototype);
   }
 }
-
-exports.IllegalStateError = IllegalStateError;
-exports.JavascriptSyntaxError = JavascriptSyntaxError;
-exports.BMLSyntaxError = BMLSyntaxError;
-exports.BMLDuplicatedRefIndexError = BMLDuplicatedRefIndexError;
-exports.BMLDuplicatedRefError = BMLDuplicatedRefError;
-exports.BMLNameError = BMLNameError;
-exports.UnknownModeError = UnknownModeError;
-exports.UnknownTransformError = UnknownTransformError;
-exports.FunctionNotFoundError = FunctionNotFoundError;
-exports.NotAFunctionError = NotAFunctionError;

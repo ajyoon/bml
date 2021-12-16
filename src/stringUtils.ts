@@ -1,4 +1,4 @@
-function lineAndColumnOf(str: string, index: number): { line: number, column: number } {
+export function lineAndColumnOf(str: string, index: number): { line: number, column: number } {
   if (index > str.length) {
     throw new Error('charIndex > string.length');
   }
@@ -20,21 +20,16 @@ function lineAndColumnOf(str: string, index: number): { line: number, column: nu
   return { line: line, column: column };
 }
 
-function lineColumnString(str: string, index: number): string {
+export function lineColumnString(str: string, index: number): string {
   let lineAndColumn = lineAndColumnOf(str, index);
   return 'line: ' + lineAndColumn.line + ', column: ' + lineAndColumn.column;
 }
 
-function isWhitespace(str: string): boolean {
+export function isWhitespace(str: string): boolean {
   return str.trim() === '';
 }
 
 /* Escape all regex-special characters in a string */
-function escapeRegExp(str: string): string {
+export function escapeRegExp(str: string): string {
   return str.replace(/([.*+?^${}()|\[\]\/\\])/g, '\\$1');
 }
-
-exports.lineAndColumnOf = lineAndColumnOf;
-exports.lineColumnString = lineColumnString;
-exports.isWhitespace = isWhitespace;
-exports.escapeRegExp = escapeRegExp;

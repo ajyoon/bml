@@ -1,20 +1,20 @@
-import { EvalBlock } from './evalBlock.ts';
-import { FunctionCall } from './functionCall.ts';
-import { Mode, ModeMap } from './mode.ts';
-import { WeightedChoice } from './weightedChoice.ts';
-import { Lexer } from './lexer.ts';
-import { TokenType } from './tokenType.ts';
-import { Rule } from './rule.ts';
-import { Replacer } from './replacer.ts';
-import { BackReference } from './backReference.ts';
-import { noOp } from './noOp.ts';
+import { EvalBlock } from './evalBlock';
+import { FunctionCall } from './functionCall';
+import { Mode, ModeMap } from './mode';
+import { WeightedChoice } from './weightedChoice';
+import { Lexer } from './lexer';
+import { TokenType } from './tokenType';
+import { Rule } from './rule';
+import { Replacer } from './replacer';
+import { BackReference } from './backReference';
+import noOp from './noOp';
 import {
   IllegalStateError,
   UnknownTransformError,
   JavascriptSyntaxError,
   BMLSyntaxError,
   BMLDuplicatedRefIndexError,
-} from './errors.ts';
+} from './errors';
 import { escapeRegExp } from './stringUtils';
 
 

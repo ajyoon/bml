@@ -1,5 +1,5 @@
-import { prettyPrintArray } from './prettyPrinting.ts';
-import { Rule } from './rule.ts';
+import { prettyPrintArray } from './prettyPrinting';
+import { Rule } from './rule';
 
 
 export class Mode {

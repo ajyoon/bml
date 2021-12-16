@@ -1,5 +1,5 @@
-import { Token } from './token.ts';
-import { TokenType } from './tokenType.ts';
+import { Token } from './token';
+import { TokenType } from './tokenType';
 
 export class Lexer {
 

@@ -1,5 +1,5 @@
-import * as evalApi from './evalApi.ts';
-import { DocumentSettings } from './settings.ts';
+import * as evalApi from './evalApi';
+import { DocumentSettings } from './settings';
 
 
 // TODO run some basic checks against provided code,

@@ -1,8 +1,8 @@
 import {
   FunctionNotFoundError,
   NotAFunctionError
-} from './errors.ts';
-import { UserDefs } from './evalBlock.ts';
+} from './errors';
+import { UserDefs } from './evalBlock';
 
 
 export class FunctionCall {
@@ -13,7 +13,7 @@ export class FunctionCall {
   }
 
   toString(): string {
-    return `functionCall('${this.functionName}')`;
+    return `FunctionCall('${this.functionName}')`;
   }
 
   execute(userDefs: UserDefs, match: string[], documentString: string, charIndex: number): string {

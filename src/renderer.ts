@@ -1,26 +1,26 @@
-import * as rand from './rand.ts';
-import * as postprocessing from './postprocessing.ts';
+import * as rand from './rand';
+import * as postprocessing from './postprocessing';
 import {
   defaultBMLSettings, defaultRenderSettings,
   mergeSettings, DocumentSettings, RenderSettings
-} from './settings.ts';
-import { Mode, ModeMap } from './mode.ts';
-import { BackReference, BackReferenceMap } from './backReference.ts';
+} from './settings';
+import { Mode, ModeMap } from './mode';
+import { BackReference, BackReferenceMap } from './backReference';
 import {
   parsePrelude,
   parseUse,
   parseInlineCommand,
-} from './parsers.ts';
-import { EvalBlock, UserDefs } from './evalBlock.ts';
-import { FunctionCall } from './functionCall.ts';
-import { Lexer } from './lexer.ts';
-import { TokenType } from './tokenType.ts';
-import { noOp } from './noOp.ts';
+} from './parsers';
+import { EvalBlock, UserDefs } from './evalBlock';
+import { FunctionCall } from './functionCall';
+import { Lexer } from './lexer';
+import { TokenType } from './tokenType';
+import noOp from './noOp';
 import {
   UnknownModeError,
   BMLDuplicatedRefError,
   IllegalStateError,
-} from './errors.ts';
+} from './errors';
 const BML_VERSION = require('../package.json')['version'];
 
 export type ChoiceResult = { choiceIndex: number, renderedOutput: string };
