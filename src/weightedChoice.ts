@@ -9,9 +9,9 @@ export type Choice = string | FunctionCall | typeof noOp;
  */
 export class WeightedChoice {
   choice: Choice;
-  weight: number;
+  weight: number | null;
 
-  constructor(choice: Choice, weight: number) {
+  constructor(choice: Choice, weight: number | null) {
     this.choice = choice;
     this.weight = weight;
   }

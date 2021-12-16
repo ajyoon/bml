@@ -41,12 +41,21 @@ export class EvalBlock {
     return new Function(funcSrc).bind(evalApi.api);
   }
 
-  execute(): string {
-    return this.toFunc()();
+  execute(): UserDefs {
+    let rawResult = this.toFunc()();
+    let defs: UserDefs = { funcs: {} };
+    for (let [key, value] of Object.entries(rawResult)) {
+      if (key === 'settings') {
+        defs.settings = <DocumentSettings>value;
+      } else {
+        defs.funcs[key] = <Function>value;
+      }
+    }
+    return defs;
   }
 }
 
 export type UserDefs = {
   settings?: DocumentSettings,
-  [index: string]: Function
+  funcs: { [index: string]: Function }
 }

@@ -52,15 +52,16 @@ export function randomInt(min: number, max: number): number {
  */
 export function weightedChoose(weights: WeightedChoice[]): { choice: Choice, choiceIndex: number } {
   let sum = 0;
-  for (let i = 0; i < weights.length; i++) {
-    sum += weights[i].weight;
+  for (let wc of weights) {
+    sum += wc.weight ?? 0;
   }
   let progress = 0;
   let pickedValue = randomFloat(0, sum);
-  for (let w = 0; w < weights.length; w++) {
-    progress += weights[w].weight;
+  for (let i = 0; i < weights.length; i++) {
+    let wc = weights[i];
+    progress += wc.weight ?? 0;
     if (progress >= pickedValue) {
-      return { choice: weights[w].choice, choiceIndex: w };
+      return { choice: wc.choice, choiceIndex: i };
     }
   }
   // If we're still here, something went wrong.

@@ -17,7 +17,7 @@ export class FunctionCall {
   }
 
   execute(userDefs: UserDefs, match: string[], documentString: string, charIndex: number): string {
-    let func = userDefs[this.functionName];
+    let func = userDefs.funcs[this.functionName];
     if (typeof func === 'undefined') {
       throw new FunctionNotFoundError(this.functionName, documentString, charIndex);
     } else if (!(func instanceof Function)) {

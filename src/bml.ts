@@ -1,4 +1,4 @@
 /* @license BML - BSD 3 Clause License - Source at github.com/ajyoon/bml - Docs at bml-lang.org */
-const renderer = require('./renderer');
+import { render } from './renderer';
 
-module.exports = renderer.render;
+module.exports = render;

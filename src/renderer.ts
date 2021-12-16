@@ -1,26 +1,15 @@
 import * as rand from './rand';
 import * as postprocessing from './postprocessing';
-import {
-  defaultBMLSettings, defaultRenderSettings,
-  mergeSettings, DocumentSettings, RenderSettings
-} from './settings';
+import { defaultBMLSettings, defaultRenderSettings, mergeSettings, RenderSettings } from './settings';
 import { Mode, ModeMap } from './mode';
-import { BackReference, BackReferenceMap } from './backReference';
-import {
-  parsePrelude,
-  parseUse,
-  parseInlineCommand,
-} from './parsers';
-import { EvalBlock, UserDefs } from './evalBlock';
+import { BackReference } from './backReference';
+import { parsePrelude, parseUse, parseInlineCommand, } from './parsers';
+import { UserDefs } from './evalBlock';
 import { FunctionCall } from './functionCall';
 import { Lexer } from './lexer';
 import { TokenType } from './tokenType';
-import noOp from './noOp';
-import {
-  UnknownModeError,
-  BMLDuplicatedRefError,
-  IllegalStateError,
-} from './errors';
+import { UnknownModeError, BMLDuplicatedRefError, IllegalStateError, } from './errors';
+import { Choice } from './weightedChoice';
 const BML_VERSION = require('../package.json')['version'];
 
 export type ChoiceResult = { choiceIndex: number, renderedOutput: string };
@@ -33,18 +22,16 @@ export type ChoiceResultMap = Map<string, ChoiceResult>;
  * If the versions do not align, log a warning to the console.
  * If no version is specified, do nothing.
  */
-function checkVersion(bmlVersion: string, specifiedInSettings: string | null) {
-  if (specifiedInSettings !== null) {
-    if (specifiedInSettings !== bmlVersion) {
-      console.warn('BML VERSION MISMATCH.' +
-        ' bml source file specifies version ' + specifiedInSettings +
-        ' but running version is ' + BML_VERSION + '.' +
-        ' unexpected behavior may occur.');
-    }
+function checkVersion(bmlVersion: string, specifiedInSettings: string) {
+  if (specifiedInSettings !== bmlVersion) {
+    console.warn('BML VERSION MISMATCH.' +
+      ' bml source file specifies version ' + specifiedInSettings +
+      ' but running version is ' + BML_VERSION + '.' +
+      ' unexpected behavior may occur.');
   }
 }
 
-function resolveBackReference(choiceResultMap: ChoiceResultMap, backReference: BackReference): string {
+function resolveBackReference(choiceResultMap: ChoiceResultMap, backReference: BackReference): Choice {
   let referredChoiceResult = choiceResultMap.get(backReference.referredIdentifier);
   if (referredChoiceResult) {
     if (backReference.choiceMap.size === 0 && backReference.fallback === null) {
@@ -70,8 +57,10 @@ function resolveBackReference(choiceResultMap: ChoiceResultMap, backReference: B
  * whenever a matching string is encountered. Rules are processed in
  * the order they are listed in the active mode's declaration.
  */
-export function renderText(str: string, startIndex: number, modes: ModeMap, activeMode: Mode,
-  userDefs: object, choiceResultMap: ChoiceResultMap | null, stackDepth: number): string {
+export function renderText(str: string, startIndex: number, modes: ModeMap,
+  activeMode: Mode | null, userDefs: UserDefs,
+  choiceResultMap: ChoiceResultMap | null, stackDepth: number
+): string {
   // TODO this function is way too complex and badly needs refactor
   choiceResultMap = choiceResultMap || new Map();
   activeMode = activeMode || null;
@@ -131,7 +120,7 @@ export function renderText(str: string, startIndex: number, modes: ModeMap, acti
         chooseRe.lastIndex = token.index + 1;
         useRe.lastIndex = token.index + 1;
         if (chooseRe.test(str)) {
-          let parseInlineCommandResult = parseInlineCommand(str, token.index, false);
+          let parseInlineCommandResult = parseInlineCommand(str, token.index);
           let replacer = parseInlineCommandResult.replacer;
           let backReference = parseInlineCommandResult.backReference;
           let replacerCallResult;
@@ -152,7 +141,9 @@ export function renderText(str: string, startIndex: number, modes: ModeMap, acti
           }
           let renderedReplacement;
           if (replacement instanceof FunctionCall) {
-            renderedReplacement = replacement.execute(userDefs, null, str, token.index);
+            renderedReplacement = replacement.execute(userDefs, [], str, token.index);
+          } else if (typeof replacement === 'symbol') {
+            throw new IllegalStateError('No-op replacers should never come from inline choices');
           } else {
             // To handle nested choices and to run rules over chosen text,
             // we recursively render the chosen text.
@@ -162,7 +153,7 @@ export function renderText(str: string, startIndex: number, modes: ModeMap, acti
           if (!(replacer && replacer.isSilent)) {
             out += renderedReplacement;
           }
-          if (replacerCallResult) {
+          if (replacerCallResult && replacer?.identifier) {
             choiceResultMap.set(
               replacer.identifier,
               { choiceIndex: replacerCallResult.choiceIndex, renderedOutput: renderedReplacement });
@@ -175,7 +166,7 @@ export function renderText(str: string, startIndex: number, modes: ModeMap, acti
           if (modes.hasOwnProperty(parseUseResult.modeName)) {
             activeMode = modes[parseUseResult.modeName];
           } else {
-            throw new UnknownModeError(str, token.index, parseUseResult.modeName);
+            throw new UnknownModeError(parseUseResult.modeName, str, token.index);
           }
         }
         break;
@@ -191,7 +182,7 @@ export function renderText(str: string, startIndex: number, modes: ModeMap, acti
                 replacement = currentRule.replacer.call().replacement;
                 if (replacement instanceof FunctionCall) {
                   out += replacement.execute(userDefs, currentMatch, str, token.index);
-                } else if (replacement === noOp) {
+                } else if (typeof replacement === 'symbol') { // no-op
                   out += currentMatch[0];
                 } else {
                   // To handle nested choices and to run rules over replaced text,
@@ -237,11 +228,13 @@ export function render(bmlDocumentString: string, renderSettings: RenderSettings
     modes,
   } = parsePrelude(bmlDocumentString);
 
-  let userDefs: UserDefs = {};
+  let userDefs: UserDefs = { funcs: {} };
   if (evalBlock && renderSettings.allowEval) {
     userDefs = evalBlock.execute();
+    if (userDefs.settings?.version) {
+      checkVersion(BML_VERSION, userDefs.settings.version);
+    }
     userDefs.settings = mergeSettings(defaultBMLSettings, userDefs.settings);
-    checkVersion(BML_VERSION, userDefs.settings.version);
   }
 
   // Main render pass
@@ -250,7 +243,7 @@ export function render(bmlDocumentString: string, renderSettings: RenderSettings
 
   // Post-processing
   if (renderSettings.renderMarkdown) {
-    output = postprocessing.renderMarkdown(output, userDefs.settings.markdownSettings);
+    output = postprocessing.renderMarkdown(output, userDefs.settings!.markdownSettings!);
   }
   if (renderSettings.whitespaceCleanup) {
     output = postprocessing.whitespaceCleanup(output);

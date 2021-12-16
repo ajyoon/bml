@@ -1,7 +1,8 @@
-#! /usr/bin/env node
 import fs from 'fs';
 import process from 'process';
 import { RenderSettings } from './settings';
+
+// Seems like these need to use `require` for "reasons"
 const bml = require('./bml.ts');
 const packageJson = require('../package.json');
 
@@ -13,7 +14,7 @@ export const SEED_SWITCHES = ['--seed'];
 export const NO_EVAL_SWITCHES = ['--no-eval'];
 export const RENDER_MARKDOWN_SWITCHES = ['--render-markdown'];
 export const NO_WHITESPACE_CLEANUP_SWITCHES = ['--no-whitespace-cleanup'];
-export const ALL_SWITCHES = [].concat(
+export const ALL_SWITCHES = ([] as string[]).concat(
   HELP_SWITCHES, VERSION_SWITCHES,
   SEED_SWITCHES, NO_EVAL_SWITCHES,
   RENDER_MARKDOWN_SWITCHES, NO_WHITESPACE_CLEANUP_SWITCHES);
@@ -108,19 +109,19 @@ export function determineAction(args: string[]): Action {
     function: printHelpForError,
     args: []
   };
-  
+
   if (argsContainAnyUnknownSwitches(args)) {
     return errorAction;
   }
 
   let expectSeed = false;
-  
+
   let file = null;
   let noEval = false;
   let renderMarkdown = false;
   let noWhitespaceCleanup = false;
   let seed = null;
-  
+
   for (let arg of args) {
     if (expectSeed) {
       if (SEED_RE.test(arg)) {
@@ -156,7 +157,7 @@ export function determineAction(args: string[]): Action {
       file = arg;
     }
   }
-  
+
   if (expectSeed) {
     console.error('No seed provided.')
     return errorAction;
@@ -168,7 +169,7 @@ export function determineAction(args: string[]): Action {
     renderMarkdown: renderMarkdown,
     whitespaceCleanup: !noWhitespaceCleanup
   };
-  
+
   if (file === null) {
     return {
       function: readFromStdin,
@@ -192,12 +193,11 @@ export function stripArgs(argv: string[]): string[] {
 export function runBmlWithErrorCheck(bmlSource: string, settings: RenderSettings): string {
   try {
     return bml(bmlSource, settings);
-  } catch (e) {
+  } catch (e: any) {
     console.error('Uh-oh! Something bad happened while rendering bml text.\n'
-                  + 'If you think this is a bug, please file one at '
-                  + packageJson.bugs.url + '\nError details:\n', e.stack);
+      + 'If you think this is a bug, please file one at '
+      + packageJson.bugs.url + '\nError details:\n', e.stack);
     process.exit(1);
-    return null; // satisfy linters...
   }
 }
 

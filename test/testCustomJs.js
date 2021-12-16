@@ -15,8 +15,8 @@ describe('Custom JS (EvalBlock & FunctionCall)', function() {
     `;
     let evalBlock = new EvalBlock(src);
     let userDefs = evalBlock.execute();
-    expect(userDefs).toContainKey('testFunc');
-    expect(userDefs.testFunc).toBeInstanceOf(Function);
+    expect(userDefs.funcs).toContainKey('testFunc');
+    expect(userDefs.funcs.testFunc).toBeInstanceOf(Function);
     let functionCall = new FunctionCall('testFunc');
     let result = functionCall.execute(userDefs, null, '', 0);
     expect(result).toBe('testFunc result');

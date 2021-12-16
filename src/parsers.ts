@@ -1,7 +1,7 @@
 import { EvalBlock } from './evalBlock';
 import { FunctionCall } from './functionCall';
 import { Mode, ModeMap } from './mode';
-import { WeightedChoice } from './weightedChoice';
+import { WeightedChoice, Choice } from './weightedChoice';
 import { Lexer } from './lexer';
 import { TokenType } from './tokenType';
 import { Rule } from './rule';
@@ -33,11 +33,11 @@ import { escapeRegExp } from './stringUtils';
  *     block contains a syntax error which makes parsing it impossible.
  */
 export function parseEval(lexer: Lexer): string {
-  if (lexer.next().tokenType !== TokenType.KW_EVAL) {
+  if (lexer.next()?.tokenType !== TokenType.KW_EVAL) {
     throw new IllegalStateError('parseEval started with non-KW_EVAL');
   }
 
-  if (lexer.nextNonWhitespace().tokenType !== TokenType.OPEN_BRACE) {
+  if (lexer.nextNonWhitespace()?.tokenType !== TokenType.OPEN_BRACE) {
     throw new BMLSyntaxError(
       'eval blocks must be opened with a curly brace ("{")',
       lexer.string, lexer.index);
@@ -307,11 +307,11 @@ export function parseReplacements(lexer: Lexer, forRule: boolean): Replacer {
 
 export function parseRule(lexer: Lexer): Rule {
   let matchers = parseMatchers(lexer);
-  if (lexer.nextNonWhitespace().tokenType !== TokenType.KW_AS) {
+  if (lexer.nextNonWhitespace()?.tokenType !== TokenType.KW_AS) {
     throw new BMLSyntaxError('matchers must be followed with keyword "as"',
       lexer.string, lexer.index);
   }
-  if (lexer.nextNonWhitespace().tokenType !== TokenType.OPEN_BRACE) {
+  if (lexer.nextNonWhitespace()?.tokenType !== TokenType.OPEN_BRACE) {
     throw new BMLSyntaxError('rule replacers must be surrounded by braces',
       lexer.string, lexer.index);
   }
@@ -321,7 +321,7 @@ export function parseRule(lexer: Lexer): Rule {
 
 export function parseMode(lexer: Lexer): Mode {
   let startIndex = lexer.index;
-  if (lexer.peek().tokenType !== TokenType.KW_MODE) {
+  if (lexer.peek()?.tokenType !== TokenType.KW_MODE) {
     throw new BMLSyntaxError('modes must begin with keyword "mode"',
       lexer.string, lexer.index);
   }
@@ -336,7 +336,7 @@ export function parseMode(lexer: Lexer): Mode {
   let mode = new Mode(modeNameMatch[2]);
   lexer.overrideIndex(lexer.index + modeNameMatch[1].length);
 
-  if (lexer.peek().tokenType !== TokenType.OPEN_BRACE) {
+  if (lexer.peek()?.tokenType !== TokenType.OPEN_BRACE) {
     throw new BMLSyntaxError('modes must be opened with a curly brace ("{")',
       lexer.string, lexer.index);
   }
@@ -524,7 +524,7 @@ export function parseBackReference(lexer: Lexer): BackReference | null {
   lexer.overrideIndex(lexer.index + referredIdentifierMatch[0].length);
 
   let choiceMap = new Map();
-  let fallback = null;
+  let fallback: Choice | null = null;
 
   let acceptColon = true;
   let acceptChoiceIndex = false;
