@@ -188,8 +188,8 @@ describe('parsePrelude', function() {
     let result = parsePrelude(testString);
 
     expect(result.preludeEndIndex).toBe(testString.indexOf('some text'));
-    expect(result.evalBlock.string).toContain('global.evalTest = 1;\n');
-    expect(result.evalBlock.string).toContain('global.evalTest2 = 2;\n');
+    expect(result.evalBlock.contents).toContain('global.evalTest = 1;\n');
+    expect(result.evalBlock.contents).toContain('global.evalTest2 = 2;\n');
     expect(result.modes).toEqual({});
   });
 

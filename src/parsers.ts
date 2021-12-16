@@ -40,7 +40,7 @@ export function parseEval(lexer: Lexer): string {
   if (lexer.nextNonWhitespace()?.tokenType !== TokenType.OPEN_BRACE) {
     throw new BMLSyntaxError(
       'eval blocks must be opened with a curly brace ("{")',
-      lexer.string, lexer.index);
+      lexer.str, lexer.index);
   }
 
   let state = 'code';
@@ -69,14 +69,14 @@ export function parseEval(lexer: Lexer): string {
         if (token.tokenType === TokenType.SINGLE_QUOTE) {
           state = 'code';
         } else if (token.tokenType === TokenType.NEW_LINE) {
-          throw new JavascriptSyntaxError(lexer.string, lexer.index);
+          throw new JavascriptSyntaxError(lexer.str, lexer.index);
         }
         break;
       case 'double-quote string':
         if (token.tokenType === TokenType.DOUBLE_QUOTE) {
           state = 'code';
         } else if (token.tokenType === TokenType.NEW_LINE) {
-          throw new JavascriptSyntaxError(lexer.string, lexer.index);
+          throw new JavascriptSyntaxError(lexer.str, lexer.index);
         }
         break;
       case 'regexp literal':
@@ -92,7 +92,7 @@ export function parseEval(lexer: Lexer): string {
           case TokenType.CLOSE_BRACE:
             openBraceCount--;
             if (openBraceCount < 1) {
-              return lexer.string.slice(startIndex, lexer.index - 1);
+              return lexer.str.slice(startIndex, lexer.index - 1);
             }
             break;
           case TokenType.COMMENT:
@@ -122,7 +122,7 @@ export function parseEval(lexer: Lexer): string {
     }
   }
   throw new BMLSyntaxError('could not find end of `eval` block',
-    lexer.string, startIndex);
+    lexer.str, startIndex);
 }
 
 export function parseMatchers(lexer: Lexer): RegExp[] {
@@ -146,7 +146,7 @@ export function parseMatchers(lexer: Lexer): RegExp[] {
           continue;
         } else {
           throw new BMLSyntaxError('unexpected regex literal.',
-            lexer.string, token.index);
+            lexer.str, token.index);
         }
       case TokenType.OPEN_PAREN:
         if (acceptMatcher) {
@@ -159,29 +159,29 @@ export function parseMatchers(lexer: Lexer): RegExp[] {
           continue;
         } else {
           throw new BMLSyntaxError('unexpected string literal.',
-            lexer.string, token.index);
+            lexer.str, token.index);
         }
       case TokenType.COMMA:
         acceptMatcher = true;
         break;
       default:
         throw new BMLSyntaxError(`Unexpected token ${token}`,
-          lexer.string, token.index);
+          lexer.str, token.index);
     }
     // If we haven't broken out or thrown an error by now, consume this token.
     lexer.next();
   }
   throw new BMLSyntaxError('Could not find end of matcher.',
-    lexer.string, startIndex);
+    lexer.str, startIndex);
 }
 
 export function parseCall(lexer: Lexer): FunctionCall {
   let callRe = /call\s+([_$a-zA-Z\xA0-\uFFFF][_$a-zA-Z0-9\xA0-\uFFFF]*)/y;
   callRe.lastIndex = lexer.index;
-  let callMatch = callRe.exec(lexer.string);
+  let callMatch = callRe.exec(lexer.str);
   if (callMatch === null) {
     throw new BMLSyntaxError('invalid call statement',
-      lexer.string, lexer.index);
+      lexer.str, lexer.index);
   }
   lexer.overrideIndex(lexer.index + callMatch[0].length);
   return new FunctionCall(callMatch[1]);
@@ -205,11 +205,11 @@ export function parseReplacements(lexer: Lexer, forRule: boolean): Replacer {
   let isSilent = false;
   let identifierRe = /\s*(#?)(\w+):/y;
   identifierRe.lastIndex = lexer.index;
-  let identifierMatch = identifierRe.exec(lexer.string);
+  let identifierMatch = identifierRe.exec(lexer.str);
   if (identifierMatch) {
     if (forRule) {
       throw new BMLSyntaxError('Choice identifiers are not allowed in rules',
-        lexer.string, lexer.index);
+        lexer.str, lexer.index);
     }
     identifier = identifierMatch[2];
     if (identifierMatch[1]) {
@@ -233,7 +233,7 @@ export function parseReplacements(lexer: Lexer, forRule: boolean): Replacer {
           if (token.tokenType == TokenType.KW_MATCH) {
             if (matchReplacementFound) {
               throw new BMLSyntaxError('Rules may have at most one special `match` choice',
-                lexer.string, token.index);
+                lexer.str, token.index);
             }
             matchReplacementFound = true;
             choices.push(new WeightedChoice(noOp, null));
@@ -246,7 +246,7 @@ export function parseReplacements(lexer: Lexer, forRule: boolean): Replacer {
           }
         } else {
           throw new BMLSyntaxError('unexpected token',
-            lexer.string, token.index);
+            lexer.str, token.index);
         }
         break;
       case TokenType.CLOSE_BRACE:
@@ -256,7 +256,7 @@ export function parseReplacements(lexer: Lexer, forRule: boolean): Replacer {
         } else {
           throw new BMLSyntaxError(
             `unexpected end of replacer: ${token.tokenType}`,
-            lexer.string, token.index);
+            lexer.str, token.index);
         }
       case TokenType.KW_CALL:
         if (acceptReplacement) {
@@ -267,7 +267,7 @@ export function parseReplacements(lexer: Lexer, forRule: boolean): Replacer {
           choices.push(new WeightedChoice(parseCall(lexer), null));
         } else {
           throw new BMLSyntaxError('unexpected call statement.',
-            lexer.string, token.index);
+            lexer.str, token.index);
         }
         continue;
       case TokenType.NUMBER:
@@ -275,10 +275,10 @@ export function parseReplacements(lexer: Lexer, forRule: boolean): Replacer {
           acceptWeight = false;
           acceptComma = true;
           acceptReplacerEnd = true;
-          choices[choices.length - 1].weight = Number(token.string);
+          choices[choices.length - 1].weight = Number(token.str);
         } else {
           throw new BMLSyntaxError('unexpected number literal.',
-            lexer.string, token.index);
+            lexer.str, token.index);
         }
         break;
       case TokenType.COMMA:
@@ -289,19 +289,19 @@ export function parseReplacements(lexer: Lexer, forRule: boolean): Replacer {
           acceptReplacerEnd = true;
         } else {
           throw new BMLSyntaxError('unexpected comma.',
-            lexer.string, token.index);
+            lexer.str, token.index);
         }
         break;
       default:
         throw new BMLSyntaxError(`Unexpected token ${token}`,
-          lexer.string, token.index);
+          lexer.str, token.index);
     }
 
     // If we haven't broken out or thrown an error by now, consume this token.
     lexer.next();
   }
   throw new BMLSyntaxError('Could not find end of replacer.',
-    lexer.string, startIndex);
+    lexer.str, startIndex);
 }
 
 
@@ -309,11 +309,11 @@ export function parseRule(lexer: Lexer): Rule {
   let matchers = parseMatchers(lexer);
   if (lexer.nextNonWhitespace()?.tokenType !== TokenType.KW_AS) {
     throw new BMLSyntaxError('matchers must be followed with keyword "as"',
-      lexer.string, lexer.index);
+      lexer.str, lexer.index);
   }
   if (lexer.nextNonWhitespace()?.tokenType !== TokenType.OPEN_BRACE) {
     throw new BMLSyntaxError('rule replacers must be surrounded by braces',
-      lexer.string, lexer.index);
+      lexer.str, lexer.index);
   }
   let replacements = parseReplacements(lexer, true);
   return new Rule(matchers, replacements);
@@ -323,22 +323,22 @@ export function parseMode(lexer: Lexer): Mode {
   let startIndex = lexer.index;
   if (lexer.peek()?.tokenType !== TokenType.KW_MODE) {
     throw new BMLSyntaxError('modes must begin with keyword "mode"',
-      lexer.string, lexer.index);
+      lexer.str, lexer.index);
   }
   let token = lexer.next();  // consume KW_MODE
   let modeNameRe = /(\s*(\w+)\s*)/y;
   modeNameRe.lastIndex = lexer.index;
-  let modeNameMatch = modeNameRe.exec(lexer.string);
+  let modeNameMatch = modeNameRe.exec(lexer.str);
   if (!modeNameMatch) {
     throw new BMLSyntaxError('mode name is absent or invalid',
-      lexer.string, lexer.index);
+      lexer.str, lexer.index);
   }
   let mode = new Mode(modeNameMatch[2]);
   lexer.overrideIndex(lexer.index + modeNameMatch[1].length);
 
   if (lexer.peek()?.tokenType !== TokenType.OPEN_BRACE) {
     throw new BMLSyntaxError('modes must be opened with a curly brace ("{")',
-      lexer.string, lexer.index);
+      lexer.str, lexer.index);
   }
   lexer.next();  // consume open brace
 
@@ -357,13 +357,13 @@ export function parseMode(lexer: Lexer): Mode {
         return mode;
       default:
         throw new BMLSyntaxError(`Unexpected token ${token}`,
-          lexer.string, token.index);
+          lexer.str, token.index);
     }
     // Accept and consume the token
     lexer.next();
   }
   throw new BMLSyntaxError('Could not find end of mode',
-    lexer.string, startIndex);
+    lexer.str, startIndex);
 }
 
 /*
@@ -376,8 +376,8 @@ type ParsePreludeResult = {
   preludeEndIndex: number, evalBlock: EvalBlock, modes: ModeMap
 };
 
-export function parsePrelude(string: string): ParsePreludeResult {
-  let lexer = new Lexer(string);
+export function parsePrelude(str: string): ParsePreludeResult {
+  let lexer = new Lexer(str);
   let evalString = '';
   let modes: ModeMap = {};
   let token;
@@ -421,13 +421,13 @@ type ParseUseResult = {
  * @returns The returned index is the index immediately
  * after the closing brace.
  */
-export function parseUse(string: string, openBraceIndex: number): ParseUseResult {
+export function parseUse(str: string, openBraceIndex: number): ParseUseResult {
   // TODO "using" syntax has been deprecated for a while and can be removed
   let useRe = /{(use|using)\s+(\w[\w\d]*)\s*}/y;
   useRe.lastIndex = openBraceIndex;
-  let match = useRe.exec(string);
+  let match = useRe.exec(str);
   if (match === null) {
-    throw new UnknownTransformError(string, openBraceIndex);
+    throw new UnknownTransformError(str, openBraceIndex);
   }
   return {
     blockEndIndex: useRe.lastIndex,
@@ -458,10 +458,10 @@ export function parseReplacementWithLexer(lexer: Lexer): string {
         }
         break;
     }
-    stringLiteral += token.string;
+    stringLiteral += token.str;
   }
   throw new BMLSyntaxError('Could not find end of replacement.',
-    lexer.string, startIndex);
+    lexer.str, startIndex);
 }
 
 /**
@@ -477,10 +477,10 @@ export function parseRegexMatcher(lexer: Lexer): RegExp {
       case TokenType.SLASH:
         return new RegExp(stringLiteral, 'y');
     }
-    stringLiteral += token.string;
+    stringLiteral += token.str;
   }
   throw new BMLSyntaxError('Could not find end of replacement.',
-    lexer.string, startIndex);
+    lexer.str, startIndex);
 }
 
 type ParseInlineCommandResult = {
@@ -493,8 +493,8 @@ type ParseInlineCommandResult = {
 // the renderer uses an ahead-of-time regex before going into parsing
 // since it will parse a 'use' command differently from replacers/backrefs.
 // maybe refactor to combine these into one brace-command parser here?
-export function parseInlineCommand(string: string, openBraceIndex: number): ParseInlineCommandResult {
-  let lexer = new Lexer(string);
+export function parseInlineCommand(str: string, openBraceIndex: number): ParseInlineCommandResult {
+  let lexer = new Lexer(str);
   lexer.overrideIndex(openBraceIndex + 1);
   let backReference = parseBackReference(lexer);
   let replacer = null;
@@ -516,7 +516,7 @@ export function parseBackReference(lexer: Lexer): BackReference | null {
   // after the opening brace but before the identifier slug
   let referredIdentifierRe = /\s*@(\w+)/y;
   referredIdentifierRe.lastIndex = lexer.index;
-  let referredIdentifierMatch = referredIdentifierRe.exec(lexer.string);
+  let referredIdentifierMatch = referredIdentifierRe.exec(lexer.str);
   if (!referredIdentifierMatch) {
     return null;
   }
@@ -549,7 +549,7 @@ export function parseBackReference(lexer: Lexer): BackReference | null {
           acceptBlockEnd = false;
         } else {
           throw new BMLSyntaxError('Unexpected colon in back reference block',
-            lexer.string, token.index);
+            lexer.str, token.index);
         }
         break;
       case TokenType.NUMBER:
@@ -557,10 +557,10 @@ export function parseBackReference(lexer: Lexer): BackReference | null {
           acceptChoiceIndex = false;
           acceptArrow = true;
           acceptComma = true;
-          currentChoiceIndexes.push(Number(token.string));
+          currentChoiceIndexes.push(Number(token.str));
         } else {
           throw new BMLSyntaxError('Unexpected number in back reference block',
-            lexer.string, token.index);
+            lexer.str, token.index);
         }
         break;
       case TokenType.ARROW:
@@ -570,7 +570,7 @@ export function parseBackReference(lexer: Lexer): BackReference | null {
           acceptComma = false;
         } else {
           throw new BMLSyntaxError('Unexpected arrow in back reference block',
-            lexer.string, token.index);
+            lexer.str, token.index);
         }
         break;
       case TokenType.OPEN_PAREN:
@@ -587,7 +587,7 @@ export function parseBackReference(lexer: Lexer): BackReference | null {
                 // it's not ideal to validate this here, but with the way it's currently
                 // built, if we don't it will just silently overwrite the key
                 throw new BMLDuplicatedRefIndexError(
-                  referredIdentifier, choiceIndex, lexer.string, token.index);
+                  referredIdentifier, choiceIndex, lexer.str, token.index);
               }
               choiceMap.set(choiceIndex, currentReplacement);
             }
@@ -607,7 +607,7 @@ export function parseBackReference(lexer: Lexer): BackReference | null {
           }
         } else {
           throw new BMLSyntaxError('Unexpected replacement in back reference block',
-            lexer.string, token.index);
+            lexer.str, token.index);
         }
         continue;
       case TokenType.COMMA:
@@ -618,7 +618,7 @@ export function parseBackReference(lexer: Lexer): BackReference | null {
           acceptReplacement = true;
         } else {
           throw new BMLSyntaxError('Unexpected comma in back reference block',
-            lexer.string, token.index);
+            lexer.str, token.index);
         }
         break;
       case TokenType.CLOSE_BRACE:
@@ -627,16 +627,16 @@ export function parseBackReference(lexer: Lexer): BackReference | null {
           return new BackReference(referredIdentifier, choiceMap, fallback);
         } else {
           throw new BMLSyntaxError('Unexpected close brace in back reference block',
-            lexer.string, token.index);
+            lexer.str, token.index);
         }
       default:
         throw new BMLSyntaxError(`Unexpected token ${token}`,
-          lexer.string, token.index);
+          lexer.str, token.index);
     }
     // If we haven't broken out or thrown an error by now, consume this token.
     lexer.next();
   }
   throw new BMLSyntaxError('Could not find end of back reference block.',
-    lexer.string, startIndex);
+    lexer.str, startIndex);
 }
 

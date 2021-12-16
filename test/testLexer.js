@@ -211,7 +211,7 @@ describe('Lexer', function() {
     let lexer = new Lexer('\\\\');
     let token = lexer.next();
     expect(token).toEqual(new Token(TokenType.TEXT, 0, '\\\\'));
-    expect(token.string.length).toBe(2);
+    expect(token.str.length).toBe(2);
     expect(lexer.next()).toBeNull();
   });
 
@@ -291,7 +291,7 @@ describe('Lexer', function() {
 
   it('can skip to the next token satisfying a predicate', function() {
     let lexer = new Lexer('abc');
-    expect(lexer.nextSatisfying((t) => t.string === 'b')).toEqual(new Token(TokenType.TEXT, 1, 'b'));
+    expect(lexer.nextSatisfying((t) => t.str === 'b')).toEqual(new Token(TokenType.TEXT, 1, 'b'));
   });
 
   it('can skip to the next non-whitespace (or comment) token', function() {

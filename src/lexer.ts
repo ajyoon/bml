@@ -3,15 +3,15 @@ import { TokenType } from './tokenType';
 
 export class Lexer {
 
-  string: string;
+  str: string;
   index: number;
   private _cachedNext: Token | null = null;
   private _newLineRe: RegExp = /\r?\n/y;
   private _whitespaceRe: RegExp = /\s+/y;
   private _numberRe: RegExp = /(\d+(\.\d+)?)|(\.\d+)/y;
 
-  constructor(string: string) {
-    this.string = string;
+  constructor(str: string) {
+    this.str = str;
     this.index = 0;
   }
 
@@ -27,7 +27,7 @@ export class Lexer {
    * Determine the next item in the token stream
    */
   _determineNextRaw(): Token | null {
-    if (this.index >= this.string.length) {
+    if (this.index >= this.str.length) {
       return null;
     }
     let tokenType;
@@ -36,9 +36,9 @@ export class Lexer {
     this._newLineRe.lastIndex = this.index;
     this._whitespaceRe.lastIndex = this.index;
     this._numberRe.lastIndex = this.index;
-    let newLineMatch = this._newLineRe.exec(this.string);
-    let whitespaceMatch = this._whitespaceRe.exec(this.string);
-    let numberMatch = this._numberRe.exec(this.string);
+    let newLineMatch = this._newLineRe.exec(this.str);
+    let whitespaceMatch = this._whitespaceRe.exec(this.str);
+    let numberMatch = this._numberRe.exec(this.str);
     if (newLineMatch !== null) {
       tokenType = TokenType.NEW_LINE;
       tokenString = newLineMatch[0];
@@ -48,85 +48,85 @@ export class Lexer {
     } else if (numberMatch !== null) {
       tokenType = TokenType.NUMBER;
       tokenString = numberMatch[0];
-    } else if (this.string.slice(this.index, this.index + 2) === '//') {
+    } else if (this.str.slice(this.index, this.index + 2) === '//') {
       tokenType = TokenType.COMMENT;
       tokenString = '//';
-    } else if (this.string.slice(this.index, this.index + 2) === '/*') {
+    } else if (this.str.slice(this.index, this.index + 2) === '/*') {
       tokenType = TokenType.OPEN_BLOCK_COMMENT;
       tokenString = '/*';
-    } else if (this.string.slice(this.index, this.index + 2) === '*/') {
+    } else if (this.str.slice(this.index, this.index + 2) === '*/') {
       tokenType = TokenType.CLOSE_BLOCK_COMMENT;
       tokenString = '*/';
-    } else if (this.string[this.index] === '/') {
+    } else if (this.str[this.index] === '/') {
       tokenType = TokenType.SLASH;
       tokenString = '/';
-    } else if (this.string[this.index] === '*') {
+    } else if (this.str[this.index] === '*') {
       tokenType = TokenType.ASTERISK;
       tokenString = '*';
-    } else if (this.string[this.index] === '\'') {
+    } else if (this.str[this.index] === '\'') {
       tokenType = TokenType.SINGLE_QUOTE;
       tokenString = '\'';
-    } else if (this.string[this.index] === '"') {
+    } else if (this.str[this.index] === '"') {
       tokenType = TokenType.DOUBLE_QUOTE;
       tokenString = '"';
-    } else if (this.string[this.index] === '`') {
+    } else if (this.str[this.index] === '`') {
       tokenType = TokenType.BACKTICK;
       tokenString = '`';
-    } else if (this.string[this.index] === '(') {
+    } else if (this.str[this.index] === '(') {
       tokenType = TokenType.OPEN_PAREN;
       tokenString = '(';
-    } else if (this.string[this.index] === ')') {
+    } else if (this.str[this.index] === ')') {
       tokenType = TokenType.CLOSE_PAREN;
       tokenString = ')';
-    } else if (this.string[this.index] === '{') {
+    } else if (this.str[this.index] === '{') {
       tokenType = TokenType.OPEN_BRACE;
       tokenString = '{';
-    } else if (this.string[this.index] === '}') {
+    } else if (this.str[this.index] === '}') {
       tokenType = TokenType.CLOSE_BRACE;
       tokenString = '}';
-    } else if (this.string[this.index] === ',') {
+    } else if (this.str[this.index] === ',') {
       tokenType = TokenType.COMMA;
       tokenString = ',';
-    } else if (this.string[this.index] === ':') {
+    } else if (this.str[this.index] === ':') {
       tokenType = TokenType.COLON;
       tokenString = ':';
-    } else if (this.string[this.index] === '@') {
+    } else if (this.str[this.index] === '@') {
       tokenType = TokenType.AT;
       tokenString = '@';
-    } else if (this.string[this.index] === '|') {
+    } else if (this.str[this.index] === '|') {
       tokenType = TokenType.PIPE;
       tokenString = '|';
-    } else if (this.string.slice(this.index, this.index + 2) === '[[') {
+    } else if (this.str.slice(this.index, this.index + 2) === '[[') {
       tokenType = TokenType.OPEN_DOUBLE_BRACKET;
       tokenString = '[[';
-    } else if (this.string.slice(this.index, this.index + 2) === ']]') {
+    } else if (this.str.slice(this.index, this.index + 2) === ']]') {
       tokenType = TokenType.CLOSE_DOUBLE_BRACKET;
       tokenString = ']]';
-    } else if (this.string.slice(this.index, this.index + 2) === '->') {
+    } else if (this.str.slice(this.index, this.index + 2) === '->') {
       tokenType = TokenType.ARROW;
       tokenString = '->';
-    } else if (this.string.slice(this.index, this.index + 2) === 'as') {
+    } else if (this.str.slice(this.index, this.index + 2) === 'as') {
       tokenType = TokenType.KW_AS;
       tokenString = 'as';
-    } else if (this.string.slice(this.index, this.index + 4) === 'call') {
+    } else if (this.str.slice(this.index, this.index + 4) === 'call') {
       tokenType = TokenType.KW_CALL;
       tokenString = 'call';
-    } else if (this.string.slice(this.index, this.index + 4) === 'eval') {
+    } else if (this.str.slice(this.index, this.index + 4) === 'eval') {
       tokenType = TokenType.KW_EVAL;
       tokenString = 'eval';
-    } else if (this.string.slice(this.index, this.index + 4) === 'mode') {
+    } else if (this.str.slice(this.index, this.index + 4) === 'mode') {
       tokenType = TokenType.KW_MODE;
       tokenString = 'mode';
-    } else if (this.string.slice(this.index, this.index + 3) === 'use') {
+    } else if (this.str.slice(this.index, this.index + 3) === 'use') {
       tokenType = TokenType.KW_USE;
       tokenString = 'use';
-    } else if (this.string.slice(this.index, this.index + 5) === 'match') {
+    } else if (this.str.slice(this.index, this.index + 5) === 'match') {
       tokenType = TokenType.KW_MATCH;
       tokenString = 'match';
     } else {
       tokenType = TokenType.TEXT;
-      if (this.string[this.index] === '\\') {
-        switch (this.string[this.index + 1]) {
+      if (this.str[this.index] === '\\') {
+        switch (this.str[this.index + 1]) {
           case '\\':
             tokenString = '\\\\';
             break;
@@ -158,7 +158,7 @@ export class Lexer {
             tokenString = '\\';
         }
       } else {
-        tokenString = this.string[this.index];
+        tokenString = this.str[this.index];
       }
     }
     let token = new Token(tokenType, tokenIndex, tokenString);
@@ -191,7 +191,7 @@ export class Lexer {
           return token;
         }
       }
-      this.index = token.index + token.string.length;
+      this.index = token.index + token.str.length;
     }
     return null;
   }
@@ -205,7 +205,7 @@ export class Lexer {
       token = this._determineNextReal();
     }
     if (token !== null) {
-      this.index += token.string.length;
+      this.index += token.str.length;
     }
     return token;
   }

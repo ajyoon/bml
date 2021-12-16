@@ -87,7 +87,7 @@ export function renderText(str: string, startIndex: number, modes: ModeMap,
       if (token.tokenType === TokenType.CLOSE_DOUBLE_BRACKET) {
         inLiteralBlock = false;
       } else {
-        out += token.string;
+        out += token.str;
       }
       lexer.next();
       continue;
@@ -113,7 +113,7 @@ export function renderText(str: string, startIndex: number, modes: ModeMap,
           // visual line break.
           out = out.substring(0, out.length - 1) + ' ';
         } else {
-          out += token.string;
+          out += token.str;
         }
         break;
       case TokenType.OPEN_BRACE:
@@ -202,7 +202,7 @@ export function renderText(str: string, startIndex: number, modes: ModeMap,
           foundMatch = false;
           continue;
         } else {
-          out += token.string;
+          out += token.str;
         }
 
         break;  // Break from `switch (token.tokenType)`
