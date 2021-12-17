@@ -1,6 +1,6 @@
 # Changelog
 
-### 0.0.28:
+### 0.0.29:
 * *Internal change*: the repo has been migrated to Typescript. All
   commands like `npm run build` and `npm run test` should still work
   just as before.
@@ -10,6 +10,9 @@
 * Fix several small parser bugs unearthed by Typescript migration.
 * Add basic safety checks to eval blocks - logging warnings when
   `Math.random()` is used and when `provide()` is omitted.
+
+### 0.0.28:
+*skipped due to bad release*
 
 ### 0.0.27:
 * Fix bug causing comments to not be stripped out in many situations
