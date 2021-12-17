@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 import fs from 'fs';
 import process from 'process';
 import { RenderSettings } from './settings';
