@@ -45,12 +45,4 @@ const bmlLib = require(libraryPath);
 let libResult = bmlLib(bmlScript, {randomSeed: seed});
 assert(libResult === expectedOutput);
 
-console.log('Checking web library');
-// Places BML in a fake global window object __fakeWindow.
-// This isn't a substitute for actually checking the library works
-// properly from a <script> tag, but it's better than nothing.
-require(webBundlePath);
-let webResult = __fakeWindow.bml(bmlScript, {randomSeed: seed});
-assert(webResult === expectedOutput);
-
 console.log('All smoke tests passed');
