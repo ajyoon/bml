@@ -1,6 +1,6 @@
 # [bml](https://bml-lang.org)
 
-[![Build Status](https://travis-ci.org/ajyoon/bml.svg?branch=master)](https://app.travis-ci.com/github/ajyoon/bml) [![Coverage Status](https://coveralls.io/repos/github/ajyoon/bml/badge.svg?branch=master)](https://coveralls.io/github/ajyoon/bml?branch=master)
+![Build](https://github.com/ajyoon/bml/actions/workflows/main.yml/badge.svg)
 
 BML is a superset of natural language which applies stochastic
 transformations on text.
