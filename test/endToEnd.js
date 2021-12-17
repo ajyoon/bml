@@ -2,6 +2,7 @@ const expect = require('expect');
 const fs = require('fs');
 
 const bml = require('../src/bml.ts');
+const { spyConsole } = require('./utils.js');
 
 describe('bml', function() {
   it('can process a document without a prelude', function() {
@@ -229,24 +230,6 @@ function captureStream(stream){
   };
 }
 
-function spyConsole() {
-  let spy = {};
-
-  beforeEach(() => {
-    spy.consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
-    spy.consoleWarn = jest.spyOn(console, 'warn').mockImplementation(() => {});
-  });
-
-  afterEach(() => {
-    spy.consoleError.mockClear();
-  });
-
-  afterAll(() => {
-    spy.consoleError.mockRestore();
-  });
-
-  return spy;
-}
 
 describe('bml logging', function() {
   let spy = spyConsole();

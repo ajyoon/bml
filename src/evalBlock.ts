@@ -19,7 +19,7 @@ const evalFuncTemplate = `
 
   ***USER CODE SLOT***
 
-  ///////// end userspace code
+  ////////// end user code
 
   return __USER_DEFS;
 `;
