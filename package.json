@@ -47,7 +47,7 @@
     "checkTypes": "./node_modules/.bin/tsc --noEmit",
     "build": "npm run checkTypes && ./node_modules/.bin/parcel build && npm run releaseTest",
     "preversion": "npm test",
-    "version": "npm run build && git add -A dist"
+    "version": "npm run build"
   },
   "devDependencies": {
     "@parcel/transformer-typescript-types": "^2.0.1",
