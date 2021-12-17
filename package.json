@@ -17,14 +17,18 @@
   },
   "source": "src/bml.ts",
   "main": "dist/index.js",
-  "browser": "dist/bml.bundle.js",
+  "bundle": "dist/bml.bundle.js",
   "cli": "dist/cli.js",
   "targets": {
     "main": {
       "optimize": true
     },
-    "browser": {
-      "optimize": true
+    "bundle": {
+      "source": "src/browserIndex.js",
+      "optimize": true,
+      "outputFormat": "global",
+      "context": "browser",
+      "isLibrary": false
     },
     "cli": {
       "source": "src/cli.ts",
