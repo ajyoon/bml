@@ -33,25 +33,25 @@ describe('cleanWhitespace', function() {
   });
 });
 
-describe('punctuationSpacingCleanup', function() {
+describe('punctuationCleanup', function() {
   it('snaps punctuation left', function() {
-    expect(postprocessing.punctuationSpacingCleanup('test . ')).toBe('test.  ');
-    expect(postprocessing.punctuationSpacingCleanup('test , ')).toBe('test,  ');
-    expect(postprocessing.punctuationSpacingCleanup('test : ')).toBe('test:  ');
-    expect(postprocessing.punctuationSpacingCleanup('test ; ')).toBe('test;  ');
-    expect(postprocessing.punctuationSpacingCleanup('test ! ')).toBe('test!  ');
-    expect(postprocessing.punctuationSpacingCleanup('test ? ')).toBe('test?  ');
+    expect(postprocessing.punctuationCleanup('test . ')).toBe('test.  ');
+    expect(postprocessing.punctuationCleanup('test , ')).toBe('test,  ');
+    expect(postprocessing.punctuationCleanup('test : ')).toBe('test:  ');
+    expect(postprocessing.punctuationCleanup('test ; ')).toBe('test;  ');
+    expect(postprocessing.punctuationCleanup('test ! ')).toBe('test!  ');
+    expect(postprocessing.punctuationCleanup('test ? ')).toBe('test?  ');
   });
 
   it('snaps groups of punctuation left together', function() {
-    expect(postprocessing.punctuationSpacingCleanup('test ?! ')).toBe('test?!  ');
+    expect(postprocessing.punctuationCleanup('test ?! ')).toBe('test?!  ');
   });
 
   it('preserves whatever whitespace comes before', function() {
-    expect(postprocessing.punctuationSpacingCleanup('test  \t?! ')).toBe('test?!  \t ');
+    expect(postprocessing.punctuationCleanup('test  \t?! ')).toBe('test?!  \t ');
   });
 
   it('corrects across newlines too', function() {
-    expect(postprocessing.punctuationSpacingCleanup('test  \n\n. ')).toBe('test.  \n\n ');
+    expect(postprocessing.punctuationCleanup('test  \n\n. ')).toBe('test.  \n\n ');
   });
 });

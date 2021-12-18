@@ -11,6 +11,12 @@ export interface DocumentSettings {
    */
   whitespaceCleanup?: boolean | null;
 
+  /**
+   * Whether to perform a post-processing step repositioning
+   * punctuation marks according to *some* English grammar rules.
+   */
+  punctuationCleanup?: boolean | null;
+
   /** 
    * The expected BML version number
    *
@@ -47,6 +53,7 @@ export interface RenderSettings {
 export const defaultBMLSettings: DocumentSettings = {
   markdownSettings: {},
   whitespaceCleanup: true,
+  punctuationCleanup: true,
   version: null,
 };
 

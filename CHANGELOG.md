@@ -8,6 +8,10 @@
   keyword.
 * Move `whitespaceCleanup` setting from cli and `renderSettings` to
   document-defined `settings` provided through `eval`.
+* Add new post-processing step for correcting position of some
+  punctuation marks according to English grammar rules. This is
+  enabled by default and can be disabled using the document-defined
+  settig `punctuationCleanup: false`.
 
 ### 0.0.30:
 * *Internal change*: the repo has been migrated to Typescript. All

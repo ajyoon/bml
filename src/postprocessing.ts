@@ -80,7 +80,7 @@ const MISPLACED_WORD_ENDING_PUNC_RE = /(\w)(\s+)([.,:;!?]+)/g;
  * - snap [, . : ; ! ?] to the end of preceding words when separated
  *   by whitespace (including line breaks.)
  */
-export function punctuationSpacingCleanup(text: string): string {
+export function punctuationCleanup(text: string): string {
   return text.replace(MISPLACED_WORD_ENDING_PUNC_RE, '$1$3$2');
 }
 

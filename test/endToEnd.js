@@ -216,6 +216,39 @@ inner text /* a block comment inside a choice */
     expect(bml('foo')).toBe('foo\n');
     expect(bml(src)).toBe('foo');
   });
+  
+  it('cleans punctuation placement by default but allows disabling', function() {
+    let srcWithPuncCleanup = `
+        eval {
+            provide({
+                settings: {
+                    whitespaceCleanup: false,
+                    punctuationCleanup: true,
+                }
+            });
+        }foo  . bar`;
+    let srcWithoutPuncCleanup = `
+        eval {
+            provide({
+                settings: {
+                    whitespaceCleanup: false,
+                    punctuationCleanup: false,
+                }
+            });
+        }foo  . bar`;
+    expect(bml(srcWithPuncCleanup)).toBe('foo.   bar');
+    expect(bml(srcWithoutPuncCleanup)).toBe('foo  . bar');
+  });
+
+  it('cleans punctuation before running markdown processing', function() {
+    let src = 'foo\n\n.\n\nbar';
+    expect(bml(src, {renderMarkdown: true})).toBe('<p>foo.</p>\n<p>bar</p>\n');
+  });
+
+  it('cleans punctuation before cleaning whitespace', function() {
+    let src = 'foo\n\n\n.\n\n\n\nbar';
+    expect(bml(src)).toBe('foo.\n\nbar\n');
+  });
 });
 
 // via https://stackoverflow.com/a/18543419/5615927

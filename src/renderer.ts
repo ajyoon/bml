@@ -242,6 +242,9 @@ export function render(bmlDocumentString: string, renderSettings: RenderSettings
     bmlDocumentString, preludeEndIndex, modes, null, userDefs, null, 0);
 
   // Post-processing
+  if (userDefs.settings.punctuationCleanup) {
+    output = postprocessing.punctuationCleanup(output);
+  }
   if (renderSettings.renderMarkdown) {
     output = postprocessing.renderMarkdown(output, userDefs.settings!.markdownSettings!);
   }
