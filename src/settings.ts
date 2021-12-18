@@ -5,6 +5,12 @@ export interface DocumentSettings {
    * @see {@link https://github.com/markedjs/marked/blob/v0.3.19/docs/USING_ADVANCED.md}
    */
   markdownSettings?: object | null;
+
+  /**
+   * Whether to perform a post-processing step cleaning up whitespace.
+   */
+  whitespaceCleanup?: boolean | null;
+
   /** 
    * The expected BML version number
    *
@@ -33,10 +39,6 @@ export interface RenderSettings {
    * Whether to render the output document as markdown to HTML.
    */
   renderMarkdown?: boolean | null;
-  /**
-   * Whether to perform a post-processing step cleaning up whitespace.
-   */
-  whitespaceCleanup?: boolean | null;
 }
 
 /**
@@ -44,6 +46,7 @@ export interface RenderSettings {
  */
 export const defaultBMLSettings: DocumentSettings = {
   markdownSettings: {},
+  whitespaceCleanup: true,
   version: null,
 };
 
@@ -51,7 +54,6 @@ export const defaultRenderSettings: RenderSettings = {
   randomSeed: null,
   allowEval: true,
   renderMarkdown: false,
-  whitespaceCleanup: true,
 };
 
 /**
@@ -60,6 +62,6 @@ export const defaultRenderSettings: RenderSettings = {
  *
  * If `newSettings` is falsy, return `originalSettings` unmodified.
  */
-export function mergeSettings<T>(originalSettings: T, newSettings: T | null): T {
+export function mergeSettings<T>(originalSettings: T, newSettings: T | null | undefined): T {
   return Object.assign({}, originalSettings, newSettings);
 }

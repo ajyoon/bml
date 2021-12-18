@@ -14,11 +14,10 @@ export const VERSION_SWITCHES = ['-v', '--version'];
 export const SEED_SWITCHES = ['--seed'];
 export const NO_EVAL_SWITCHES = ['--no-eval'];
 export const RENDER_MARKDOWN_SWITCHES = ['--render-markdown'];
-export const NO_WHITESPACE_CLEANUP_SWITCHES = ['--no-whitespace-cleanup'];
 export const ALL_SWITCHES = ([] as string[]).concat(
   HELP_SWITCHES, VERSION_SWITCHES,
   SEED_SWITCHES, NO_EVAL_SWITCHES,
-  RENDER_MARKDOWN_SWITCHES, NO_WHITESPACE_CLEANUP_SWITCHES);
+  RENDER_MARKDOWN_SWITCHES);
 
 export type BMLArgs = { bmlSource: string, settings: RenderSettings };
 export type Action = { function: Function, args: any[] };
@@ -69,7 +68,6 @@ export function printHelp() {
     ${SEED_SWITCHES} INTEGER             set the random seed for the bml render
     ${NO_EVAL_SWITCHES}                  disable Javascript evaluation
     ${RENDER_MARKDOWN_SWITCHES}          render the document as markdown to HTML
-    ${NO_WHITESPACE_CLEANUP_SWITCHES}    disable whitespace cleanup
 
   Source Code at https://github.com/ajyoon/bml
   Report Bugs at https://github.com/ajyoon/bml/issues
@@ -120,7 +118,6 @@ export function determineAction(args: string[]): Action {
   let file = null;
   let noEval = false;
   let renderMarkdown = false;
-  let noWhitespaceCleanup = false;
   let seed = null;
 
   for (let arg of args) {
@@ -146,8 +143,6 @@ export function determineAction(args: string[]): Action {
       noEval = true;
     } else if (RENDER_MARKDOWN_SWITCHES.includes(arg)) {
       renderMarkdown = true;
-    } else if (NO_WHITESPACE_CLEANUP_SWITCHES.includes(arg)) {
-      noWhitespaceCleanup = true;
     } else if (SEED_SWITCHES.includes(arg)) {
       expectSeed = true;
     } else {
@@ -168,7 +163,6 @@ export function determineAction(args: string[]): Action {
     randomSeed: seed,
     allowEval: !noEval,
     renderMarkdown: renderMarkdown,
-    whitespaceCleanup: !noWhitespaceCleanup
   };
 
   if (file === null) {

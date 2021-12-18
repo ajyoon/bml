@@ -205,9 +205,16 @@ inner text /* a block comment inside a choice */
   });
 
   it('cleans whitespace by default but allows disabling', function() {
-    let src = 'foo';
-    expect(bml(src, {whitespaceCleanup: false})).toBe('foo');
-    expect(bml(src)).toBe('foo\n');
+    let src = `
+        eval {
+            provide({
+                settings: {
+                    whitespaceCleanup: false
+                }
+            });
+        }foo`;
+    expect(bml('foo')).toBe('foo\n');
+    expect(bml(src)).toBe('foo');
   });
 });
 

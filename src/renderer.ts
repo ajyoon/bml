@@ -234,8 +234,8 @@ export function render(bmlDocumentString: string, renderSettings: RenderSettings
     if (userDefs.settings?.version) {
       checkVersion(BML_VERSION, userDefs.settings.version);
     }
-    userDefs.settings = mergeSettings(defaultBMLSettings, userDefs.settings);
   }
+  userDefs.settings = mergeSettings(defaultBMLSettings, userDefs.settings);
 
   // Main render pass
   let output = renderText(
@@ -245,7 +245,7 @@ export function render(bmlDocumentString: string, renderSettings: RenderSettings
   if (renderSettings.renderMarkdown) {
     output = postprocessing.renderMarkdown(output, userDefs.settings!.markdownSettings!);
   }
-  if (renderSettings.whitespaceCleanup) {
+  if (userDefs.settings.whitespaceCleanup) {
     output = postprocessing.whitespaceCleanup(output);
   }
 

@@ -85,13 +85,11 @@ describe('cli', function() {
   it('supports all settings', function() {
     let path = 'foo.bml';
     let action = cli.determineAction([
-      '--seed', '123', '--no-eval', '--render-markdown',
-      '--no-whitespace-cleanup', path]);
+      '--seed', '123', '--no-eval', '--render-markdown', path]);
     let expectedSettings = {
       randomSeed: 123,
       allowEval: false,
       renderMarkdown: true,
-      whitespaceCleanup: false
     };
     expect(action.function).toBe(cli.readFromPath);
     expect(action.args).toEqual([path, expectedSettings]);

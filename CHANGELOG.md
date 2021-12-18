@@ -6,6 +6,8 @@
   `·foo·bar\n`
 * Remove support for the long-deprecated `using` alias of the `use`
   keyword.
+* Move `whitespaceCleanup` setting from cli and `renderSettings` to
+  document-defined `settings` provided through `eval`.
 
 ### 0.0.30:
 * *Internal change*: the repo has been migrated to Typescript. All
