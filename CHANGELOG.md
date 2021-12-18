@@ -4,6 +4,8 @@
 * Improve whitespace cleanup by making it collapse runs of spaces in
   the middle of lines, for example `·foo···bar·` is cleaned to
   `·foo·bar\n`
+* Remove support for the long-deprecated `using` alias of the `use`
+  keyword.
 
 ### 0.0.30:
 * *Internal change*: the repo has been migrated to Typescript. All

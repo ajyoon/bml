@@ -71,7 +71,7 @@ export function renderText(str: string, startIndex: number, modes: ModeMap,
   let foundMatch = false;
   let replacement = null;
   let chooseRe = /\s*(\(|call|#?\w+:|@\w+)/y;
-  let useRe = /\s*(use|using)/y;
+  let useRe = /\s*use/y;
   let token;
   let lexer = new Lexer(str);
   lexer.overrideIndex(startIndex);

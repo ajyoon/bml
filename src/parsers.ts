@@ -416,14 +416,13 @@ type ParseUseResult = {
 };
 
 /**
- * Parse a `use` block of the form `{use|using modeName}`
+ * Parse a `use` block of the form `{use modeName}`
  *
  * @returns The returned index is the index immediately
  * after the closing brace.
  */
 export function parseUse(str: string, openBraceIndex: number): ParseUseResult {
-  // TODO "using" syntax has been deprecated for a while and can be removed
-  let useRe = /{(use|using)\s+(\w[\w\d]*)\s*}/y;
+  let useRe = /{use\s+(\w[\w\d]*)\s*}/y;
   useRe.lastIndex = openBraceIndex;
   let match = useRe.exec(str);
   if (match === null) {
@@ -431,7 +430,7 @@ export function parseUse(str: string, openBraceIndex: number): ParseUseResult {
   }
   return {
     blockEndIndex: useRe.lastIndex,
-    modeName: match[2]
+    modeName: match[1]
   };
 }
 

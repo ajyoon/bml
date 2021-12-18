@@ -1,10 +1,6 @@
 import * as evalApi from './evalApi';
 import { DocumentSettings } from './settings';
 
-
-// TODO run some basic checks against provided code,
-// like ensuring there are no uses of `Math.random`
-
 const evalFuncTemplate = `
   const bml = this;
   const __USER_DEFS = {};

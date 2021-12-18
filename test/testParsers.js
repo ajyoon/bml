@@ -246,22 +246,19 @@ describe('parseRule', function() {
 
 
 describe('parseUse', function() {
-  it('Extracts the mode name with "use" syntax', function() {
+  it('Extracts the mode name', function() {
     let testString = '{use testMode}';
     let result = parseUse(testString, 0);
     expect(result.blockEndIndex).toBe(testString.length);
     expect(result.modeName).toBe('testMode');
   });
-
-  it('Extracts the mode name with "using" syntax', function() {
-    let testString = '{using testMode}';
-    let result = parseUse(testString, 0);
-    expect(result.blockEndIndex).toBe(testString.length);
-    expect(result.modeName).toBe('testMode');
+  
+  it('Errors when using old "using" syntax', function() {
+    expect(() => parseUse('{using testMode}', 0)).toThrowError(UnknownTransformError);
   });
 
   it('Throws an UnknownTransformError when there is a syntax error.', function() {
-    let testString = '{using ????}';
+    let testString = '{use ????}';
     expect(() => parseUse(testString, 0)).toThrowError(UnknownTransformError);
   });
 });
