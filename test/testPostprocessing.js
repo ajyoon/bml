@@ -63,17 +63,22 @@ describe('punctuationCleanup', function() {
 
 describe('capitalizationCleanup', function() {
   it('Does nothing on well-capitalized text', function() {
-    let src = 'test. Test 2! 123 test? Test';
+    let src = 'Test. Test 2! 123 test? Test';
     expect(postprocessing.capitalizationCleanup(src)).toBe(src);
   });
   
   it('Capitalizes plain ASCII characters', function() {
     let src = 'test. test.';
-    expect(postprocessing.capitalizationCleanup(src)).toBe('test. Test.');
+    expect(postprocessing.capitalizationCleanup(src)).toBe('Test. Test.');
   });
 
   it('Capitalizes extended latin characters', function() {
     let src = 'test! ä';
-    expect(postprocessing.capitalizationCleanup(src)).toBe('test! Ä');
+    expect(postprocessing.capitalizationCleanup(src)).toBe('Test! Ä');
+  });
+
+  it('Works across line breaks', function() {
+    let src = 'test. \ntest.';
+    expect(postprocessing.capitalizationCleanup(src)).toBe('Test. \nTest.');
   });
 });

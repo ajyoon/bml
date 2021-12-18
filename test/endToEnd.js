@@ -9,8 +9,8 @@ describe('bml', function() {
     let testString = 'hello {(beautiful) 60, (wonderful)} world!';
     let result = bml(testString);
     let possibleOutcomes = [
-      'hello beautiful world!\n',
-      'hello wonderful world!\n',
+      'Hello beautiful world!\n',
+      'Hello wonderful world!\n',
     ];
     expect(possibleOutcomes).toEqual(expect.arrayContaining([result]));
   });
@@ -25,7 +25,7 @@ describe('bml', function() {
         {call foo}
     `;
     let result = bml(testString);
-    expect(result).toBe('foo!\n');
+    expect(result).toBe('Foo!\n');
   });
 
   it('can process recursive rule choices', function() {
@@ -38,9 +38,9 @@ describe('bml', function() {
         `;
     let result = bml(testString).trim();
     let possibleOutcomes = [
-      'just kidding',
-      'outer inner 1',
-      'outer inner 2',
+      'Just kidding',
+      'Outer inner 1',
+      'Outer inner 2',
     ];
     expect(possibleOutcomes).toEqual(expect.arrayContaining([result]));
   });
@@ -53,16 +53,16 @@ describe('bml', function() {
         {use test}
         {(foo)}
         `;
-    expect(bml(testString).trim()).toBe('bar');
+    expect(bml(testString).trim()).toBe('Bar');
   });
 
   it('can process recursive inline choices', function() {
     let testString = 'hello {(simple), ({(very ), ()}recursive)} world!';
     let result = bml(testString);
     let possibleOutcomes = [
-      'hello simple world!\n',
-      'hello recursive world!\n',
-      'hello very recursive world!\n',
+      'Hello simple world!\n',
+      'Hello recursive world!\n',
+      'Hello very recursive world!\n',
     ];
     expect(possibleOutcomes).toEqual(expect.arrayContaining([result]));
   });
@@ -91,11 +91,11 @@ describe('bml', function() {
 
   it('allows refs and backrefs with empty strings', function() {
     // backref mapping is empty string
-    expect(bml('{t: (a) 100, (b)} => {@t: 0 -> (), (not a)}')).toBe('a =>\n');
+    expect(bml('{t: (a) 100, (b)} => {@t: 0 -> (), (not a)}')).toBe('A =>\n');
     // backref mapping with empty string does not interfere with fallback
-    expect(bml('{t: (a), (b) 100} => {@t: 0 -> (), (not a)}')).toBe('b => not a\n');
+    expect(bml('{t: (a), (b) 100} => {@t: 0 -> (), (not a)}')).toBe('B => not a\n');
     // fallback with empty string works too
-    expect(bml('{t: (a), (b) 100} => {@t: 0 -> (not b), ()}')).toBe('b =>\n');
+    expect(bml('{t: (a), (b) 100} => {@t: 0 -> (not b), ()}')).toBe('B =>\n');
   });
 
   it('correctly executes copy-backrefs', function() {
@@ -112,8 +112,8 @@ describe('bml', function() {
     let testString = 'silent {#Name: (Alice), (Bob)} then referenced {@Name}';
     let result = bml(testString);
     let possibleOutcomes = [
-      'silent then referenced Alice\n',
-      'silent then referenced Bob\n'
+      'Silent then referenced Alice\n',
+      'Silent then referenced Bob\n'
     ];
     expect(possibleOutcomes).toEqual(expect.arrayContaining([result]));
   });
@@ -131,7 +131,7 @@ describe('bml', function() {
     // comment
     (foo)}`;
     let result = bml(testString);
-    expect(result).toBe('foo\n');
+    expect(result).toBe('Foo\n');
   });
 
   it('tracks named choices made inside recursively rendered text', function() {
@@ -139,13 +139,13 @@ describe('bml', function() {
       {({TestChoice: (foo)})} {@TestChoice}
     `;
     let result = bml(testString);
-    expect(result).toBe('foo foo\n');
+    expect(result).toBe('Foo foo\n');
   });
   
   it('supports visual linebreaks', function() {
-    expect(bml("foo\\\nbar")).toBe('foo bar\n');
-    expect(bml("foo\\\n      bar")).toBe('foo bar\n');
-    expect(bml("foo\\\n      {(bar)}")).toBe('foo bar\n');
+    expect(bml("foo\\\nbar")).toBe('Foo bar\n');
+    expect(bml("foo\\\n      bar")).toBe('Foo bar\n');
+    expect(bml("foo\\\n      {(bar)}")).toBe('Foo bar\n');
   });
   
   it('supports comments in text', function() {
@@ -159,7 +159,7 @@ outer text
 // Comments can include string/command delimiters too )}
 inner text /* a block comment inside a choice */
 )}`;
-    expect(bml(testString)).toBe('outer text\ninner text\n');
+    expect(bml(testString)).toBe('Outer text\ninner text\n');
   });
   
   it('respects literal blocks', function() {
@@ -170,7 +170,7 @@ inner text /* a block comment inside a choice */
         {use testMode}
         [[foo {(literal text should not interpreted)}]]
     `;
-    expect(bml(testString).trim()).toBe('foo {(literal text should not interpreted)}');
+    expect(bml(testString).trim()).toBe('Foo {(literal text should not interpreted)}');
   });
 
   it('produces the exact same document when using a fixed random seed', function() {
@@ -213,8 +213,8 @@ inner text /* a block comment inside a choice */
                 }
             });
         }foo`;
-    expect(bml('foo')).toBe('foo\n');
-    expect(bml(src)).toBe('foo');
+    expect(bml('foo')).toBe('Foo\n');
+    expect(bml(src)).toBe('Foo');
   });
   
   it('cleans punctuation placement by default but allows disabling', function() {
@@ -244,12 +244,12 @@ inner text /* a block comment inside a choice */
 
   it('cleans punctuation before running markdown processing', function() {
     let src = 'foo\n\n.\n\nbar';
-    expect(bml(src, {renderMarkdown: true})).toBe('<p>foo.</p>\n<p>bar</p>\n');
+    expect(bml(src, {renderMarkdown: true})).toBe('<p>Foo.</p>\n<p>Bar</p>\n');
   });
 
   it('cleans punctuation before cleaning whitespace', function() {
     let src = 'foo\n\n\n.\n\n\n\nbar';
-    expect(bml(src)).toBe('foo.\n\nBar\n');
+    expect(bml(src)).toBe('Foo.\n\nBar\n');
   });
   
   it('corrects sentence capitalization by default but allows disabling', function() {
@@ -262,7 +262,7 @@ inner text /* a block comment inside a choice */
                 }
             });
         }test. test.`;
-    expect(bml('test. test.')).toBe('test. Test.\n');
+    expect(bml('test. test.')).toBe('Test. Test.\n');
     expect(bml(src)).toBe('test. test.');
   });
 });
