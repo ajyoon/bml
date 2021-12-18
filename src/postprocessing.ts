@@ -71,12 +71,17 @@ export function whitespaceCleanup(text: string): string {
   return out;
 }
 
+const MISPLACED_WORD_ENDING_PUNC_RE = /(\w)(\s+)([.,:;!?]+)/g;
+
 /**
  * Performs simple English-like correction of whitespace around
  * punctuation marks.
+ *
+ * - snap [, . : ; ! ?] to the end of preceding words when separated
+ *   by whitespace (including line breaks.)
  */
 export function punctuationSpacingCleanup(text: string): string {
-  return '';
+  return text.replace(MISPLACED_WORD_ENDING_PUNC_RE, '$1$3$2');
 }
 
 export function renderMarkdown(text: string, markedSettings: object) {
