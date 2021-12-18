@@ -17,6 +17,12 @@ export interface DocumentSettings {
    */
   punctuationCleanup?: boolean | null;
 
+  /**
+   * Whether to perform basic capitalization correction for words
+   * following sentence-ending punctuation.
+   */
+  capitalizationCleanup?: boolean | null;
+
   /** 
    * The expected BML version number
    *
@@ -54,6 +60,7 @@ export const defaultBMLSettings: DocumentSettings = {
   markdownSettings: {},
   whitespaceCleanup: true,
   punctuationCleanup: true,
+  capitalizationCleanup: true,
   version: null,
 };
 

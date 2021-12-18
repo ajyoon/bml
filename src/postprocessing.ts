@@ -84,6 +84,24 @@ export function punctuationCleanup(text: string): string {
   return text.replace(MISPLACED_WORD_ENDING_PUNC_RE, '$1$3$2');
 }
 
+
+// \p{Ll} matches unicode lowercase letters which have uppercase variants.
+const INCORRECT_CAPS_RE = /([.!?]\s+)(\p{Ll})/gu;
+
+function correctCaps(match: string, p1: string, p2: string) {
+  return p1 + p2.toUpperCase();
+}
+
+/**
+ * Tries to correct capitalization of the first words of sentences.
+ *
+ * This automatically capitalizes the first letter of the first word
+ * following a sentence-ending punctuation mark.
+ */
+export function capitalizationCleanup(text: string): string {
+  return text.replace(INCORRECT_CAPS_RE, correctCaps);
+}
+
 export function renderMarkdown(text: string, markedSettings: object) {
   return marked(text, markedSettings);
 }

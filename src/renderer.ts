@@ -251,6 +251,9 @@ export function render(bmlDocumentString: string, renderSettings: RenderSettings
   if (userDefs.settings.whitespaceCleanup) {
     output = postprocessing.whitespaceCleanup(output);
   }
+  if (userDefs.settings.capitalizationCleanup) {
+    output = postprocessing.capitalizationCleanup(output);
+  }
 
   return output;
 }

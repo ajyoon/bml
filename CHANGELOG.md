@@ -11,7 +11,11 @@
 * Add new post-processing step for correcting position of some
   punctuation marks according to English grammar rules. This is
   enabled by default and can be disabled using the document-defined
-  settig `punctuationCleanup: false`.
+  setting `punctuationCleanup: false`.
+* Add a new post-processing step for correcting capitalization of the
+  first words of sentences. This is enabled by default and can be
+  disabled using the document-defined setting `capitalizationCleanup:
+  false`.
 
 ### 0.0.30:
 * *Internal change*: the repo has been migrated to Typescript. All

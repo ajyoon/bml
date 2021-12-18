@@ -54,4 +54,26 @@ describe('punctuationCleanup', function() {
   it('corrects across newlines too', function() {
     expect(postprocessing.punctuationCleanup('test  \n\n. ')).toBe('test.  \n\n ');
   });
+  
+  it('does nothing on correctly written text', function() {
+    let src = 'test, test:  test; test! test? ';
+    expect(postprocessing.punctuationCleanup(src)).toBe(src);
+  });
+});
+
+describe('capitalizationCleanup', function() {
+  it('Does nothing on well-capitalized text', function() {
+    let src = 'test. Test 2! 123 test? Test';
+    expect(postprocessing.capitalizationCleanup(src)).toBe(src);
+  });
+  
+  it('Capitalizes plain ASCII characters', function() {
+    let src = 'test. test.';
+    expect(postprocessing.capitalizationCleanup(src)).toBe('test. Test.');
+  });
+
+  it('Capitalizes extended latin characters', function() {
+    let src = 'test! ä';
+    expect(postprocessing.capitalizationCleanup(src)).toBe('test! Ä');
+  });
 });

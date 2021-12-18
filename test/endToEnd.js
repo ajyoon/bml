@@ -223,6 +223,7 @@ inner text /* a block comment inside a choice */
             provide({
                 settings: {
                     whitespaceCleanup: false,
+                    capitalizationCleanup: false,
                     punctuationCleanup: true,
                 }
             });
@@ -232,6 +233,7 @@ inner text /* a block comment inside a choice */
             provide({
                 settings: {
                     whitespaceCleanup: false,
+                    capitalizationCleanup: false,
                     punctuationCleanup: false,
                 }
             });
@@ -247,7 +249,21 @@ inner text /* a block comment inside a choice */
 
   it('cleans punctuation before cleaning whitespace', function() {
     let src = 'foo\n\n\n.\n\n\n\nbar';
-    expect(bml(src)).toBe('foo.\n\nbar\n');
+    expect(bml(src)).toBe('foo.\n\nBar\n');
+  });
+  
+  it('corrects sentence capitalization by default but allows disabling', function() {
+    let src = `
+        eval {
+            provide({
+                settings: {
+                    capitalizationCleanup: false,
+                    whitespaceCleanup: false
+                }
+            });
+        }test. test.`;
+    expect(bml('test. test.')).toBe('test. Test.\n');
+    expect(bml(src)).toBe('test. test.');
   });
 });
 
