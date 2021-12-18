@@ -36,11 +36,11 @@ describe('bml', function() {
         {use test}
         recurse!
         `;
-    let result = bml(testString);
+    let result = bml(testString).trim();
     let possibleOutcomes = [
-      'just kidding\n',
-      'outer inner 1\n',
-      'outer inner 2\n',
+      'just kidding',
+      'outer inner 1',
+      'outer inner 2',
     ];
     expect(possibleOutcomes).toEqual(expect.arrayContaining([result]));
   });
@@ -53,8 +53,7 @@ describe('bml', function() {
         {use test}
         {(foo)}
         `;
-    let result = bml(testString);
-    expect(result).toBe('bar\n');
+    expect(bml(testString).trim()).toBe('bar');
   });
 
   it('can process recursive inline choices', function() {
@@ -171,7 +170,7 @@ inner text /* a block comment inside a choice */
         {use testMode}
         [[foo {(literal text should not interpreted)}]]
     `;
-    expect(bml(testString)).toBe('foo {(literal text should not interpreted)}\n');
+    expect(bml(testString).trim()).toBe('foo {(literal text should not interpreted)}');
   });
 
   it('produces the exact same document when using a fixed random seed', function() {

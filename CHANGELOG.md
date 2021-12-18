@@ -2,8 +2,8 @@
 
 ### 0.0.31:
 * Improve whitespace cleanup by making it collapse runs of spaces in
-  the middle of lines, for example ` foo bar ` is cleaned to ` foo
-  bar\n`
+  the middle of lines, for example `·foo···bar·` is cleaned to
+  `·foo·bar\n`
 
 ### 0.0.30:
 * *Internal change*: the repo has been migrated to Typescript. All
