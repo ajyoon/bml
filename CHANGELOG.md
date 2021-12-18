@@ -1,5 +1,10 @@
 # Changelog
 
+### 0.0.31:
+* Improve whitespace cleanup by making it collapse runs of spaces in
+  the middle of lines, for example ` foo bar ` is cleaned to ` foo
+  bar\n`
+
 ### 0.0.30:
 * *Internal change*: the repo has been migrated to Typescript. All
   commands like `npm run build` and `npm run test` should still work

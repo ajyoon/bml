@@ -2,6 +2,7 @@ const expect = require('expect');
 
 const postprocessing = require('../src/postprocessing.ts');
 
+
 describe('cleanWhitespace', function() {
   it('removes blank lines at start and end of string', function() {
     expect(postprocessing.whitespaceCleanup('\n\n\n\nfoo\n   \n')).toBe('foo\n');
@@ -17,5 +18,22 @@ describe('cleanWhitespace', function() {
   
   it('automatically inserts an EOF line break', function() {
     expect(postprocessing.whitespaceCleanup('foo')).toBe('foo\n');
+  });
+  
+  it('doesnt insert a redundant EOF line break when one already exists', function() {
+    expect(postprocessing.whitespaceCleanup('foo\n')).toBe('foo\n');
+  });
+  
+  it('preserves leading whitespace on every line', function() {
+    expect(postprocessing.whitespaceCleanup(' foo')).toBe(' foo\n');
+  });
+  
+  it('collapses runs of more than 1 whitespace in the middle of a line', function() {
+    expect(postprocessing.whitespaceCleanup('  foo     bar')).toBe('  foo bar\n');
+  });
+});
+
+describe('punctuationSpacingCleanup', function() {
+  xit('snaps punctuation left', function() {
   });
 });

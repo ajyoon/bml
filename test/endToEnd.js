@@ -113,8 +113,8 @@ describe('bml', function() {
     let testString = 'silent {#Name: (Alice), (Bob)} then referenced {@Name}';
     let result = bml(testString);
     let possibleOutcomes = [
-      'silent  then referenced Alice\n',
-      'silent  then referenced Bob\n'
+      'silent then referenced Alice\n',
+      'silent then referenced Bob\n'
     ];
     expect(possibleOutcomes).toEqual(expect.arrayContaining([result]));
   });
