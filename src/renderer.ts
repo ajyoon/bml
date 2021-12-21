@@ -214,7 +214,7 @@ export function renderText(str: string, startIndex: number, modes: ModeMap,
   return out;
 }
 
-export function render(bmlDocumentString: string, renderSettings: RenderSettings): string {
+export function render(bmlDocumentString: string, renderSettings?: RenderSettings): string {
   // Resolve render settings
   renderSettings = mergeSettings(defaultRenderSettings, renderSettings);
   if (renderSettings.randomSeed) {

@@ -1,4 +1,4 @@
-const expect = require('expect');
+import expect from 'expect';
 
 import { EvalBlock } from '../src/evalBlock';
 import { validateEvalBlock } from '../src/evalBlockValidator';
@@ -6,22 +6,16 @@ import { spyConsole } from './utils';
 
 let spy = spyConsole();
 
-function expectToWarn(fn, code, warningContains) {
-  let block = new EvalBlock(code);
-  fn(block);
-  expect(console.warn).toHaveBeenCalledTimes(1);
-  expect(spy.consoleWarn.mock.calls[0][0]).toContain(warningContains);
-}
+type TestFn = () => void;
 
-function expectToWarn(fn, warningContains) {
+function expectToWarn(fn: TestFn, warningContains: string) {
   fn();
   expect(console.warn).toHaveBeenCalledTimes(1);
   expect(spy.consoleWarn.mock.calls[0][0]).toContain(warningContains);
 }
 
-function expectNotToWarn(fn, code) {
-  let block = new EvalBlock(code);
-  fn(block);
+function expectNotToWarn(fn: TestFn) {
+  fn();
   expect(console.warn).not.toHaveBeenCalled();
 }
 

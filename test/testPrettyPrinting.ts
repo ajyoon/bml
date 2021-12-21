@@ -1,6 +1,6 @@
-const expect = require('expect');
+import expect from 'expect';
 
-const prettyPrinting = require('../src/prettyPrinting.ts');
+import * as prettyPrinting from '../src/prettyPrinting';
 
 
 describe('prettyPrintArray', function() {

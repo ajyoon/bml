@@ -1,4 +1,4 @@
-const expect = require('expect');
+import expect from 'expect';
 const fs = require('fs');
 
 const mergeSettings = require('../src/settings.ts').mergeSettings;

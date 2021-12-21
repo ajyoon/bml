@@ -1,4 +1,4 @@
-const expect = require('expect');
+import expect from 'expect';
 
 const WeightedChoice = require('../src/weightedChoice.ts').WeightedChoice;
 const noOp = require('../src/noOp.ts');

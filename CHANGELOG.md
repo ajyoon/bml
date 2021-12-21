@@ -1,5 +1,8 @@
 # Changelog
 
+### 0.0.32:
+* Add validations to eval-proided fields.
+
 ### 0.0.31:
 * Improve whitespace cleanup by making it collapse runs of spaces in
   the middle of lines, for example `·foo···bar·` is cleaned to

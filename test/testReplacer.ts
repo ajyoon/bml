@@ -1,4 +1,4 @@
-const expect = require('expect');
+import expect from 'expect';
 const rand = require('../src/rand.ts');
 const WeightedChoice = require('../src/weightedChoice.ts').WeightedChoice;
 const Replacer = require('../src/replacer.ts').Replacer;

@@ -1,6 +1,5 @@
-const expect = require('expect');
-
-const postprocessing = require('../src/postprocessing.ts');
+import expect from 'expect';
+import * as postprocessing from '../src/postprocessing';
 
 
 describe('cleanWhitespace', function() {
@@ -8,7 +7,7 @@ describe('cleanWhitespace', function() {
     expect(postprocessing.whitespaceCleanup('\n\n\n\nfoo\n   \n')).toBe('foo\n');
   });
 
-  it('collapses runs of more than 1 blank line into 1', function () {
+  it('collapses runs of more than 1 blank line into 1', function() {
     expect(postprocessing.whitespaceCleanup('foo\n\nbar\n\n\n\n\nbiz')).toBe('foo\n\nbar\n\nbiz\n');
   });
 
@@ -54,7 +53,7 @@ describe('punctuationCleanup', function() {
   it('corrects across newlines too', function() {
     expect(postprocessing.punctuationCleanup('test  \n\n. ')).toBe('test.  \n\n ');
   });
-  
+
   it('does nothing on correctly written text', function() {
     let src = 'test, test:  test; test! test? ';
     expect(postprocessing.punctuationCleanup(src)).toBe(src);
@@ -66,7 +65,7 @@ describe('capitalizationCleanup', function() {
     let src = 'Test. Test 2! 123 test? Test';
     expect(postprocessing.capitalizationCleanup(src)).toBe(src);
   });
-  
+
   it('Capitalizes plain ASCII characters', function() {
     let src = 'test. test.';
     expect(postprocessing.capitalizationCleanup(src)).toBe('Test. Test.');

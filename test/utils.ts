@@ -1,5 +1,5 @@
 export function spyConsole() {
-  let spy = {};
+  let spy: any = {};
 
   beforeEach(() => {
     spy.consoleError = jest.spyOn(console, 'error').mockImplementation(() => { });

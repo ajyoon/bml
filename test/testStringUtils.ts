@@ -1,4 +1,4 @@
-const expect = require('expect');
+import expect from 'expect';
 
 const _stringUtils = require('../src/stringUtils.ts');
 const lineAndColumnOf = _stringUtils.lineAndColumnOf;

@@ -1,11 +1,10 @@
-const expect = require('expect');
-
-const cli = require('../src/cli.ts');
-const defaultSettings = require('../src/settings.ts').defaultRenderSettings;
+import expect from 'expect';
+import * as cli from '../src/cli';
+import { defaultRenderSettings } from '../src/settings';
 
 
 describe('cli', function() {
-  
+
   beforeAll(() => {
     // Many of these tests trigger console errors which spam the Jest
     // test results because for some reason Jest doesn't support
@@ -31,13 +30,13 @@ describe('cli', function() {
     let path = 'some path';
     let action = cli.determineAction([path]);
     expect(action.function).toBe(cli.readFromPath);
-    expect(action.args).toEqual([path, defaultSettings]);
+    expect(action.args).toEqual([path, defaultRenderSettings]);
   });
 
   it('reads from stdin when not given any arguments', function() {
     let action = cli.determineAction([]);
     expect(action.function).toBe(cli.readFromStdin);
-    expect(action.args).toEqual([defaultSettings]);
+    expect(action.args).toEqual([defaultRenderSettings]);
   });
 
   it('strips away only the first arg when `node` is not the first', function() {
@@ -49,7 +48,7 @@ describe('cli', function() {
     let stripped = cli.stripArgs(['/usr/bin/node', 'second', 'third']);
     expect(stripped).toEqual(['third']);
   });
-  
+
   it('fails when seed flag is used but no seed is provided', function() {
     let action = cli.determineAction(['--seed']);
     expect(action.function).toBe(cli.printHelpForError);
@@ -66,22 +65,22 @@ describe('cli', function() {
       expect(action.function).toBe(cli.printHelpForError);
     }
   });
-  
+
   it('supports negative seeds', function() {
-      let action = cli.determineAction(['--seed', '-123']);
-      expect(action.function).toBe(cli.readFromStdin);
+    let action = cli.determineAction(['--seed', '-123']);
+    expect(action.function).toBe(cli.readFromStdin);
   });
-  
+
   it('fails on unknown flags', function() {
-      let action = cli.determineAction(['--foo']);
-      expect(action.function).toBe(cli.printHelpForError);
+    let action = cli.determineAction(['--foo']);
+    expect(action.function).toBe(cli.printHelpForError);
   });
-  
+
   it('fails when more than one path is provided', function() {
     let action = cli.determineAction(['1.bml', '2.bml']);
     expect(action.function).toBe(cli.printHelpForError);
   });
-  
+
   it('supports all settings', function() {
     let path = 'foo.bml';
     let action = cli.determineAction([

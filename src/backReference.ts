@@ -1,6 +1,6 @@
 import { Choice } from './weightedChoice';
 
-export type BackReferenceMap = Map<number, string>;
+export type BackReferenceMap = Map<number, Choice>;
 
 export class BackReference {
 

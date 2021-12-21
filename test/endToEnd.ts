@@ -1,8 +1,8 @@
-const expect = require('expect');
-const fs = require('fs');
+import expect from 'expect';
+import fs from 'fs';
 
-const bml = require('../src/bml.ts');
-const { spyConsole } = require('./utils.js');
+import bml from '../src/bml';
+import { spyConsole } from './utils';
 
 describe('bml', function() {
   it('can process a document without a prelude', function() {
@@ -30,7 +30,7 @@ describe('bml', function() {
 
   it('can process recursive rule choices', function() {
     let testString =
-        `mode test {
+      `mode test {
             (recurse!) as {(just kidding) 50, (outer {(inner 1), (inner 2)}) 50}
         }
         {use test}
@@ -47,7 +47,7 @@ describe('bml', function() {
 
   it('respects the active mode on recursively rendered text', function() {
     let testString =
-        `mode test {
+      `mode test {
             (foo) as {(bar) 100}
         }
         {use test}
@@ -69,7 +69,7 @@ describe('bml', function() {
 
   it('can process refs, backrefs, and unused fallbacks', function() {
     let testString = '{Name: (Alice), (Bob)} went to the store. '
-        + '{@Name: 0 -> (She), 1 -> (He), (unused fallback)} bought some tofu.';
+      + '{@Name: 0 -> (She), 1 -> (He), (unused fallback)} bought some tofu.';
     let result = bml(testString);
     let possibleOutcomes = [
       'Alice went to the store. She bought some tofu.\n',
@@ -80,7 +80,7 @@ describe('bml', function() {
 
   it('can process refs and backrefs with used fallbacks', function() {
     let testString = '{Name: (Alice), (Bob)} went to the store. '
-        + '{@Name: 0 -> (She), (USED FALLBACK)} bought some tofu.';
+      + '{@Name: 0 -> (She), (USED FALLBACK)} bought some tofu.';
     let result = bml(testString);
     let possibleOutcomes = [
       'Alice went to the store. She bought some tofu.\n',
@@ -141,13 +141,13 @@ describe('bml', function() {
     let result = bml(testString);
     expect(result).toBe('Foo foo\n');
   });
-  
+
   it('supports visual linebreaks', function() {
     expect(bml("foo\\\nbar")).toBe('Foo bar\n');
     expect(bml("foo\\\n      bar")).toBe('Foo bar\n');
     expect(bml("foo\\\n      {(bar)}")).toBe('Foo bar\n');
   });
-  
+
   it('supports comments in text', function() {
     let testString = `// a line comment
 // another line comment
@@ -161,7 +161,7 @@ inner text /* a block comment inside a choice */
 )}`;
     expect(bml(testString)).toBe('Outer text\ninner text\n');
   });
-  
+
   it('respects literal blocks', function() {
     let testString = `
         mode testMode {
@@ -182,7 +182,7 @@ inner text /* a block comment inside a choice */
 
   it('only renders markdown when set to', function() {
     let src = '# foo';
-    expect(bml(src, {renderMarkdown: true}))
+    expect(bml(src, { renderMarkdown: true }))
       .toBe('<h1 id="foo">foo</h1>\n');
     expect(bml(src)).toBe('# foo\n');
   });
@@ -200,7 +200,7 @@ inner text /* a block comment inside a choice */
         }
         "testing"---
     `;
-    let result = bml(testString, {renderMarkdown: true});
+    let result = bml(testString, { renderMarkdown: true });
     expect(result).toBe('<p>“testing”—</p>\n');
   });
 
@@ -216,7 +216,7 @@ inner text /* a block comment inside a choice */
     expect(bml('foo')).toBe('Foo\n');
     expect(bml(src)).toBe('Foo');
   });
-  
+
   it('cleans punctuation placement by default but allows disabling', function() {
     let srcWithPuncCleanup = `
         eval {
@@ -244,14 +244,14 @@ inner text /* a block comment inside a choice */
 
   it('cleans punctuation before running markdown processing', function() {
     let src = 'foo\n\n.\n\nbar';
-    expect(bml(src, {renderMarkdown: true})).toBe('<p>Foo.</p>\n<p>Bar</p>\n');
+    expect(bml(src, { renderMarkdown: true })).toBe('<p>Foo.</p>\n<p>Bar</p>\n');
   });
 
   it('cleans punctuation before cleaning whitespace', function() {
     let src = 'foo\n\n\n.\n\n\n\nbar';
     expect(bml(src)).toBe('Foo.\n\nBar\n');
   });
-  
+
   it('corrects sentence capitalization by default but allows disabling', function() {
     let src = `
         eval {
@@ -266,24 +266,6 @@ inner text /* a block comment inside a choice */
     expect(bml(src)).toBe('test. test.');
   });
 });
-
-// via https://stackoverflow.com/a/18543419/5615927
-function captureStream(stream){
-  var oldWrite = stream.write;
-  var buf = '';
-  stream.write = function(chunk, encoding, callback) {
-    buf += chunk.toString(); // chunk is a String or Buffer
-    oldWrite.apply(stream, arguments);
-  };
-  return {
-    unhook: function unhook(){
-     stream.write = oldWrite;
-    },
-    captured: function(){
-      return buf;
-    }
-  };
-}
 
 
 describe('bml logging', function() {

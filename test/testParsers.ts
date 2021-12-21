@@ -1,35 +1,30 @@
-const expect = require('expect');
-const fs = require('fs');
+import expect from 'expect';
+import fs from 'fs';
 
-const parsers = require('../src/parsers.ts');
-const errors = require('../src/errors.ts');
-const EvalBlock = require('../src/evalBlock.ts').EvalBlock;
-const FunctionCall = require('../src/functionCall.ts').FunctionCall;
-const Mode = require('../src/mode.ts').Mode;
-const Rule = require('../src/rule.ts').Rule;
-const Replacer = require('../src/replacer.ts').Replacer;
-const Lexer = require('../src/lexer.ts').Lexer;
-const Token = require('../src/token.ts').Token;
-const TokenType = require('../src/tokenType.ts').TokenType;
-const WeightedChoice = require('../src/weightedChoice.ts').WeightedChoice;
-const BackReference = require('../src/backReference.ts').BackReference;
-const noOp = require('../src/noOp.ts');
+import { FunctionCall } from '../src/functionCall';
+import { Mode } from '../src/mode';
+import { Rule } from '../src/rule';
+import { Replacer } from '../src/replacer';
+import { Lexer } from '../src/lexer';
+import { Token } from '../src/token';
+import { TokenType } from '../src/tokenType';
+import { WeightedChoice } from '../src/weightedChoice';
+import { BackReference } from '../src/backReference';
+import noOp from '../src/noOp';
 
-const JavascriptSyntaxError = errors.JavascriptSyntaxError;
-const UnknownTransformError = errors.UnknownTransformError;
-const BMLSyntaxError = errors.BMLSyntaxError;
-const BMLDuplicatedRefIndexError = errors.BMLDuplicatedRefIndexError;
+import {
+  JavascriptSyntaxError,
+  UnknownTransformError,
+  BMLSyntaxError,
+  BMLDuplicatedRefIndexError,
+} from '../src/errors';
 
-const parseEval = parsers.parseEval;
-const parseRule = parsers.parseRule;
-const parseMode = parsers.parseMode;
-const parsePrelude = parsers.parsePrelude;
-const parseUse = parsers.parseUse;
-const parseInlineCommand = parsers.parseInlineCommand;
-const parseMatchers = parsers.parseMatchers;
-const parseCall = parsers.parseCall;
-const parseReplacements = parsers.parseReplacements;
-const parseBackReference = parsers.parseBackReference;
+import {
+  parseEval, parseRule, parseMode, parsePrelude, parseUse,
+  parseInlineCommand, parseMatchers, parseCall, parseReplacements,
+  parseBackReference,
+} from '../src/parsers';
+
 
 
 describe('parseEval', function() {
@@ -124,7 +119,7 @@ describe('parseMode', function() {
 
   it('allows comments within modes', function() {
     let testString =
-        `mode test {
+      `mode test {
              // test
              // test
          }`;
@@ -134,7 +129,7 @@ describe('parseMode', function() {
     expect(mode).toBeInstanceOf(Mode);
     expect(mode.name).toBe('test');
   });
-  
+
   it('fails when mode name is absent', function() {
     let lexer = new Lexer('mode {}');
     expect(() => parseMode(lexer)).toThrowError(BMLSyntaxError);
@@ -147,7 +142,7 @@ describe('parseMode', function() {
 
   it('can parse a mixture of literal and regex matcher rules', function() {
     let testString =
-        `mode test {
+      `mode test {
              // some comments
              (bml) as {(BML), match}
              // more comments
@@ -163,13 +158,13 @@ describe('parseMode', function() {
     expect(mode.rules).toHaveLength(2);
     expect(mode.rules[0]).toEqual(new Rule([/bml/y], new Replacer(
       [new WeightedChoice('BML', null),
-       new WeightedChoice(noOp, null)
+      new WeightedChoice(noOp, null)
       ], null, false)));
     expect(mode.rules[1]).toEqual(new Rule([/javascript/y], new Replacer(
       [new WeightedChoice('Javascript', 30),
-       new WeightedChoice('JS', 10),
-       new WeightedChoice('js', 10),
-       new WeightedChoice(noOp, null)
+      new WeightedChoice('JS', 10),
+      new WeightedChoice('js', 10),
+      new WeightedChoice(noOp, null)
       ],
       null, false)));
   });
@@ -225,7 +220,7 @@ describe('parseRule', function() {
     let lexer = new Lexer(testString);
     expect(() => parseRule(lexer)).toThrowError(BMLSyntaxError);
   });
-  
+
   it('maps `match` keyword replacers to no-ops', function() {
     let testString = '(a) as {(b), match 40}';
     let lexer = new Lexer(testString);
@@ -233,10 +228,10 @@ describe('parseRule', function() {
     expect(lexer.index).toBe(testString.length);
     expect(rule).toEqual(new Rule([/a/y], new Replacer(
       [new WeightedChoice('b', null),
-       new WeightedChoice(noOp, 40)],
+      new WeightedChoice(noOp, 40)],
       null, false)));
   });
-  
+
   it('Errors if multiple `match` replacers are used', function() {
     let testString = '(x) as {match, match 50}';
     let lexer = new Lexer(testString);
@@ -252,7 +247,7 @@ describe('parseUse', function() {
     expect(result.blockEndIndex).toBe(testString.length);
     expect(result.modeName).toBe('testMode');
   });
-  
+
   it('Errors when using old "using" syntax', function() {
     expect(() => parseUse('{using testMode}', 0)).toThrowError(UnknownTransformError);
   });
@@ -319,7 +314,7 @@ describe('parseInlineCommand', function() {
     expect(result.replacer).toBeInstanceOf(Replacer);
     expect(result.blockEndIndex).toBe(testString.length);
     expect(result.backReference).toBeNull();
-    expect(result.replacer.identifier).toBe('TestChoice');
+    expect(result.replacer!.identifier).toBe('TestChoice');
   });
 
   it('allows blocks with identifiers to be marked silent with # prefix', function() {
@@ -328,8 +323,8 @@ describe('parseInlineCommand', function() {
     expect(result.replacer).toBeInstanceOf(Replacer);
     expect(result.blockEndIndex).toBe(testString.length);
     expect(result.backReference).toBeNull();
-    expect(result.replacer.identifier).toBe('TestChoice');
-    expect(result.replacer.isSilent).toBe(true);
+    expect(result.replacer!.identifier).toBe('TestChoice');
+    expect(result.replacer!.isSilent).toBe(true);
   });
 
   it('allows back references', function() {
@@ -441,7 +436,7 @@ describe('parseReplacements', function() {
     expect(result.weights.length).toBe(1);
     expect(result.weights[0]).toBeInstanceOf(WeightedChoice);
     expect(result.weights[0].choice).toBeInstanceOf(FunctionCall);
-    expect(result.weights[0].choice.functionName).toBe('test');
+    expect((result.weights[0].choice as FunctionCall).functionName).toBe('test');
     expect(result.weights[0].weight).toBe(100);
     expect(lexer.index).toBe(testString.length);
   });
@@ -464,7 +459,7 @@ describe('parseReplacements', function() {
     expect(result.weights.length).toBe(1);
     expect(result.weights[0]).toBeInstanceOf(WeightedChoice);
     expect(result.weights[0].choice).toBeInstanceOf(FunctionCall);
-    expect(result.weights[0].choice.functionName).toBe('test');
+    expect((result.weights[0].choice as FunctionCall).functionName).toBe('test');
     expect(result.weights[0].weight).toBe(5);
     expect(lexer.index).toBe(testString.length);
   });
@@ -477,7 +472,7 @@ describe('parseReplacements', function() {
 
     expect(result.weights[0]).toBeInstanceOf(WeightedChoice);
     expect(result.weights[0].choice).toBeInstanceOf(FunctionCall);
-    expect(result.weights[0].choice.functionName).toBe('test');
+    expect((result.weights[0].choice as FunctionCall).functionName).toBe('test');
     expect(result.weights[0].weight).toBe(5);
 
     expect(result.weights[1]).toBeInstanceOf(WeightedChoice);
@@ -505,14 +500,14 @@ describe('parseBackReference', function() {
   it('returns null on non-backref blocks', function() {
     let testString = '(test) 5}';
     let lexer = new Lexer(testString);
-    let result = parseBackReference(lexer);
+    let result = parseBackReference(lexer)!;
     expect(result).toBeNull();
   });
 
   it('parses a simple case with a single string branch and no fallback', function() {
     let testString = '@TestRef: 0 -> (foo)}';
     let lexer = new Lexer(testString);
-    let result = parseBackReference(lexer);
+    let result = parseBackReference(lexer)!;
     expect(result.referredIdentifier).toBe('TestRef');
     expect(result.choiceMap.size).toBe(1);
     expect(result.choiceMap.get(0)).toBe('foo');
@@ -520,45 +515,45 @@ describe('parseBackReference', function() {
 
   it('parses a simple case with a single call branch and no fallback', function() {
     let testString = '@TestRef: 0 -> call foo}';
-    let result = parseBackReference(new Lexer(testString));
+    let result = parseBackReference(new Lexer(testString))!;
     expect(result.referredIdentifier).toBe('TestRef');
     expect(result.choiceMap.size).toBe(1);
     expect(result.choiceMap.get(0)).toBeInstanceOf(FunctionCall);
-    expect(result.choiceMap.get(0).functionName).toBe('foo');
+    expect((result.choiceMap.get(0) as FunctionCall).functionName).toBe('foo');
   });
 
   it('allows a single branch with a fallback', function() {
     let testString = '@TestRef: 0 -> call foo, (fallback)}';
-    let result = parseBackReference(new Lexer(testString));
+    let result = parseBackReference(new Lexer(testString))!;
     expect(result.referredIdentifier).toBe('TestRef');
     expect(result.choiceMap.size).toBe(1);
     expect(result.choiceMap.get(0)).toBeInstanceOf(FunctionCall);
-    expect(result.choiceMap.get(0).functionName).toBe('foo');
+    expect((result.choiceMap.get(0) as FunctionCall).functionName).toBe('foo');
     expect(result.fallback).toBe('fallback');
   });
 
   it('parses multiple branches of all types with fallback', function() {
     let testString = '@TestRef: 0 -> (foo), 1 -> call someFunc, 2 -> (bar), call fallbackFunc}';
-    let result = parseBackReference(new Lexer(testString));
+    let result = parseBackReference(new Lexer(testString))!;
     expect(result.referredIdentifier).toBe('TestRef');
     expect(result.choiceMap.size).toBe(3);
     expect(result.choiceMap.get(0)).toBe('foo');
     expect(result.choiceMap.get(1)).toBeInstanceOf(FunctionCall);
-    expect(result.choiceMap.get(1).functionName).toBe('someFunc');
+    expect((result.choiceMap.get(1) as FunctionCall).functionName).toBe('someFunc');
     expect(result.choiceMap.get(2)).toBe('bar');
-    expect(result.fallback).toBeInstanceOf(FunctionCall);
-    expect(result.fallback.functionName).toBe('fallbackFunc');
+    expect(result.fallback!).toBeInstanceOf(FunctionCall);
+    expect((result.fallback! as FunctionCall).functionName).toBe('fallbackFunc');
   });
 
   it('parses copy refs', function() {
     let testString = '@TestRef}';
     let lexer = new Lexer(testString);
-    let result = parseBackReference(lexer);
+    let result = parseBackReference(lexer)!;
     expect(result.referredIdentifier).toBe('TestRef');
     expect(result.choiceMap.size).toBe(0);
   });
 
-  function testParseStrToGiveSyntaxError(backRefString) {
+  function testParseStrToGiveSyntaxError(backRefString: string) {
     expect(() => {
       parseBackReference(new Lexer(backRefString));
     }).toThrowError(BMLSyntaxError);

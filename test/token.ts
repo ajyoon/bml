@@ -1,4 +1,4 @@
-const expect = require('expect');
+import expect from 'expect';
 
 const TokenType = require('../src/tokenType.ts').TokenType;
 const Token = require('../src/token.ts').Token;

@@ -1,8 +1,8 @@
-const expect = require('expect');
+import expect from 'expect';
 
-const Lexer = require('../src/lexer.ts').Lexer;
-const Token = require('../src/token.ts').Token;
-const TokenType = require('../src/tokenType.ts').TokenType;
+import { Lexer } from '../src/lexer';
+import { Token } from '../src/token';
+import { TokenType } from '../src/tokenType';
 
 
 describe('Lexer', function() {
@@ -209,7 +209,7 @@ describe('Lexer', function() {
 
   it('tokenizes escaped backslashes as text', function() {
     let lexer = new Lexer('\\\\');
-    let token = lexer.next();
+    let token = lexer.next()!;
     expect(token).toEqual(new Token(TokenType.TEXT, 0, '\\\\'));
     expect(token.str.length).toBe(2);
     expect(lexer.next()).toBeNull();

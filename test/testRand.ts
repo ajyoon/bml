@@ -1,22 +1,26 @@
-const expect = require('expect');
-const fs = require('fs');
-const sha = require('sha.js');
+import expect from 'expect';
+import sha from 'sha.js';
+import { Buffer } from 'buffer';
 
-const WeightedChoice = require('../src/weightedChoice.ts').WeightedChoice;
-
-// this import is made mutable for test purposes
+import { WeightedChoice } from '../src/weightedChoice';
 let rand = require('../src/rand.ts');
 
-function testGeneratorFunctionTypeAndRange(randomFunction, typeValidationFunction, min, max) {
+type RandomFunction = (a: number, b: number) => number;
+type ValidateNumberKind = (a: number) => boolean;
+
+function testGeneratorFunctionTypeAndRange(
+  randomFunction: RandomFunction, typeValidationFunction: ValidateNumberKind,
+  min: number, max: number) {
   for (let i = 0; i < 100; i++) {
     let value = randomFunction(min, max);
-    expect(value).toSatisfy((v) => typeValidationFunction(v));
+    expect(typeValidationFunction(value)).toBe(true);
     expect(value).toBeGreaterThanOrEqual(min);
     expect(value).toBeLessThanOrEqual(max);
   }
 }
 
-function testGeneratorFunctionOutputMean(randomFunction, min, max) {
+function testGeneratorFunctionOutputMean(
+  randomFunction: RandomFunction, min: number, max: number) {
   let sum = 0;
   for (let i = 0; i < 1000; i++) {
     sum += randomFunction(min, max);
@@ -27,8 +31,8 @@ function testGeneratorFunctionOutputMean(randomFunction, min, max) {
 }
 
 describe('randomFloat', function() {
-  function isFloat(number) {
-    return number % 1 !== 0;
+  function isFloat(n: number): boolean {
+    return n % 1 !== 0;
   }
 
   it('generates floats within the given range', function() {
@@ -41,8 +45,8 @@ describe('randomFloat', function() {
 });
 
 describe('randomInt', function() {
-  function isInt(number) {
-    return number % 1 === 0;
+  function isInt(n: number) {
+    return n % 1 === 0;
   }
 
   it('generates ints within the given range', function() {
@@ -57,8 +61,8 @@ describe('randomInt', function() {
 describe('normalizeWeights', function() {
   it('should do nothing when all weights sum to 100', function() {
     let weights = [
-      new WeightedChoice(1, 40),
-      new WeightedChoice(1, 60),
+      new WeightedChoice('a', 40),
+      new WeightedChoice('b', 60),
     ];
     expect(rand.normalizeWeights(weights)).toEqual(weights);
   });
@@ -86,16 +90,17 @@ describe('setRandomSeed', function() {
     let firstResult = rand.randomFloat(0, 1);
     expect(rand.randomFloat(0, 1)).not.toBeCloseTo(firstResult);
   });
-  
+
   it('produces stable results forever', function() {
     jest.isolateModules(() => rand = require('../src/rand.ts'));
     rand.setRandomSeed(1234);
-    let results = [];
-    for (let i = 0; i < 100000; i++) {
-      results.push(rand.randomInt());
+    let iters = 100000;
+    let results = Buffer.alloc(iters * 8);
+    for (let i = 0; i < iters; i++) {
+      results.writeFloatBE(rand.randomInt(), i * 8);
     }
     let hash = sha('sha256').update(results).digest('hex');
-    expect(hash).toBe('9192c25b734fcbadbe32dadc28089c60db0e39f90cc20ce2e5733f57261acc0c');
+    expect(hash).toBe('f2f381924630531a5e188f5cdbd110b90f90b796f7daf0dcf402070e8d46ae80');
   });
 });
 
@@ -111,7 +116,7 @@ describe('weightedChoose', function() {
     let result = rand.weightedChoose(weights);
     expect(result.choice).toBe('foo');
     expect(result.choiceIndex).toBe(0);
-    
+
     result = rand.weightedChoose(weights);
     expect(result.choice).toBe('foo');
     expect(result.choiceIndex).toBe(0);
