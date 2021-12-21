@@ -97,3 +97,19 @@ export class NotAFunctionError extends Error {
     Object.setPrototypeOf(this, NotAFunctionError.prototype);
   }
 }
+
+export class EvalProvidedSettingsError extends Error {
+  constructor(field: string, value: any) {
+    super(`Eval-provided field '${field}' of '${value}' is invalid`)
+    this.name = 'EvalProvidedSettingsError';
+    Object.setPrototypeOf(this, EvalProvidedSettingsError.prototype);
+  }
+}
+
+export class EvalProvideError extends Error {
+  constructor(msg: string) {
+    super(msg)
+    this.name = 'EvalProvideError';
+    Object.setPrototypeOf(this, EvalProvideError.prototype);
+  }
+}

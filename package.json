@@ -53,6 +53,7 @@
     "@parcel/transformer-typescript-types": "^2.0.1",
     "@swc/core": "^1.2.119",
     "@swc/jest": "^0.2.14",
+    "@types/jest": "^27.0.3",
     "jest": "^27.4.4",
     "jest-extended": "^1.2.0",
     "parcel": "^2.0.1",

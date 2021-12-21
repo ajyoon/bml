@@ -70,20 +70,4 @@ describe('Custom JS (EvalBlock & FunctionCall)', function() {
       functionCall.execute(userDefs, null, 'stub source', 0);
     }).toThrowError(FunctionNotFoundError);
   });
-  
-  it('Gives error when calling non-function', function() {
-    let src = `
-        provide({
-            notAFunc: 'notAFunc'
-        });
-    `;
-    let evalBlock = new EvalBlock(src);
-    let userDefs = evalBlock.execute();
-    let functionCall = new FunctionCall('notAFunc');
-    expect(() => {
-      functionCall.execute(userDefs, null, 'stub source', 0);
-    }).toThrowError(NotAFunctionError);
-  });
-  
-
 });

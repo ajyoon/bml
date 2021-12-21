@@ -1,5 +1,6 @@
 import * as evalApi from './evalApi';
 import { DocumentSettings } from './settings';
+import { UserDefs, validateAndBuildUserDefs } from './userDefs';
 
 const evalFuncTemplate = `
   const bml = this;
@@ -38,20 +39,7 @@ export class EvalBlock {
   }
 
   execute(): UserDefs {
-    let rawResult = this.toFunc()();
-    let defs: UserDefs = { funcs: {} };
-    for (let [key, value] of Object.entries(rawResult)) {
-      if (key === 'settings') {
-        defs.settings = <DocumentSettings>value;
-      } else {
-        defs.funcs[key] = <Function>value;
-      }
-    }
-    return defs;
+    return validateAndBuildUserDefs(this.toFunc()());
   }
 }
 
-export type UserDefs = {
-  settings?: DocumentSettings,
-  funcs: { [index: string]: Function }
-}

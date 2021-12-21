@@ -4,7 +4,7 @@ import { defaultBMLSettings, defaultRenderSettings, mergeSettings, RenderSetting
 import { Mode, ModeMap } from './mode';
 import { BackReference } from './backReference';
 import { parsePrelude, parseUse, parseInlineCommand, } from './parsers';
-import { UserDefs } from './evalBlock';
+import { UserDefs } from './userDefs';
 import { FunctionCall } from './functionCall';
 import { Lexer } from './lexer';
 import { TokenType } from './tokenType';

@@ -2,7 +2,7 @@ import {
   FunctionNotFoundError,
   NotAFunctionError
 } from './errors';
-import { UserDefs } from './evalBlock';
+import { UserDefs } from './userDefs';
 
 
 export class FunctionCall {
