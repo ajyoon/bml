@@ -2,6 +2,7 @@
 
 ### 0.0.32:
 * Add validations to eval-proided fields.
+* Fix backslash escapes on braces and square brackets
 
 ### 0.0.31:
 * Improve whitespace cleanup by making it collapse runs of spaces in

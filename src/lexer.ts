@@ -150,6 +150,14 @@ export class Lexer {
             tokenString = '\'';
             this.index++;
             break;
+          case '[':
+            tokenString = '[';
+            this.index++;
+            break;
+          case '{':
+            tokenString = '{';
+            this.index++;
+            break;
           case '\"':
             tokenString = '\"';
             this.index++;

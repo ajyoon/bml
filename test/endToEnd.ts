@@ -148,6 +148,18 @@ describe('bml', function() {
     expect(bml("foo\\\n      {(bar)}")).toBe('Foo bar\n');
   });
 
+  it('allows escaping open braces', function() {
+    expect(bml('Foo \\{ (test), (test2) } bar')).toBe('Foo { (test), (test2) } bar\n');
+  });
+
+  it('allows escaping open square brackets', function() {
+    expect(bml('Foo \\[[{ (test) }]] bar')).toBe('Foo [[test]] bar\n');
+  });
+
+  it('allows escaping backslashes', function() {
+    expect(bml('Foo \\')).toBe('Foo \\\n');
+  })
+
   it('supports comments in text', function() {
     let testString = `// a line comment
 // another line comment
