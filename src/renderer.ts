@@ -82,7 +82,6 @@ export function renderText(str: string, startIndex: number, modes: ModeMap,
   }
 
   while ((token = lexer.peek()) !== null) {
-
     if (inLiteralBlock) {
       if (token.tokenType === TokenType.CLOSE_DOUBLE_BRACKET) {
         inLiteralBlock = false;

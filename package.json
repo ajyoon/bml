@@ -45,7 +45,8 @@
     "test": "jest",
     "releaseTest": "node test/releaseTest.js",
     "checkTypes": "./node_modules/.bin/tsc --noEmit",
-    "build": "npm run checkTypes && ./node_modules/.bin/parcel build && npm run releaseTest",
+    "buildOnly": "./node_modules/.bin/parcel build",
+    "build": "npm run checkTypes && npm run buildOnly && npm run releaseTest",
     "preversion": "npm test",
     "version": "npm run build"
   },

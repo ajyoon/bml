@@ -32,6 +32,7 @@ export class Lexer {
     }
     let tokenType;
     let tokenIndex = this.index;
+    let tokenEndIndex = null;
     let tokenString;
     this._newLineRe.lastIndex = this.index;
     this._whitespaceRe.lastIndex = this.index;
@@ -126,50 +127,31 @@ export class Lexer {
     } else {
       tokenType = TokenType.TEXT;
       if (this.str[this.index] === '\\') {
-        switch (this.str[this.index + 1]) {
-          case '\\':
-            tokenString = '\\\\';
-            break;
-          case '/':
-            tokenString = '/';
-            this.index++;
-            break;
-          case 'n':
-            tokenString = '\n';
-            this.index++;
-            break;
-          case 't':
-            tokenString = '\t';
-            this.index++;
-            break;
-          case 'r':
-            tokenString = '\r';
-            this.index++;
-            break;
-          case '\'':
-            tokenString = '\'';
-            this.index++;
-            break;
-          case '[':
-            tokenString = '[';
-            this.index++;
-            break;
-          case '{':
-            tokenString = '{';
-            this.index++;
-            break;
-          case '\"':
-            tokenString = '\"';
-            this.index++;
-            break;
-          default:
-            tokenString = '\\';
+        let nextChar = this.str[this.index + 1];
+        if ('\\/[{'.includes(nextChar)) {
+          tokenEndIndex = this.index + 2;
+          tokenString = nextChar;
+        } else if (nextChar === 'n') {
+          tokenEndIndex = this.index + 2;
+          tokenString = '\n';
+        } else if (nextChar === 't') {
+          tokenEndIndex = this.index + 2;
+          tokenString = '\t';
+        } else if (nextChar === 'r') {
+          tokenEndIndex = this.index + 2;
+          tokenString = '\r';
+        } else {
+          tokenString = '\\';
         }
       } else {
         tokenString = this.str[this.index];
       }
     }
-    let token = new Token(tokenType, tokenIndex, tokenString);
+
+    if (tokenEndIndex === null) {
+      tokenEndIndex = tokenIndex + tokenString.length;
+    }
+    let token = new Token(tokenType, tokenIndex, tokenEndIndex, tokenString);
     return token;
   }
 
@@ -177,6 +159,7 @@ export class Lexer {
     let inLineComment = false;
     let inBlockComment = false;
     let token;
+    let startIndex = this.index;
     while ((token = this._determineNextRaw()) !== null) {
       if (inLineComment) {
         if (token.tokenType === TokenType.NEW_LINE) {
@@ -186,9 +169,8 @@ export class Lexer {
         if (token.tokenType === TokenType.CLOSE_BLOCK_COMMENT) {
           // Block comments output a single whitespace positioned at
           // the closing slash of the `*/`
-          let virtualWhitespaceTokenIdx = token.index + 1;
-          this.index = virtualWhitespaceTokenIdx;
-          return new Token(TokenType.WHITESPACE, virtualWhitespaceTokenIdx, ' ');
+          let virtualSpaceIdx = token.index + 1;
+          return new Token(TokenType.WHITESPACE, virtualSpaceIdx, virtualSpaceIdx + 1, ' ');
         }
       } else {
         if (token.tokenType === TokenType.COMMENT) {
@@ -196,11 +178,17 @@ export class Lexer {
         } else if (token.tokenType === TokenType.OPEN_BLOCK_COMMENT) {
           inBlockComment = true;
         } else {
+          this.index = startIndex;
           return token;
         }
       }
-      this.index = token.index + token.str.length;
+      // Determining the next real token currently requires
+      // fake-consuming tokens until a real one is found.  It's a bad
+      // hack, but `this.index` should be reset to the initial
+      // position before this function exits.
+      this.index = token.endIndex;
     }
+    this.index = startIndex;
     return null;
   }
 
@@ -213,7 +201,9 @@ export class Lexer {
       token = this._determineNextReal();
     }
     if (token !== null) {
-      this.index += token.str.length;
+      this.index = token.endIndex;
+    } else {
+      this.index = this.str.length;
     }
     return token;
   }

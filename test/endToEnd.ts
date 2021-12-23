@@ -149,10 +149,12 @@ describe('bml', function() {
   });
 
   it('allows escaping open braces', function() {
+    expect(bml('\\{}')).toBe('{}\n');
     expect(bml('Foo \\{ (test), (test2) } bar')).toBe('Foo { (test), (test2) } bar\n');
   });
 
   it('allows escaping open square brackets', function() {
+    expect(bml('\\[[]]')).toBe('[[]]\n')
     expect(bml('Foo \\[[{ (test) }]] bar')).toBe('Foo [[test]] bar\n');
   });
 

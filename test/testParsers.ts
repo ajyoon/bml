@@ -358,7 +358,8 @@ describe('parseMatchers', function() {
     let lexer = new Lexer(testString);
     let result = parseMatchers(lexer);
     expect(result).toEqual([/test/y]);
-    expect(lexer.peek()).toEqual(new Token(TokenType.KW_AS, testString.indexOf('as'), 'as'));
+    let idx = testString.indexOf('as');
+    expect(lexer.peek()).toEqual(new Token(TokenType.KW_AS, idx, idx + 2, 'as'));
   });
 
   it('parses a single simple regex matcher', function() {
@@ -366,7 +367,8 @@ describe('parseMatchers', function() {
     let lexer = new Lexer(testString);
     let result = parseMatchers(lexer);
     expect(result).toEqual([/test/y]);
-    expect(lexer.peek()).toEqual(new Token(TokenType.KW_AS, testString.indexOf('as'), 'as'));
+    let idx = testString.indexOf('as');
+    expect(lexer.peek()).toEqual(new Token(TokenType.KW_AS, idx, idx + 2, 'as'));
   });
 
   it('parses a regex matcher with escaped chars', function() {
@@ -377,7 +379,7 @@ describe('parseMatchers', function() {
     let lexer = new Lexer(testString);
     let result = parseMatchers(lexer);
     expect(result).toEqual([/space \s and escaped \/ slash!/y]);
-    expect(lexer.peek()).toEqual(new Token(TokenType.KW_AS, 33, 'as'));
+    expect(lexer.peek()).toEqual(new Token(TokenType.KW_AS, 33, 35, 'as'));
   });
 
   it('parses multiple matchers', function() {
@@ -385,7 +387,8 @@ describe('parseMatchers', function() {
     let lexer = new Lexer(testString);
     let result = parseMatchers(lexer);
     expect(result).toEqual([/test/y, /test2/y]);
-    expect(lexer.peek()).toEqual(new Token(TokenType.KW_AS, testString.indexOf('as'), 'as'));
+    let idx = testString.indexOf('as');
+    expect(lexer.peek()).toEqual(new Token(TokenType.KW_AS, idx, idx + 2, 'as'));
   });
 });
 
@@ -490,8 +493,7 @@ describe('parseReplacements', function() {
     let testString = '(test) (part of next rule)';
     let lexer = new Lexer(testString);
     expect(() => {
-      let result = parseReplacements(lexer, false);
-      console.log(result);
+      parseReplacements(lexer, false);
     }).toThrowError(BMLSyntaxError);
   });
 });

@@ -5,7 +5,7 @@ const Token = require('../src/token.ts').Token;
 
 describe('Token', function() {
   it('has a useful toString', function() {
-    let token = new Token(TokenType.TEXT, 0, 'test');
-    expect(token.toString()).toBe('Token{tokenType: TEXT, index: 0, string: \'test\'}');
+    let token = new Token(TokenType.TEXT, 0, 4, 'test');
+    expect(token.toString()).toBe('Token{tokenType: TEXT, index: 0, endIndex: 4, string: \'test\'}');
   });
 });
