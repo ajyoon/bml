@@ -135,7 +135,7 @@ export function parseMatchers(lexer: Lexer): RegExp[] {
       case TokenType.WHITESPACE:
       case TokenType.NEW_LINE:
         break;
-      case TokenType.KW_AS:
+      case TokenType.ARROW:
         return matchers;
       case TokenType.SLASH:
         if (acceptMatcher) {
@@ -307,8 +307,8 @@ export function parseReplacements(lexer: Lexer, forRule: boolean): Replacer {
 
 export function parseRule(lexer: Lexer): Rule {
   let matchers = parseMatchers(lexer);
-  if (lexer.nextNonWhitespace()?.tokenType !== TokenType.KW_AS) {
-    throw new BMLSyntaxError('matchers must be followed with keyword "as"',
+  if (lexer.nextNonWhitespace()?.tokenType !== TokenType.ARROW) {
+    throw new BMLSyntaxError('matchers must be followed by an arrow (->)',
       lexer.str, lexer.index);
   }
   if (lexer.nextNonWhitespace()?.tokenType !== TokenType.OPEN_BRACE) {

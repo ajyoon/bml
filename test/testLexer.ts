@@ -145,12 +145,6 @@ describe('Lexer', function() {
     expect(lexer.next()).toBeNull();
   });
 
-  it('tokenizes the keyword "as"', function() {
-    let lexer = new Lexer('as');
-    expect(lexer.next()).toEqual(new Token(TokenType.KW_AS, 0, 2, 'as'));
-    expect(lexer.next()).toBeNull();
-  });
-
   it('tokenizes the keyword "call"', function() {
     let lexer = new Lexer('call');
     expect(lexer.next()).toEqual(new Token(TokenType.KW_CALL, 0, 4, 'call'));

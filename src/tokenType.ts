@@ -20,7 +20,6 @@ export enum TokenType {
   AT = 'AT',
   PIPE = 'PIPE',
   ARROW = 'ARROW',
-  KW_AS = 'KW_AS',
   KW_CALL = 'KW_CALL',
   KW_EVAL = 'KW_EVAL',
   KW_MODE = 'KW_MODE',

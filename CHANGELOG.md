@@ -1,5 +1,9 @@
 # Changelog
 
+### 0.0.33: BREAKING CHANGE
+* Change the `as` keyword used in mode rules to the arrow `->` used in
+  reference mappings.
+
 ### 0.0.32:
 * Add validations to eval-proided fields.
 * Fix several bugs around escape sequences, including escaped braces

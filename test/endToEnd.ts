@@ -31,7 +31,7 @@ describe('bml', function() {
   it('can process recursive rule choices', function() {
     let testString =
       `mode test {
-            (recurse!) as {(just kidding) 50, (outer {(inner 1), (inner 2)}) 50}
+            (recurse!) -> {(just kidding) 50, (outer {(inner 1), (inner 2)}) 50}
         }
         {use test}
         recurse!
@@ -48,7 +48,7 @@ describe('bml', function() {
   it('respects the active mode on recursively rendered text', function() {
     let testString =
       `mode test {
-            (foo) as {(bar) 100}
+            (foo) -> {(bar) 100}
         }
         {use test}
         {(foo)}
@@ -179,7 +179,7 @@ inner text /* a block comment inside a choice */
   it('respects literal blocks', function() {
     let testString = `
         mode testMode {
-            (foo) as {(bar)}
+            (foo) -> {(bar)}
         }
         {use testMode}
         [[foo {(literal text should not interpreted)}]]

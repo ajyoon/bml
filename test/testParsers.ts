@@ -144,9 +144,9 @@ describe('parseMode', function() {
     let testString =
       `mode test {
              // some comments
-             (bml) as {(BML), match}
+             (bml) -> {(BML), match}
              // more comments
-             /javascript/ as {(Javascript) 30, (JS) 10,
+             /javascript/ -> {(Javascript) 30, (JS) 10,
                  (js) 10, match}
              // more comments
         }`;
@@ -208,7 +208,7 @@ describe('parsePrelude', function() {
 
 describe('parseRule', function() {
   it('can parse a one-to-one rule', function() {
-    let testString = '(x) as {(y)}';
+    let testString = '(x) -> {(y)}';
     let lexer = new Lexer(testString);
     let rule = parseRule(lexer);
     expect(lexer.index).toBe(testString.length);
@@ -216,13 +216,13 @@ describe('parseRule', function() {
   });
 
   it('does not allow identifiers in replacers', function() {
-    let testString = '(x) as {MisplacedTestIdentifier: (y)}';
+    let testString = '(x) -> {MisplacedTestIdentifier: (y)}';
     let lexer = new Lexer(testString);
     expect(() => parseRule(lexer)).toThrowError(BMLSyntaxError);
   });
 
   it('maps `match` keyword replacers to no-ops', function() {
-    let testString = '(a) as {(b), match 40}';
+    let testString = '(a) -> {(b), match 40}';
     let lexer = new Lexer(testString);
     let rule = parseRule(lexer);
     expect(lexer.index).toBe(testString.length);
@@ -233,7 +233,7 @@ describe('parseRule', function() {
   });
 
   it('Errors if multiple `match` replacers are used', function() {
-    let testString = '(x) as {match, match 50}';
+    let testString = '(x) -> {match, match 50}';
     let lexer = new Lexer(testString);
     expect(() => parseRule(lexer)).toThrowError(BMLSyntaxError);
   });
@@ -354,41 +354,41 @@ describe('parseInlineCommand', function() {
 
 describe('parseMatchers', function() {
   it('parsers a single matcher', function() {
-    let testString = '(test) as';
+    let testString = '(test) ->';
     let lexer = new Lexer(testString);
     let result = parseMatchers(lexer);
     expect(result).toEqual([/test/y]);
-    let idx = testString.indexOf('as');
-    expect(lexer.peek()).toEqual(new Token(TokenType.KW_AS, idx, idx + 2, 'as'));
+    let idx = testString.indexOf('->');
+    expect(lexer.peek()).toEqual(new Token(TokenType.ARROW, idx, idx + 2, '->'));
   });
 
   it('parses a single simple regex matcher', function() {
-    let testString = '/test/ as';
+    let testString = '/test/ ->';
     let lexer = new Lexer(testString);
     let result = parseMatchers(lexer);
     expect(result).toEqual([/test/y]);
-    let idx = testString.indexOf('as');
-    expect(lexer.peek()).toEqual(new Token(TokenType.KW_AS, idx, idx + 2, 'as'));
+    let idx = testString.indexOf('->');
+    expect(lexer.peek()).toEqual(new Token(TokenType.ARROW, idx, idx + 2, '->'));
   });
 
   it('parses a regex matcher with escaped chars', function() {
     // Escaping in JS string literals gets confusing, but I've
-    // verified this is how `/\s escaped \/ slash!/ as` read from
+    // verified this is how `/\s escaped \/ slash!/ ->` read from
     // file is written in a string.
-    let testString = '/space \\s and escaped \\/ slash!/ as';
+    let testString = '/space \\s and escaped \\/ slash!/ ->';
     let lexer = new Lexer(testString);
     let result = parseMatchers(lexer);
     expect(result).toEqual([/space \s and escaped \/ slash!/y]);
-    expect(lexer.peek()).toEqual(new Token(TokenType.KW_AS, 33, 35, 'as'));
+    expect(lexer.peek()).toEqual(new Token(TokenType.ARROW, 33, 35, '->'));
   });
 
   it('parses multiple matchers', function() {
-    let testString = '(test), /test2/ as';
+    let testString = '(test), /test2/ ->';
     let lexer = new Lexer(testString);
     let result = parseMatchers(lexer);
     expect(result).toEqual([/test/y, /test2/y]);
-    let idx = testString.indexOf('as');
-    expect(lexer.peek()).toEqual(new Token(TokenType.KW_AS, idx, idx + 2, 'as'));
+    let idx = testString.indexOf('->');
+    expect(lexer.peek()).toEqual(new Token(TokenType.ARROW, idx, idx + 2, '->'));
   });
 });
 

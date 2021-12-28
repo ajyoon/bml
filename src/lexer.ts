@@ -106,9 +106,6 @@ export class Lexer {
     } else if (this.str.slice(this.index, this.index + 2) === '->') {
       tokenType = TokenType.ARROW;
       tokenString = '->';
-    } else if (this.str.slice(this.index, this.index + 2) === 'as') {
-      tokenType = TokenType.KW_AS;
-      tokenString = 'as';
     } else if (this.str.slice(this.index, this.index + 4) === 'call') {
       tokenType = TokenType.KW_CALL;
       tokenString = 'call';
