@@ -61,9 +61,6 @@ export class Lexer {
     } else if (this.str[this.index] === '/') {
       tokenType = TokenType.SLASH;
       tokenString = '/';
-    } else if (this.str[this.index] === '*') {
-      tokenType = TokenType.ASTERISK;
-      tokenString = '*';
     } else if (this.str[this.index] === '\'') {
       tokenType = TokenType.SINGLE_QUOTE;
       tokenString = '\'';

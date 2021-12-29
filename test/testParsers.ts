@@ -382,6 +382,14 @@ describe('parseMatchers', function() {
     expect(lexer.peek()).toEqual(new Token(TokenType.ARROW, 33, 35, '->'));
   });
 
+  it('parses regex matchers ending with asterisks', function() {
+    let testString = '/test*/ ->';
+    let lexer = new Lexer(testString);
+    let result = parseMatchers(lexer);
+    expect(result).toEqual([/test*/y]);
+    expect(lexer.peek()).toEqual(new Token(TokenType.ARROW, 8, 10, '->'));
+  });
+
   it('parses multiple matchers', function() {
     let testString = '(test), /test2/ ->';
     let lexer = new Lexer(testString);

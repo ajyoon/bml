@@ -55,12 +55,6 @@ describe('Lexer', function() {
     expect(lexer.next()).toBeNull();
   });
 
-  it('tokenizes asterisks', function() {
-    let lexer = new Lexer('*');
-    expect(lexer.next()).toEqual(new Token(TokenType.ASTERISK, 0, 1, '*'));
-    expect(lexer.next()).toBeNull();
-  });
-
   it('tokenizes single quotes', function() {
     let lexer = new Lexer('\'');
     expect(lexer.next()).toEqual(new Token(TokenType.SINGLE_QUOTE, 0, 1, '\''));

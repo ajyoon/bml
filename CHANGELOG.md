@@ -1,5 +1,8 @@
 # Changelog
 
+### 0.0.34:
+* Fix bug breaking regexp matchers ending with asterisks.
+
 ### 0.0.33: BREAKING CHANGE
 * Change the `as` keyword used in mode rules to the arrow `->` used in
   reference mappings.

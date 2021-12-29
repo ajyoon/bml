@@ -472,9 +472,12 @@ export function parseRegexMatcher(lexer: Lexer): RegExp {
   let stringLiteral = '';
   let token;
   while ((token = lexer.next()) !== null) {
-    switch (token.tokenType) {
-      case TokenType.SLASH:
-        return new RegExp(stringLiteral, 'y');
+    if (token.tokenType === TokenType.SLASH) {
+      return new RegExp(stringLiteral, 'y');
+    } else if (token.tokenType === TokenType.CLOSE_BLOCK_COMMENT) {
+      // A funny edge case where regexps ending with an asterisk are
+      // tokenized as close-block-comments.
+      return new RegExp(stringLiteral + '*', 'y');
     }
     stringLiteral += token.str;
   }
