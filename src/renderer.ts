@@ -140,7 +140,8 @@ export function renderText(str: string, startIndex: number, modes: ModeMap,
           }
           let renderedReplacement;
           if (replacement instanceof FunctionCall) {
-            renderedReplacement = replacement.execute(userDefs, [], str, token.index);
+            let inlineCall = { input: str, index: token.index };
+            renderedReplacement = replacement.execute(userDefs, inlineCall);
           } else if (typeof replacement === 'symbol') {
             throw new IllegalStateError('No-op replacers should never come from inline choices');
           } else {
@@ -180,7 +181,7 @@ export function renderText(str: string, startIndex: number, modes: ModeMap,
               if (currentMatch !== null) {
                 replacement = currentRule.replacer.call().replacement;
                 if (replacement instanceof FunctionCall) {
-                  out += replacement.execute(userDefs, currentMatch, str, token.index);
+                  out += replacement.execute(userDefs, currentMatch);
                 } else if (typeof replacement === 'symbol') { // no-op
                   out += currentMatch[0];
                 } else {

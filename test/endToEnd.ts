@@ -28,6 +28,48 @@ describe('bml', function() {
     expect(result).toBe('Foo!\n');
   });
 
+  it('passes the raw regexp match to mode-executed custom functions', function() {
+    let testString = `
+        eval {
+            provide({
+                foo: (match, inlineCall) => {
+                    return \`
+match.index: \${ match.index }
+match.input: \${ match.input }
+match[0]: \${ match[0] }
+                    \`;
+                }
+            });
+        }
+        mode test {
+            (test) -> {call foo}
+        }
+        {use test}
+        test`;
+    let result = bml(testString);
+    expect(result).toBe(
+      'Match.index: 354\nmatch.input:' + testString + '\nmatch[0]: test\n');
+  });
+
+  it('binds and passes inline call params to custom functions', function() {
+    let testString = `
+        eval {
+            provide({
+                foo: (match, inlineCall) => {
+                    return \`
+match: \${ match }
+inlineCall.index: \${ inlineCall.index }
+inlineCall.input: \${ inlineCall.input }
+                    \`;
+                }
+            });
+        }
+        {call foo}`;
+    let result = bml(testString);
+    expect(result).toBe(
+      'Match: null\ninlineCall.index: 286\ninlineCall.input:' + testString + '\n');
+  })
+
   it('can process recursive rule choices', function() {
     let testString =
       `mode test {

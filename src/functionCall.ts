@@ -5,6 +5,16 @@ import {
 import { UserDefs } from './userDefs';
 
 
+export type InlineCall = {
+  input: string,
+  index: number
+};
+
+
+function isRegExpMatchArray(arg: RegExpMatchArray | InlineCall): arg is RegExpMatchArray {
+  return (arg as RegExpMatchArray)[0] !== undefined;
+}
+
 export class FunctionCall {
   functionName: string;
 
@@ -16,13 +26,25 @@ export class FunctionCall {
     return `FunctionCall('${this.functionName}')`;
   }
 
-  execute(userDefs: UserDefs, match: string[], documentString: string, charIndex: number): string {
+  execute(userDefs: UserDefs, arg: RegExpMatchArray | InlineCall): string {
     let func = userDefs.funcs[this.functionName];
-    if (typeof func === 'undefined') {
-      throw new FunctionNotFoundError(this.functionName, documentString, charIndex);
-    } else if (!(func instanceof Function)) {
-      throw new NotAFunctionError(this.functionName, documentString, charIndex);
+    let input, index;
+    let match = null;
+    let inlineCall = null;
+    if (isRegExpMatchArray(arg)) {
+      match = arg;
+      input = arg.input!;
+      index = arg.index!;
+    } else {
+      inlineCall = arg;
+      input = arg.input;
+      index = arg.index;
     }
-    return func(match || [''], documentString, charIndex);
+    if (typeof func === 'undefined') {
+      throw new FunctionNotFoundError(this.functionName, input, index);
+    } else if (!(func instanceof Function)) {
+      throw new NotAFunctionError(this.functionName, input, index);
+    }
+    return func(match, inlineCall);
   }
 }

@@ -1,6 +1,20 @@
 # Changelog
 
-### 0.0.34:
+### 0.0.34: BREAKING CHANGE
+* Change the signature for custom JS functions. The new signature is:
+
+  ```ts
+  (match: RegExpMatchArray | null,
+   inlineCall: { input: string, index: number } | null) -> string
+  ``` 
+
+  This corrects old awkwardness in the signatures by making it unclear
+  from which context functions were being called. It also corrects an
+  old redundancy where the `match` object was always a regexp match
+  array, which already includes the input and match
+  index. Furthermore, this provides a natural location for potential
+  future arguments that could be applied to inline calls.
+
 * Fix bug breaking regexp matchers ending with asterisks.
 
 ### 0.0.33: BREAKING CHANGE
