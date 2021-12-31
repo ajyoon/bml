@@ -6,7 +6,7 @@ import { FunctionNotFoundError } from '../src/errors';
 
 const someInput = { input: '', index: 0 }
 
-function runBmlCustomFunc(body, arg: RegExpMatchArray | InlineCall) {
+function runBmlCustomFunc(body: string, arg: RegExpMatchArray | InlineCall) {
   let src = `
     function assert(obj) {
         if (!obj) {
