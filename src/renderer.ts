@@ -50,6 +50,11 @@ function resolveBackReference(choiceResultMap: ChoiceResultMap, backReference: B
   return backReference.fallback;
 }
 
+type RenderTextResult = {
+  activeMode: Mode | null,
+  output: string
+}
+
 /**
  * The main loop which processes the text component of a bml document.
  *
@@ -57,13 +62,12 @@ function resolveBackReference(choiceResultMap: ChoiceResultMap, backReference: B
  * whenever a matching string is encountered. Rules are processed in
  * the order they are listed in the active mode's declaration.
  */
-export function renderText(str: string, startIndex: number, modes: ModeMap,
+function renderText(str: string, startIndex: number, modes: ModeMap,
   activeMode: Mode | null, userDefs: UserDefs,
   choiceResultMap: ChoiceResultMap | null, stackDepth: number
-): string {
+): RenderTextResult {
   // TODO this function is way too complex and badly needs refactor
   choiceResultMap = choiceResultMap || new Map();
-  activeMode = activeMode || null;
   let inVisualLineBreak = false;
   let inLiteralBlock = false;
   let out = '';
@@ -147,8 +151,10 @@ export function renderText(str: string, startIndex: number, modes: ModeMap,
           } else {
             // To handle nested choices and to run rules over chosen text,
             // we recursively render the chosen text.
-            renderedReplacement = renderText(
+            let recursiveRenderResult = renderText(
               replacement, 0, modes, activeMode, userDefs, choiceResultMap, stackDepth + 1);
+            renderedReplacement = recursiveRenderResult.output;
+            activeMode = recursiveRenderResult.activeMode;
           }
           if (!(replacer && replacer.isSilent)) {
             out += renderedReplacement;
@@ -187,9 +193,10 @@ export function renderText(str: string, startIndex: number, modes: ModeMap,
                 } else {
                   // To handle nested choices and to run rules over replaced text,
                   // we recursively render the chosen text.
-                  let renderedReplacement = renderText(
+                  let recursiveRenderResult = renderText(
                     replacement, 0, modes, activeMode, userDefs, choiceResultMap, stackDepth + 1);
-                  out += renderedReplacement;
+                  out += recursiveRenderResult.output;
+                  activeMode = recursiveRenderResult.activeMode;
                 }
                 lexer.overrideIndex(lexer.index + currentMatch[0].length);
                 foundMatch = true;
@@ -211,7 +218,7 @@ export function renderText(str: string, startIndex: number, modes: ModeMap,
     lexer.next();  // Consume token
   }
 
-  return out;
+  return { activeMode, output: out };
 }
 
 export function render(bmlDocumentString: string, renderSettings?: RenderSettings): string {
@@ -238,7 +245,7 @@ export function render(bmlDocumentString: string, renderSettings?: RenderSetting
   userDefs.settings = mergeSettings(defaultBMLSettings, userDefs.settings);
 
   // Main render pass
-  let output = renderText(
+  let { output } = renderText(
     bmlDocumentString, preludeEndIndex, modes, null, userDefs, null, 0);
 
   // Post-processing

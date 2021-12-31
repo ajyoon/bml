@@ -15,6 +15,8 @@
   index. Furthermore, this provides a natural location for potential
   future arguments that could be applied to inline calls.
 
+* Make mode changes inside recursively rendered text bubble up.
+
 * Fix bug breaking regexp matchers ending with asterisks.
 
 ### 0.0.33: BREAKING CHANGE

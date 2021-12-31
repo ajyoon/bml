@@ -98,6 +98,17 @@ inlineCall.input: \${ inlineCall.input }
     expect(bml(testString).trim()).toBe('Bar');
   });
 
+  it('allows mode changes inside recursively rendered text to bubble up', function() {
+    let testString =
+      `mode test {
+            (foo) -> {(bar) 100}
+        }
+        {({use test})}
+        foo
+        `;
+    expect(bml(testString).trim()).toBe('Bar');
+  });
+
   it('can process recursive inline choices', function() {
     let testString = 'hello {(simple), ({(very ), ()}recursive)} world!';
     let result = bml(testString);
