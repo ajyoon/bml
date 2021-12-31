@@ -1,5 +1,4 @@
 import * as evalApi from './evalApi';
-import { DocumentSettings } from './settings';
 import { UserDefs, validateAndBuildUserDefs } from './userDefs';
 
 const evalFuncTemplate = `

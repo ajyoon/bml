@@ -1,7 +1,6 @@
 import expect from 'expect';
-const fs = require('fs');
 
-const mergeSettings = require('../src/settings.ts').mergeSettings;
+import { mergeSettings } from '../src/settings';
 
 
 describe('mergeSettings', function() {

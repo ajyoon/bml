@@ -17,6 +17,7 @@ import {
   UnknownTransformError,
   BMLSyntaxError,
   BMLDuplicatedRefIndexError,
+  ModeNameError,
 } from '../src/errors';
 
 import {
@@ -140,6 +141,11 @@ describe('parseMode', function() {
     expect(() => parseMode(lexer)).toThrowError(BMLSyntaxError);
   });
 
+  it('fails when special mode name "none" is used', function() {
+    let lexer = new Lexer('mode none {}');
+    expect(() => parseMode(lexer)).toThrowError(ModeNameError);
+  });
+
   it('can parse a mixture of literal and regex matcher rules', function() {
     let testString =
       `mode test {
@@ -189,7 +195,6 @@ describe('parsePrelude', function() {
   });
 
   it('recognizes mode blocks and passes them to parseMode', function() {
-    let modeEnd = 'MODE END TEST MARKER';
     let testString = `mode firstMode {
                           // do something
                       }
@@ -570,7 +575,6 @@ describe('parseBackReference', function() {
   }
 
   it('throws an error when invalid syntax is used', function() {
-    let testString = '@TestRef: 0 -> (foo), 1 -> call someFunc, 2 -> (bar)}';
     testParseStrToGiveSyntaxError('@TestRef: aaskfj');
     testParseStrToGiveSyntaxError('@TestRef: 0 - > (foo)');
     testParseStrToGiveSyntaxError('@TestRef: 0 -> {foo}');

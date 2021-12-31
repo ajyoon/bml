@@ -14,6 +14,7 @@ import {
   JavascriptSyntaxError,
   BMLSyntaxError,
   BMLDuplicatedRefIndexError,
+  ModeNameError,
 } from './errors';
 import { escapeRegExp } from './stringUtils';
 
@@ -333,7 +334,12 @@ export function parseMode(lexer: Lexer): Mode {
     throw new BMLSyntaxError('mode name is absent or invalid',
       lexer.str, lexer.index);
   }
-  let mode = new Mode(modeNameMatch[2]);
+  let modeName = modeNameMatch[2];
+  if (modeName === 'none') {
+    throw new ModeNameError('none', 'It shadows the built-in "none" pseudo-mode.',
+      lexer.str, lexer.index);
+  }
+  let mode = new Mode(modeName);
   lexer.overrideIndex(lexer.index + modeNameMatch[1].length);
 
   if (lexer.peek()?.tokenType !== TokenType.OPEN_BRACE) {

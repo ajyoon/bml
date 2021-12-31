@@ -68,6 +68,16 @@ export class UnknownModeError extends Error {
   }
 }
 
+export class ModeNameError extends Error {
+  constructor(modeName: string, message: string, bmlDoc: string, errorIndex: number) {
+    let msg = `Mode name '${modeName}' is not allowed. ${message} at `
+      + stringUtils.lineColumnString(bmlDoc, errorIndex);
+    super(msg);
+    this.name = 'ModeNameError';
+    Object.setPrototypeOf(this, ModeNameError.prototype);
+  }
+}
+
 export class UnknownTransformError extends Error {
   constructor(bmlDoc: string, errorIndex: number) {
     let msg = 'Unknown transform at '

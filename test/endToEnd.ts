@@ -90,24 +90,35 @@ inlineCall.input: \${ inlineCall.input }
   it('respects the active mode on recursively rendered text', function() {
     let testString =
       `mode test {
-            (foo) -> {(bar) 100}
-        }
-        {use test}
-        {(foo)}
-        `;
+           (foo) -> {(bar)}
+       }
+       {use test}
+       {(foo)}
+       `;
     expect(bml(testString).trim()).toBe('Bar');
   });
 
   it('allows mode changes inside recursively rendered text to bubble up', function() {
     let testString =
       `mode test {
-            (foo) -> {(bar) 100}
-        }
-        {({use test})}
-        foo
-        `;
+           (foo) -> {(bar)}
+       }
+       {({use test})}
+       foo
+       `;
     expect(bml(testString).trim()).toBe('Bar');
   });
+
+  it('allows deactivating modes', function() {
+    let testString =
+      `mode test {
+           (foo) -> {(bar)}
+       }
+       {use test} foo {use none} foo
+       `;
+    expect(bml(testString).trim()).toBe('Bar foo');
+  });
+
 
   it('can process recursive inline choices', function() {
     let testString = 'hello {(simple), ({(very ), ()}recursive)} world!';

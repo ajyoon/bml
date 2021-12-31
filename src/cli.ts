@@ -3,9 +3,9 @@ import fs from 'fs';
 import process from 'process';
 import { RenderSettings } from './settings';
 
-// Seems like these need to use `require` for "reasons"
-const bml = require('./bml.ts');
 const packageJson = require('../package.json');
+// Seems this needs to use `require` to bundle correctly. No idea why.
+const bml = require('./bml.ts');
 
 const SEED_RE = /^-?\d+$/;
 

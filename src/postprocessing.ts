@@ -88,7 +88,8 @@ export function punctuationCleanup(text: string): string {
 // \p{Ll} matches unicode lowercase letters which have uppercase variants.
 const INCORRECT_CAPS_RE = /([.!?]\s+|^\s*)(\p{Ll})/gu;
 
-function correctCaps(match: string, p1: string, p2: string) {
+// Conforms to `text.replace` replacer function interface
+function correctCaps(_match: string, p1: string, p2: string) {
   return p1 + p2.toUpperCase();
 }
 

@@ -171,6 +171,8 @@ function renderText(str: string, startIndex: number, modes: ModeMap,
           lexer.overrideIndex(parseUseResult.blockEndIndex);
           if (modes.hasOwnProperty(parseUseResult.modeName)) {
             activeMode = modes[parseUseResult.modeName];
+          } else if (parseUseResult.modeName === 'none') {
+            activeMode = null;
           } else {
             throw new UnknownModeError(parseUseResult.modeName, str, token.index);
           }

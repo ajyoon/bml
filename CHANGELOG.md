@@ -14,9 +14,10 @@
   array, which already includes the input and match
   index. Furthermore, this provides a natural location for potential
   future arguments that could be applied to inline calls.
-
 * Make mode changes inside recursively rendered text bubble up.
-
+* Allow deactivating the active mode using `{use none}`. The mode name
+  `none` is now reserved and BML will throw a `ModeNameError` if a
+  document tries to shadow it.
 * Fix bug breaking regexp matchers ending with asterisks.
 
 ### 0.0.33: BREAKING CHANGE

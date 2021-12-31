@@ -1,8 +1,8 @@
 import expect from 'expect';
 
-const WeightedChoice = require('../src/weightedChoice.ts').WeightedChoice;
-const noOp = require('../src/noOp.ts');
-const FunctionCall = require('../src/functionCall.ts').FunctionCall;
+import noOp from '../src/noOp';
+import { WeightedChoice } from '../src/weightedChoice';
+import { FunctionCall } from '../src/functionCall';
 
 describe('Replacer', function() {
   it('has a useful toString for all choice types', function() {
