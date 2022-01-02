@@ -7,7 +7,8 @@ export class Lexer {
   index: number;
   private _cachedNext: Token | null = null;
   private _newLineRe: RegExp = /\r?\n/y;
-  private _whitespaceRe: RegExp = /\s+/y;
+  private _visualNewLineRe: RegExp = /\\\r?\n/y;
+  private _whitespaceRe: RegExp = /[^\S\r\n]+/y;  // non-newline whitespace
   private _numberRe: RegExp = /(\d+(\.\d+)?)|(\.\d+)/y;
 
   constructor(str: string) {
@@ -35,14 +36,20 @@ export class Lexer {
     let tokenEndIndex = null;
     let tokenString;
     this._newLineRe.lastIndex = this.index;
+    this._visualNewLineRe.lastIndex = this.index;
     this._whitespaceRe.lastIndex = this.index;
     this._numberRe.lastIndex = this.index;
     let newLineMatch = this._newLineRe.exec(this.str);
+    let visualNewLineMatch = this._visualNewLineRe.exec(this.str);
     let whitespaceMatch = this._whitespaceRe.exec(this.str);
     let numberMatch = this._numberRe.exec(this.str);
     if (newLineMatch !== null) {
       tokenType = TokenType.NEW_LINE;
       tokenString = newLineMatch[0];
+    } else if (visualNewLineMatch !== null) {
+      tokenType = TokenType.VISUAL_NEW_LINE;
+      tokenEndIndex = visualNewLineMatch.index + visualNewLineMatch[0].length;
+      tokenString = ' ';
     } else if (whitespaceMatch !== null) {
       tokenType = TokenType.WHITESPACE;
       tokenString = whitespaceMatch[0];
@@ -156,7 +163,8 @@ export class Lexer {
     let startIndex = this.index;
     while ((token = this._determineNextRaw()) !== null) {
       if (inLineComment) {
-        if (token.tokenType === TokenType.NEW_LINE) {
+        if (token.tokenType === TokenType.NEW_LINE
+          || token.tokenType === TokenType.VISUAL_NEW_LINE) {
           inLineComment = false;
         }
       } else if (inBlockComment) {

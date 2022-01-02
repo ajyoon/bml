@@ -212,6 +212,10 @@ inlineCall.input: \${ inlineCall.input }
     expect(bml("foo\\\n      {(bar)}")).toBe('Foo bar\n');
   });
 
+  it('doesnt treat lines ending with *escaped* backslashes as visual linebreaks', function() {
+    expect(bml("foo \\\\\n  test")).toBe('Foo \\\n  test\n');
+  })
+
   it('allows escaping open braces', function() {
     expect(bml('\\{}')).toBe('{}\n');
     expect(bml('Foo \\{ (test), (test2) } bar')).toBe('Foo { (test), (test2) } bar\n');
@@ -239,6 +243,16 @@ inner text /* a block comment inside a choice */
 )}`;
     expect(bml(testString)).toBe('Outer text\ninner text\n');
   });
+
+  it('allows line comments to end with whitespace', function() {
+    let testString = '// a line comment \nregular text';
+    expect(bml(testString)).toBe('Regular text\n');
+  })
+
+  xit('allows line comments to be terminated with otherwise visual line breaks', function() {
+    let testString = 'test\n// a line comment \\\n  regular text';
+    expect(bml(testString)).toBe('Test\n regular text\n');
+  })
 
   it('respects literal blocks', function() {
     let testString = `

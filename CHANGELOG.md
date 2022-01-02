@@ -19,6 +19,9 @@
   `none` is now reserved and BML will throw a `ModeNameError` if a
   document tries to shadow it.
 * Fix bug breaking regexp matchers ending with asterisks.
+* Fix bug where line comments ending with whitespace didn't terminate
+* Fix bugs with line comments ending with backslashes, escaped
+  (literal) and not (visual line breaks.)
 
 ### 0.0.33: BREAKING CHANGE
 * Change the `as` keyword used in mode rules to the arrow `->` used in

@@ -109,15 +109,10 @@ function renderText(str: string, startIndex: number, modes: ModeMap,
       case TokenType.OPEN_DOUBLE_BRACKET:
         inLiteralBlock = true;
         break;
-      case TokenType.NEW_LINE:
-        if (out.endsWith('\\')) {
-          inVisualLineBreak = true;
-          // hackily overwrite the backslash to a space since it's for a
-          // visual line break.
-          out = out.substring(0, out.length - 1) + ' ';
-        } else {
-          out += token.str;
-        }
+      case TokenType.VISUAL_NEW_LINE:
+        inVisualLineBreak = true;
+        // Emit the visual newline's virtual whitespace repr.
+        out += token.str;
         break;
       case TokenType.OPEN_BRACE:
         chooseRe.lastIndex = token.index + 1;
