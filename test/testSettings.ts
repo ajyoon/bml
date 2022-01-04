@@ -5,17 +5,20 @@ import { mergeSettings } from '../src/settings';
 
 describe('mergeSettings', function() {
   it('should handle replacing all fields', function() {
-    let originalSettings = {
-      renderMarkdown: false,
-      contextSize: 5,
+    interface TestObj {
+      foo?: boolean;
+      bar?: number;
+    };
+    let originalSettings: TestObj = {
+      foo: true,
+      bar: 10,
     };
     let merged = mergeSettings(
       originalSettings,
       {
-        renderMarkdown: true,
-        contextSize: 1000,
+        foo: false
       });
-    expect(true).toBe(merged.renderMarkdown);
-    expect(1000).toBe(merged.contextSize);
+    expect(merged.foo).toBe(false);
+    expect(merged.bar).toBe(10);
   });
 });

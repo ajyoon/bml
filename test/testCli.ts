@@ -84,11 +84,10 @@ describe('cli', function() {
   it('supports all settings', function() {
     let path = 'foo.bml';
     let action = cli.determineAction([
-      '--seed', '123', '--no-eval', '--render-markdown', path]);
+      '--seed', '123', '--no-eval', path]);
     let expectedSettings = {
       randomSeed: 123,
       allowEval: false,
-      renderMarkdown: true,
     };
     expect(action.function).toBe(cli.readFromPath);
     expect(action.args).toEqual([path, expectedSettings]);

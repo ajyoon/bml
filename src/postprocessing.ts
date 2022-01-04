@@ -1,5 +1,3 @@
-import marked from 'marked';
-
 const BLANK_LINE_RE = /^\s*$/;
 const TRAILING_WHITESPACE_RE = /\s+$/;
 
@@ -101,8 +99,4 @@ function correctCaps(_match: string, p1: string, p2: string) {
  */
 export function capitalizationCleanup(text: string): string {
   return text.replace(INCORRECT_CAPS_RE, correctCaps);
-}
-
-export function renderMarkdown(text: string, markedSettings: object) {
-  return marked(text, markedSettings);
 }

@@ -1,6 +1,16 @@
 # Changelog
 
 ### 0.0.34: BREAKING CHANGE
+* Remove built-in markdown support. This has long been an outlier
+  feature that needlessly bloats the library bundle size for users
+  which don't need it. Users needing markdown should now pull in a
+  markdown rendering library themselves and manually run it on BML's
+  output. This results in a web bundle size reduction of ~16kb, nearly
+  a third.
+  * To exactly replicate old behavior, use `marked@0.3.19` and
+    manually plug in any markdown settings needed.
+  * The CLI `--render-markdown` flag has been removed
+  * The BML document setting `markdownSettings` has been removed
 * Change the signature for custom JS functions. The new signature is:
 
   ```ts

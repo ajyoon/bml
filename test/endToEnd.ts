@@ -272,30 +272,6 @@ inner text /* a block comment inside a choice */
     expect(firstResult).toBe(secondResult);
   });
 
-  it('only renders markdown when set to', function() {
-    let src = '# foo';
-    expect(bml(src, { renderMarkdown: true }))
-      .toBe('<h1 id="foo">foo</h1>\n');
-    expect(bml(src)).toBe('# foo\n');
-  });
-
-  it('respects markdown settings provided by user', function() {
-    let testString = `
-        eval {
-            provide({
-                settings: {
-                    markdownSettings: {
-                        smartypants: true,
-                    }
-                }
-            });
-        }
-        "testing"---
-    `;
-    let result = bml(testString, { renderMarkdown: true });
-    expect(result).toBe('<p>“testing”—</p>\n');
-  });
-
   it('cleans whitespace by default but allows disabling', function() {
     let src = `
         eval {
@@ -332,11 +308,6 @@ inner text /* a block comment inside a choice */
         }foo  . bar`;
     expect(bml(srcWithPuncCleanup)).toBe('foo.   bar');
     expect(bml(srcWithoutPuncCleanup)).toBe('foo  . bar');
-  });
-
-  it('cleans punctuation before running markdown processing', function() {
-    let src = 'foo\n\n.\n\nbar';
-    expect(bml(src, { renderMarkdown: true })).toBe('<p>Foo.</p>\n<p>Bar</p>\n');
   });
 
   it('cleans punctuation before cleaning whitespace', function() {

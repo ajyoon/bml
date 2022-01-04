@@ -1,12 +1,5 @@
 export interface DocumentSettings {
   /**
-   * Settings to pass to `marked`
-   *  
-   * @see {@link https://github.com/markedjs/marked/blob/v0.3.19/docs/USING_ADVANCED.md}
-   */
-  markdownSettings?: object | null;
-
-  /**
    * Whether to perform a post-processing step cleaning up whitespace.
    */
   whitespaceCleanup?: boolean | null;
@@ -47,17 +40,12 @@ export interface RenderSettings {
    * This can be useful for security purposes.
    */
   allowEval?: boolean | null;
-  /**
-   * Whether to render the output document as markdown to HTML.
-   */
-  renderMarkdown?: boolean | null;
 }
 
 /**
  * Default settings. These are passed in to the main bml rendering function.
  */
 export const defaultBMLSettings: DocumentSettings = {
-  markdownSettings: {},
   whitespaceCleanup: true,
   punctuationCleanup: true,
   capitalizationCleanup: true,
@@ -67,7 +55,6 @@ export const defaultBMLSettings: DocumentSettings = {
 export const defaultRenderSettings: RenderSettings = {
   randomSeed: null,
   allowEval: true,
-  renderMarkdown: false,
 };
 
 /**

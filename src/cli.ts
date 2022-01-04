@@ -13,11 +13,9 @@ export const HELP_SWITCHES = ['-h', '--h', '-help', '--help'];
 export const VERSION_SWITCHES = ['-v', '--version'];
 export const SEED_SWITCHES = ['--seed'];
 export const NO_EVAL_SWITCHES = ['--no-eval'];
-export const RENDER_MARKDOWN_SWITCHES = ['--render-markdown'];
 export const ALL_SWITCHES = ([] as string[]).concat(
   HELP_SWITCHES, VERSION_SWITCHES,
-  SEED_SWITCHES, NO_EVAL_SWITCHES,
-  RENDER_MARKDOWN_SWITCHES);
+  SEED_SWITCHES, NO_EVAL_SWITCHES);
 
 export type BMLArgs = { bmlSource: string, settings: RenderSettings };
 export type Action = { function: Function, args: any[] };
@@ -67,7 +65,6 @@ export function printHelp() {
 
     ${SEED_SWITCHES} INTEGER             set the random seed for the bml render
     ${NO_EVAL_SWITCHES}                  disable Javascript evaluation
-    ${RENDER_MARKDOWN_SWITCHES}          render the document as markdown to HTML
 
   Source Code at https://github.com/ajyoon/bml
   Report Bugs at https://github.com/ajyoon/bml/issues
@@ -117,7 +114,6 @@ export function determineAction(args: string[]): Action {
 
   let file = null;
   let noEval = false;
-  let renderMarkdown = false;
   let seed = null;
 
   for (let arg of args) {
@@ -141,8 +137,6 @@ export function determineAction(args: string[]): Action {
       };
     } else if (NO_EVAL_SWITCHES.includes(arg)) {
       noEval = true;
-    } else if (RENDER_MARKDOWN_SWITCHES.includes(arg)) {
-      renderMarkdown = true;
     } else if (SEED_SWITCHES.includes(arg)) {
       expectSeed = true;
     } else {
@@ -162,7 +156,6 @@ export function determineAction(args: string[]): Action {
   let settings = {
     randomSeed: seed,
     allowEval: !noEval,
-    renderMarkdown: renderMarkdown,
   };
 
   if (file === null) {
