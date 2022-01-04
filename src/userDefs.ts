@@ -35,7 +35,6 @@ function validateSettingField(settings: RawUserDefs, field: string, expectedType
 function validateUserDefs(userDefs: RawUserDefs) {
   let settings = userDefs['settings'];
   if (settings) {
-    validateSettingField(settings, 'markdownSettings', 'object');
     validateSettingField(settings, 'whitespaceCleanup', 'boolean');
     validateSettingField(settings, 'punctuationCleanup', 'boolean');
     validateSettingField(settings, 'capitalizationCleanup', 'boolean');

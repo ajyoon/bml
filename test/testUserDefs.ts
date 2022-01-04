@@ -12,14 +12,6 @@ describe('validateAndBuildUserDefs', function() {
     });
   });
 
-  it('errors on malformed markdownSettings', function() {
-    expect(() => validateAndBuildUserDefs({
-      settings: {
-        markdownSettings: 0
-      }
-    })).toThrow(EvalProvidedSettingsError);
-  });
-
   it('errors on malformed whitespaceCleanup', function() {
     expect(() => validateAndBuildUserDefs({
       settings: {
