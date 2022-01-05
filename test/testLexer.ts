@@ -265,16 +265,12 @@ describe('Lexer', function() {
     expect(lexer.next()).toBeNull();
   });
 
-  it('automatically skips line comments', function() {
+  it('line comments emit NEW_LINE', function() {
     let lexer = new Lexer('//foo\ntest');
+    expect(lexer.peek()).toEqual(new Token(TokenType.NEW_LINE, 5, 6, '\n'));
+    expect(lexer.next()).toEqual(new Token(TokenType.NEW_LINE, 5, 6, '\n'));
     expect(lexer.peek()).toEqual(new Token(TokenType.TEXT, 6, 7, 't'));
     expect(lexer.next()).toEqual(new Token(TokenType.TEXT, 6, 7, 't'));
-  });
-
-  it('skips over sequential line comments', function() {
-    let lexer = new Lexer('//foo\n//bar\ntest');
-    expect(lexer.peek()).toEqual(new Token(TokenType.TEXT, 12, 13, 't'));
-    expect(lexer.next()).toEqual(new Token(TokenType.TEXT, 12, 13, 't'));
   });
 
   it('converts block comments into a single white space', function() {

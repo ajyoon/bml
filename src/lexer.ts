@@ -166,6 +166,7 @@ export class Lexer {
         if (token.tokenType === TokenType.NEW_LINE
           || token.tokenType === TokenType.VISUAL_NEW_LINE) {
           inLineComment = false;
+          return new Token(TokenType.NEW_LINE, token.index, token.endIndex, token.str);
         }
       } else if (inBlockComment) {
         if (token.tokenType === TokenType.CLOSE_BLOCK_COMMENT) {

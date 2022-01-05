@@ -241,8 +241,13 @@ outer text
 // Comments can include string/command delimiters too )}
 inner text /* a block comment inside a choice */
 )}`;
-    expect(bml(testString)).toBe('Outer text\ninner text\n');
+    expect(bml(testString)).toBe('Outer text\n\ninner text\n');
   });
+
+  it('allows line comments at end of lines', function() {
+    let testString = 'foo// comment\nbar';
+    expect(bml(testString)).toBe('Foo\nbar\n');
+  })
 
   it('allows line comments to end with whitespace', function() {
     let testString = '// a line comment \nregular text';

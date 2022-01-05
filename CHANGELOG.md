@@ -1,5 +1,9 @@
 # Changelog
 
+### 0.0.35:
+* Make line comments emit a single newline. This fixes the behavior of
+  lines which end in line comments. like `foo // comment\n`
+
 ### 0.0.34: BREAKING CHANGE
 * Remove built-in markdown support. This has long been an outlier
   feature that needlessly bloats the library bundle size for users
