@@ -1,6 +1,8 @@
 import { Token } from './token';
 import { TokenType } from './tokenType';
 
+const ANY_WHITESPACE_RE = /\s/;
+
 export class Lexer {
 
   str: string;
@@ -161,6 +163,7 @@ export class Lexer {
     let inBlockComment = false;
     let token;
     let startIndex = this.index;
+
     while ((token = this._determineNextRaw()) !== null) {
       if (inLineComment) {
         if (token.tokenType === TokenType.NEW_LINE
@@ -177,7 +180,19 @@ export class Lexer {
         }
       } else {
         if (token.tokenType === TokenType.COMMENT) {
-          inLineComment = true;
+          // Use some hacky checks to work around lack of lookbehind
+          // and elegant lookahead.
+          let commentFollowedByWhitespace = token.index >= this.str.length
+            || ANY_WHITESPACE_RE.test(this.str[token.endIndex]);
+          let commentPrecededByWhitespace = token.index === 0
+            || ANY_WHITESPACE_RE.test(this.str[token.index - 1]);
+          if (commentPrecededByWhitespace || commentFollowedByWhitespace) {
+            inLineComment = true;
+          } else {
+            // If line comment isn't preceded or followed by whitespace,
+            // emit a TEXT token for it instead.
+            return new Token(TokenType.TEXT, token.index, token.endIndex, token.str);
+          }
         } else if (token.tokenType === TokenType.OPEN_BLOCK_COMMENT) {
           inBlockComment = true;
         } else {

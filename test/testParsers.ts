@@ -38,10 +38,10 @@ describe('parseEval', function() {
   });
 
   it('should ignore braces in inline comments', function() {
-    let testString = 'eval {//}\n}';
+    let testString = 'eval { //}\n}';
     let lexer = new Lexer(testString);
     let block = parseEval(lexer);
-    expect(block).toBe('//}\n');
+    expect(block).toBe(' //}\n');
     expect(lexer.index).toBe(testString.length);
   });
 

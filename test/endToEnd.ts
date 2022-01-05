@@ -244,8 +244,21 @@ inner text /* a block comment inside a choice */
     expect(bml(testString)).toBe('Outer text\n\ninner text\n');
   });
 
+  it('requires line comments to be preceded or followed by a whitespace', function() {
+    let testString = `
+//line comment preceded by whitespace
+foo// line comment followed by whitespace
+not//a line comment`;
+    expect(bml(testString)).toBe('Foo\nnot//a line comment\n');
+  })
+
   it('allows line comments at end of lines', function() {
     let testString = 'foo// comment\nbar';
+    expect(bml(testString)).toBe('Foo\nbar\n');
+  })
+
+  it('allows lines to end with a bare line comment', function() {
+    let testString = 'foo//\nbar';
     expect(bml(testString)).toBe('Foo\nbar\n');
   })
 
