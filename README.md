@@ -3,7 +3,7 @@
 A lightweight programming language for writing text that changes
 
 - [Read the docs](https://bml-lang.org)
-- [Try it online!](https://bml-lang.org/try)
+- [Try it online!](https://bml-lang.org/sandbox)
 - [Install the VS Code extension](https://marketplace.visualstudio.com/items?itemName=bml-lang.bml-vscode)
 
 ```
