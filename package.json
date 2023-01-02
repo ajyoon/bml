@@ -62,7 +62,8 @@
     "typescript": "^4.5.4"
   },
   "dependencies": {
-    "seedrandom": "2.4.4"
+    "seedrandom": "2.4.4",
+    "nearley": "2.20.1"
   },
   "license": "BSD-3-Clause"
 }

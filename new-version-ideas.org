@@ -1,0 +1,51 @@
+* Next BML version ideas
+  After working extensively with BML on my Tao Te Ching chancelation, I've come to want new and different things out of the language, many of them being breaking changes.
+** Remove rules and modes
+   I almost never actually use these, and they're generally things which people can accomplish with post-processing steps. This functionality adds quite a lot of complexity to the language which doesn't align with its utility.
+** Use a proper AST parser
+   This will help fix a lot of weird edge case bugs and will make static analysis much easier, which will make it much easier to calculate the number of possible branches for fun.
+** Replace eval keyword with ={{ code }}= syntax and remove =call= keyword
+   These code snippets can then optionally return text to be inserted. This allows function calls to be performed with complex arguments.
+** Allow bare curly braces in choice slots
+   e.g.
+   #+begin_src bml
+     {(Foo), {@bar} 50, {{someFunc()}}}
+   #+end_src
+** Allow multiple fallback options in backref blocks
+   e.g.
+   #+begin_src bml
+     {@foo: 0 -> (bar), (biz), (baz)}
+   #+end_src
+   
+   In current bml this needs to be written:
+   
+   #+begin_src bml
+     {@foo: 0 -> (bar), ({(biz), (baz)})}
+   #+end_src
+** Ideally leave room for some way to do smart grammar things
+   Things like pluralization matching can be pretty tedious and often push me to skipping some chancelation variety. If there was some kind of way to support this in the language with a plugin that would be very helpful. It seems pretty complicated though..
+** Support "re-using" choice blocks
+   Sometimes I find myself wanting to reuse a choice block without copying the picked result from the original. Maybe this could be done with syntax like:
+
+   #+begin_src bml
+     {#foo: (foo), (bar)}
+     {@!foo}
+     {@!foo}
+     {@!foo}
+   #+end_src
+   
+   giving something like "foo / bar / foo"
+** Support choice exhaustion
+   Related to reusing choice blocks, it would be useful to rerun a previous choice, but excluding previously picked results. Maybe something like:
+
+   #+begin_src bml
+     {$foo: (foo), (bar), (biz), (baz)}
+     {@!foo}
+     {@!foo}
+     {@!foo}
+   #+end_src
+   
+   giving something like "biz / baz / bar / foo", never repeating. In this syntax, ={@!foo}= requests rerunning the referred choice with exclusion, and maybe a bare ={@foo}= would return whatever the initially picked result was. Set choices would be incompatible with mapped backrefs since the indexes are not stable.
+
+   The =$= symbol may be nice with "$" conveying "S" for "Set"
+
