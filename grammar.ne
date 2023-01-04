@@ -18,7 +18,7 @@ class Choice {
 		this.options = options;
 		this.id = id;
 		this.isSilent = isSilent;
-
+		
 	}
 }
 
@@ -83,9 +83,29 @@ function processChoiceReferenceSilentDeclaration(m) {
 function processChoiceReferenceBackRef(m) {
 	return new ChoiceReferenceBackRef(m[1]);
 }
+
+class EvalBlock {
+	constructor(source) {
+		this.source = source;
+	}
+}
 %}
 
-main -> choiceBlock	| backRefBlockWithoutMapping | backRefBlockWithMapping
+mainNodes -> mainNode:+
+mainNode ->
+	plaintext {% id %}
+	| choiceBlock {% id %}
+	| backRefBlockWithoutMapping {% id %}
+	| backRefBlockWithMapping {% id %}
+	| eval {% id %}
+
+
+# A run of plain text
+# Note this will need to be adjusted to support brace-blocks inside
+# matching plaintext parens
+plaintext -> [^){] {% id %} | matchingParenInPlaintext {% id %}
+matchingParenInPlaintext -> "(" ( [^){] | matchingParenInPlaintext ):* ")"
+
 
 # Basic choice blocks, including those with reference ids and silent choice blocks
 choiceBlock -> "{" _ (choiceReferenceDeclaration | choiceReferenceSilentDeclaration):? _
@@ -119,11 +139,21 @@ maybeMappedOption ->
 	unsigned_int _ "->" _ choiceOptionWithoutWeight
 	| choiceOption
 backRefBlockWithMapping -> "{" _ choiceReferenceBackRef ":" _ maybeMappedOption ( _ "," _ maybeMappedOption ):* _ "}"
-
+	
 choiceReferenceBackRef -> "@" choiceReferenceId {% processChoiceReferenceBackRef %}
 
 choiceReferenceId -> [\w_]:+ {% function(d) { return d[0].join("") } %}
 choiceReferenceDeclaration -> choiceReferenceId ":" {% processChoiceReferenceDeclaration %}
 choiceReferenceSilentDeclaration -> "#" choiceReferenceId ":" {% processChoiceReferenceSilentDeclaration %}
+
+
+# Note this will fail to properly parse some javascript edge cases where
+# non-syntactical braces appear in comments and strings.
+eval -> "{{" ( [^{] | matchingBraceInEval ):* "}}" {%
+	function (d) {return new EvalBlock(d[1].flat(Infinity).join("")) }
+%}
+
+matchingBraceInEval -> "{" ( [^{] | matchingBraceInEval ):* "}"
+
 
 
