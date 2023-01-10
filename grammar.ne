@@ -19,9 +19,16 @@ class TextBranch extends Branch {
     }
 }
 
+class EvalBranch extends Branch {
+    constructor(source, weight) {
+        super(weight);
+        this.source = source;
+    }
+}
+
 class Fork {
-    constructor(id, options, isSilent) {
-        this.options = options;
+    constructor(id, branches, isSilent) {
+        this.branches = branches;
         this.id = id;
         this.isSilent = isSilent;
     }
@@ -50,7 +57,6 @@ class Ref {
 
 
 function processRef(m) {
-    console.log(m);
     let id = m[2].id;
     let map = {};
     let fallbackBranches = [];
@@ -73,9 +79,6 @@ function processRef(m) {
 function processTextBranch(m) {
     let bodyArray = m[2];
     let weight = null;
-    if (m.length >= 7) {
-        weight = m[6];
-    }
     let bodyRuns = [];
     bodyArray.forEach((entry) => {
         let lastRun = bodyRuns[bodyRuns.length - 1];
@@ -96,13 +99,13 @@ function processFork(m) {
         forkId = m[2][0].id;
         isSilent = m[2][0].isSilent;
     }
-    let firstBranch = m[4];
+    let firstBranch = m[4][0];
     let laterBranchesRawArray = m[5];
     if (firstBranch) {
         branches.push(firstBranch);
     }
     laterBranchesRawArray.forEach((subArr) => {
-        branches.push(subArr[3]);
+        branches.push(subArr[3][0]);
     });
     return new Fork(forkId, branches, isSilent);
 }
@@ -119,10 +122,10 @@ function processForkRefId(m) {
     return new ForkRefId(m[1]);
 }
 
-class EvalBlock {
-    constructor(source) {
-        this.source = source;
-    }
+function processMainNodeParens(m) {
+	m[1].unshift("(");
+	m[1].push(")");
+	return m[1];
 }
 %}
 
@@ -132,21 +135,25 @@ mainNode ->
         | fork {% id %}
         | bareRef {% id %}
         | ref {% id %}
+		| "(" mainNodes ")" {% processMainNodeParens %}
 
 
 # A run of plain text
 # Note this will need to be adjusted to support forks inside
 # matching plaintext parens
-plaintext -> [^){] {% id %} | matchingParenInPlaintext {% id %}
-matchingParenInPlaintext -> "(" ( [^){] | matchingParenInPlaintext ):* ")"
+plaintext -> [^{}()] {% id %}
+#plaintext -> [^){] {% id %} | matchingParenInPlaintext {% id %}
+#matchingParenInPlaintext -> "(" ( [^){] | matchingParenInPlaintext ):* ")"
 
 # Fundamental fork blocks
 fork -> "{" _ (forkIdDeclaration | forkIdDeclarationSilent):? _
-        branch (_ "," _ branch):* _ "}"
+        branch (_ "," _ branch):* _ ",":? _ "}"
         {% processFork %}
-branch -> "(" _ textBranchChar:* _ ")" _ decimal:?
-        {% processTextBranch %}
-branchWithoutWeight -> "(" _ textBranchChar:* _ ")"
+
+branch -> (textBranch | evalBranch) _ decimal:?
+    {% function(d) { d[0].weight = d[2]; return d[0]; } %}
+
+textBranch -> "(" _ textBranchChar:* _ ")"
         {% processTextBranch %}
 
 textBranchChar -> [^){] {% id %}
@@ -163,31 +170,33 @@ textBranchCharEscape -> [\\nrt] {% id %}
     }
 %}
 
-# Bare refs which copy the result of the referred fork, e.g. {@foo}
-bareRef -> "{" _ forkRefId _ "}"
-    {% (m) => { return new ForkRefId(m[2].id); } %}
-
-# Mapped refs, e.g. {@foo: 0 -> (bar), 1 -> (biz), (baz)}
-maybeMappedBranch ->
-	unsigned_int _ "->" _ branchWithoutWeight
-	| branch
-ref -> "{" _ forkRefId ":" _ maybeMappedBranch ( _ "," _ maybeMappedBranch ):* _ "}"
-    {% processRef %}
-
-	
-forkRefId -> "@" forkId {% processForkRefId %}
-
-forkId -> [\w_]:+ {% function(d) { return d[0].join("") } %}
-forkIdDeclaration -> forkId ":" {% processForkIdDeclaration %}
-forkIdDeclarationSilent -> "#" forkId ":" {% processForkIdSilentDeclaration %}
-
-
 # Note this will fail to properly parse some javascript edge cases where
 # non-syntactical brackets appear in comments and strings.
-eval -> "[" ( [^[] | matchingBracketInEval ):* "]" {%
-	function (d) {return new EvalBlock(d[1].flat(Infinity).join("")) }
+evalBranch -> "[" ( [^[] | matchingBracketInEval ):* "]" {%
+    function (d) {
+        source = d[1].flat(Infinity).join("");
+        return new EvalBranch(source, null);
+    }
 %}
 
 matchingBracketInEval -> "[" ( [^[] | matchingBracketInEval ):* "]"
 
 
+# Bare refs which copy the result of the referred fork, e.g. {@foo}
+bareRef -> "{" _ forkRefId _ "}"
+    {% (m) => { return new ForkRefId(m[2].id); } %}
+
+# Mapped refs, e.g. {@foo: 0 -> (bar), 1 -> (biz), (baz)}
+# TODO don't match when mapped branch has weight
+maybeMappedBranch ->
+        unsigned_int _ "->" _ branch
+        | branch
+ref -> "{" _ forkRefId ":" _ maybeMappedBranch ( _ "," _ maybeMappedBranch ):* _ "}"
+    {% processRef %}
+
+
+forkRefId -> "@" forkId {% processForkRefId %}
+
+forkId -> [\w_]:+ {% function(d) { return d[0].join("") } %}
+forkIdDeclaration -> forkId ":" {% processForkIdDeclaration %}
+forkIdDeclarationSilent -> "#" forkId ":" {% processForkIdSilentDeclaration %}
