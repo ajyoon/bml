@@ -11,10 +11,6 @@ export type InlineCall = {
 };
 
 
-function isRegExpMatchArray(arg: RegExpMatchArray | InlineCall): arg is RegExpMatchArray {
-  return (arg as RegExpMatchArray)[0] !== undefined;
-}
-
 export class FunctionCall {
   functionName: string;
 
@@ -26,20 +22,14 @@ export class FunctionCall {
     return `FunctionCall('${this.functionName}')`;
   }
 
-  execute(userDefs: UserDefs, arg: RegExpMatchArray | InlineCall): string {
+  execute(userDefs: UserDefs, arg: InlineCall): string {
     let func = userDefs.funcs[this.functionName];
     let input, index;
     let match = null;
     let inlineCall = null;
-    if (isRegExpMatchArray(arg)) {
-      match = arg;
-      input = arg.input!;
-      index = arg.index!;
-    } else {
-      inlineCall = arg;
-      input = arg.input;
-      index = arg.index;
-    }
+    inlineCall = arg;
+    input = arg.input;
+    index = arg.index;
     if (typeof func === 'undefined') {
       throw new FunctionNotFoundError(this.functionName, input, index);
     } else if (!(func instanceof Function)) {

@@ -1,14 +1,12 @@
 import * as evalApi from './evalApi';
-import { UserDefs, validateAndBuildUserDefs } from './userDefs';
 
 const evalFuncTemplate = `
   const bml = this;
-  const __USER_DEFS = {};
 
-  function provide(obj) {
-    for (let key in obj) {
-      __USER_DEFS[key] = obj[key];
-    }
+  let __output = '';
+
+  function insert(str) {
+    __output += str;
   }
 
   ////////// start user code
@@ -17,7 +15,7 @@ const evalFuncTemplate = `
 
   ////////// end user code
 
-  return __USER_DEFS;
+  return __output;
 `;
 
 
@@ -38,7 +36,7 @@ export class EvalBlock {
   }
 
   execute(): UserDefs {
-    return validateAndBuildUserDefs(this.toFunc()());
+    return this.toFunc()();
   }
 }
 

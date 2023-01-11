@@ -160,12 +160,9 @@ export function parseReplacements(lexer: Lexer): Replacer {
           acceptWeight = true;
           acceptComma = true;
           acceptReplacerEnd = true;
-          // TODO make WeightedChoice support `EvalBlock`s.
-          // Need to merge the functionality of `FunctionCall` with it.
-          let evalBlock = parseEval(lexer);
-          choices.push(new WeightedChoice(evalBlock, null));
+          choices.push(new WeightedChoice(parseEval(lexer), null));
         } else {
-          throw new BMLSyntaxError('unexpected call statement.',
+          throw new BMLSyntaxError('unexpected eval block.',
             lexer.str, token.index);
         }
         continue;
@@ -249,7 +246,7 @@ export function parseInlineCommand(str: string, openBraceIndex: number): ParseIn
   let backReference = parseBackReference(lexer);
   let replacer = null;
   if (backReference == null) {
-    replacer = parseReplacements(lexer, false);
+    replacer = parseReplacements(lexer);
   }
   return {
     blockEndIndex: lexer.index,
@@ -390,3 +387,14 @@ export function parseBackReference(lexer: Lexer): BackReference | null {
     lexer.str, startIndex);
 }
 
+
+class SyntaxTree {
+
+}
+
+/**
+ * The top-level parsing function. Returns an AST.
+ */
+export function parseDocument(str: string, lexer: Lexer | null) {
+
+}

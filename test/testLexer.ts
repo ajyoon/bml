@@ -129,12 +129,6 @@ describe('Lexer', function() {
     expect(lexer.next()).toBeNull();
   });
 
-  it('tokenizes pipe', function() {
-    let lexer = new Lexer('|');
-    expect(lexer.next()).toEqual(new Token(TokenType.PIPE, 0, 1, '|'));
-    expect(lexer.next()).toBeNull();
-  });
-
   it('tokenizes arrow', function() {
     let lexer = new Lexer('->');
     expect(lexer.next()).toEqual(new Token(TokenType.ARROW, 0, 2, '->'));
@@ -153,33 +147,15 @@ describe('Lexer', function() {
     expect(lexer.next()).toBeNull();
   });
 
-  it('tokenizes the keyword "call"', function() {
-    let lexer = new Lexer('call');
-    expect(lexer.next()).toEqual(new Token(TokenType.KW_CALL, 0, 4, 'call'));
+  it('tokenizes open single bracket', function() {
+    let lexer = new Lexer('[');
+    expect(lexer.next()).toEqual(new Token(TokenType.OPEN_BRACKET, 0, 1, '['));
     expect(lexer.next()).toBeNull();
   });
 
-  it('tokenizes the keyword "eval"', function() {
-    let lexer = new Lexer('eval');
-    expect(lexer.next()).toEqual(new Token(TokenType.KW_EVAL, 0, 4, 'eval'));
-    expect(lexer.next()).toBeNull();
-  });
-
-  it('tokenizes the keyword "mode"', function() {
-    let lexer = new Lexer('mode');
-    expect(lexer.next()).toEqual(new Token(TokenType.KW_MODE, 0, 4, 'mode'));
-    expect(lexer.next()).toBeNull();
-  });
-
-  it('tokenizes the keyword "use"', function() {
-    let lexer = new Lexer('use');
-    expect(lexer.next()).toEqual(new Token(TokenType.KW_USE, 0, 3, 'use'));
-    expect(lexer.next()).toBeNull();
-  });
-
-  it('tokenizes the keyword "match"', function() {
-    let lexer = new Lexer('match');
-    expect(lexer.next()).toEqual(new Token(TokenType.KW_MATCH, 0, 5, 'match'));
+  it('tokenizes close single bracket', function() {
+    let lexer = new Lexer(']');
+    expect(lexer.next()).toEqual(new Token(TokenType.CLOSE_BRACKET, 0, 1, ']'));
     expect(lexer.next()).toBeNull();
   });
 

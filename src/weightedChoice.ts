@@ -1,8 +1,8 @@
 import { FunctionCall } from './functionCall';
-import noOp from './noOp';
+import { EvalBlock } from './evalBlock';
 
 
-export type Choice = string | FunctionCall | typeof noOp;
+export type Choice = string | EvalBlock;
 
 /**
  * An outcome with a weight.
