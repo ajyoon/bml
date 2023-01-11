@@ -2,27 +2,20 @@ import expect from 'expect';
 import fs from 'fs';
 
 import { FunctionCall } from '../src/functionCall';
-import { Mode } from '../src/mode';
-import { Rule } from '../src/rule';
 import { Replacer } from '../src/replacer';
 import { Lexer } from '../src/lexer';
-import { Token } from '../src/token';
-import { TokenType } from '../src/tokenType';
 import { WeightedChoice } from '../src/weightedChoice';
 import { BackReference } from '../src/backReference';
-import noOp from '../src/noOp';
 
 import {
   JavascriptSyntaxError,
-  UnknownTransformError,
   BMLSyntaxError,
   BMLDuplicatedRefIndexError,
-  ModeNameError,
 } from '../src/errors';
 
 import {
-  parseEval, parseRule, parseMode, parsePrelude, parseUse,
-  parseInlineCommand, parseMatchers, parseCall, parseReplacements,
+  parseEval,
+  parseInlineCommand, parseReplacements,
   parseBackReference,
 } from '../src/parsers';
 
@@ -105,161 +98,6 @@ describe('parseEval', function() {
     let block = parseEval(lexer);
     expect(block).toBe(parsersFileContents);
     expect(lexer.index).toBe(testString.length);
-  });
-});
-
-describe('parseMode', function() {
-  it('should allow empty modes', function() {
-    let testString = 'mode test {}';
-    let lexer = new Lexer(testString);
-    let mode = parseMode(lexer);
-    expect(lexer.index).toBe(testString.length);
-    expect(mode).toBeInstanceOf(Mode);
-    expect(mode.name).toBe('test');
-  });
-
-  it('allows comments within modes', function() {
-    let testString =
-      `mode test {
-             // test
-             // test
-         }`;
-    let lexer = new Lexer(testString);
-    let mode = parseMode(lexer);
-    expect(lexer.index).toBe(testString.length);
-    expect(mode).toBeInstanceOf(Mode);
-    expect(mode.name).toBe('test');
-  });
-
-  it('fails when mode name is absent', function() {
-    let lexer = new Lexer('mode {}');
-    expect(() => parseMode(lexer)).toThrowError(BMLSyntaxError);
-  });
-
-  it('fails when mode name is malformed', function() {
-    let lexer = new Lexer('mode ??? {}');
-    expect(() => parseMode(lexer)).toThrowError(BMLSyntaxError);
-  });
-
-  it('fails when special mode name "none" is used', function() {
-    let lexer = new Lexer('mode none {}');
-    expect(() => parseMode(lexer)).toThrowError(ModeNameError);
-  });
-
-  it('can parse a mixture of literal and regex matcher rules', function() {
-    let testString =
-      `mode test {
-             // some comments
-             (bml) -> {(BML), match}
-             // more comments
-             /javascript/ -> {(Javascript) 30, (JS) 10,
-                 (js) 10, match}
-             // more comments
-        }`;
-    let lexer = new Lexer(testString);
-    let mode = parseMode(lexer);
-    expect(lexer.index).toBe(testString.length);
-    expect(mode).toBeInstanceOf(Mode);
-    expect(mode.name).toBe('test');
-    expect(mode.rules).toHaveLength(2);
-    expect(mode.rules[0]).toEqual(new Rule([/bml/y], new Replacer(
-      [new WeightedChoice('BML', null),
-      new WeightedChoice(noOp, null)
-      ], null, false)));
-    expect(mode.rules[1]).toEqual(new Rule([/javascript/y], new Replacer(
-      [new WeightedChoice('Javascript', 30),
-      new WeightedChoice('JS', 10),
-      new WeightedChoice('js', 10),
-      new WeightedChoice(noOp, null)
-      ],
-      null, false)));
-  });
-});
-
-describe('parsePrelude', function() {
-  it('finds and executes multiple eval blocks', function() {
-    let testString = `eval {
-                          global.evalTest = 1;
-                      }
-                      // comment
-                      eval {
-                          global.evalTest2 = 2;
-                      }
-                      some text`;
-    let result = parsePrelude(testString);
-
-    expect(result.preludeEndIndex).toBe(testString.indexOf('some text'));
-    expect(result.evalBlock.contents).toContain('global.evalTest = 1;\n');
-    expect(result.evalBlock.contents).toContain('global.evalTest2 = 2;\n');
-    expect(result.modes).toEqual({});
-  });
-
-  it('recognizes mode blocks and passes them to parseMode', function() {
-    let testString = `mode firstMode {
-                          // do something
-                      }
-                      mode secondMode {
-                          // do something
-                      }
-                      some text`;
-    let result = parsePrelude(testString);
-
-    expect(result.preludeEndIndex).toBe(testString.indexOf('some text'));
-    expect(result.modes).toHaveProperty('firstMode');
-    expect(result.modes).toHaveProperty('secondMode');
-  });
-});
-
-
-describe('parseRule', function() {
-  it('can parse a one-to-one rule', function() {
-    let testString = '(x) -> {(y)}';
-    let lexer = new Lexer(testString);
-    let rule = parseRule(lexer);
-    expect(lexer.index).toBe(testString.length);
-    expect(rule.matchers.length).toBe(1);
-  });
-
-  it('does not allow identifiers in replacers', function() {
-    let testString = '(x) -> {MisplacedTestIdentifier: (y)}';
-    let lexer = new Lexer(testString);
-    expect(() => parseRule(lexer)).toThrowError(BMLSyntaxError);
-  });
-
-  it('maps `match` keyword replacers to no-ops', function() {
-    let testString = '(a) -> {(b), match 40}';
-    let lexer = new Lexer(testString);
-    let rule = parseRule(lexer);
-    expect(lexer.index).toBe(testString.length);
-    expect(rule).toEqual(new Rule([/a/y], new Replacer(
-      [new WeightedChoice('b', null),
-      new WeightedChoice(noOp, 40)],
-      null, false)));
-  });
-
-  it('Errors if multiple `match` replacers are used', function() {
-    let testString = '(x) -> {match, match 50}';
-    let lexer = new Lexer(testString);
-    expect(() => parseRule(lexer)).toThrowError(BMLSyntaxError);
-  });
-});
-
-
-describe('parseUse', function() {
-  it('Extracts the mode name', function() {
-    let testString = '{use testMode}';
-    let result = parseUse(testString, 0);
-    expect(result.blockEndIndex).toBe(testString.length);
-    expect(result.modeName).toBe('testMode');
-  });
-
-  it('Errors when using old "using" syntax', function() {
-    expect(() => parseUse('{using testMode}', 0)).toThrowError(UnknownTransformError);
-  });
-
-  it('Throws an UnknownTransformError when there is a syntax error.', function() {
-    let testString = '{use ????}';
-    expect(() => parseUse(testString, 0)).toThrowError(UnknownTransformError);
   });
 });
 
@@ -357,87 +195,11 @@ describe('parseInlineCommand', function() {
 });
 
 
-describe('parseMatchers', function() {
-  it('parsers a single matcher', function() {
-    let testString = '(test) ->';
-    let lexer = new Lexer(testString);
-    let result = parseMatchers(lexer);
-    expect(result).toEqual([/test/y]);
-    let idx = testString.indexOf('->');
-    expect(lexer.peek()).toEqual(new Token(TokenType.ARROW, idx, idx + 2, '->'));
-  });
-
-  it('parses a single simple regex matcher', function() {
-    let testString = '/test/ ->';
-    let lexer = new Lexer(testString);
-    let result = parseMatchers(lexer);
-    expect(result).toEqual([/test/y]);
-    let idx = testString.indexOf('->');
-    expect(lexer.peek()).toEqual(new Token(TokenType.ARROW, idx, idx + 2, '->'));
-  });
-
-  it('parses a regex matcher with escaped chars', function() {
-    // Escaping in JS string literals gets confusing, but I've
-    // verified this is how `/\s escaped \/ slash!/ ->` read from
-    // file is written in a string.
-    let testString = '/space \\s and escaped \\/ slash!/ ->';
-    let lexer = new Lexer(testString);
-    let result = parseMatchers(lexer);
-    expect(result).toEqual([/space \s and escaped \/ slash!/y]);
-    expect(lexer.peek()).toEqual(new Token(TokenType.ARROW, 33, 35, '->'));
-  });
-
-  it('parses regex matchers ending with asterisks', function() {
-    let testString = '/test*/ ->';
-    let lexer = new Lexer(testString);
-    let result = parseMatchers(lexer);
-    expect(result).toEqual([/test*/y]);
-    expect(lexer.peek()).toEqual(new Token(TokenType.ARROW, 8, 10, '->'));
-  });
-
-  it('parses multiple matchers', function() {
-    let testString = '(test), /test2/ ->';
-    let lexer = new Lexer(testString);
-    let result = parseMatchers(lexer);
-    expect(result).toEqual([/test/y, /test2/y]);
-    let idx = testString.indexOf('->');
-    expect(lexer.peek()).toEqual(new Token(TokenType.ARROW, idx, idx + 2, '->'));
-  });
-});
-
-
-describe('parseCall', function() {
-  it('errors on malformed call statements', function() {
-    let failingStrings = [
-      'fails',
-      'call 1234876',
-      'call',
-      'call,',
-      'call \'',
-    ];
-    for (let i = 0; i < failingStrings.length; i++) {
-      let testString = failingStrings[i];
-      let lexer = new Lexer(testString);
-      expect(() => parseCall(lexer)).toThrowError(BMLSyntaxError);
-    }
-  });
-
-  it('moves the lexer to the character after the call block', function() {
-    let testString = 'call test,';
-    let lexer = new Lexer(testString);
-    let functionCall = parseCall(lexer);
-    expect(functionCall).toBeInstanceOf(FunctionCall);
-    expect(functionCall.functionName).toBe('test');
-    expect(lexer.index).toBe(testString.length - 1);
-  });
-});
-
-
 describe('parseReplacements', function() {
   it('parses a string literal replacer with braces', function() {
     let testString = '(test)}';
     let lexer = new Lexer(testString);
-    let result = parseReplacements(lexer, false);
+    let result = parseReplacements(lexer);
     expect(result.weights.length).toBe(1);
     expect(result.weights[0]).toBeInstanceOf(WeightedChoice);
     expect(result.weights[0].choice).toBe('test');
@@ -448,7 +210,7 @@ describe('parseReplacements', function() {
   it('parses a call replacer', function() {
     let testString = 'call test}';
     let lexer = new Lexer(testString);
-    let result = parseReplacements(lexer, false);
+    let result = parseReplacements(lexer);
     expect(result.weights.length).toBe(1);
     expect(result.weights[0]).toBeInstanceOf(WeightedChoice);
     expect(result.weights[0].choice).toBeInstanceOf(FunctionCall);
@@ -460,7 +222,7 @@ describe('parseReplacements', function() {
   it('parses strings with weights', function() {
     let testString = '(test) 5}';
     let lexer = new Lexer(testString);
-    let result = parseReplacements(lexer, false);
+    let result = parseReplacements(lexer);
     expect(result.weights.length).toBe(1);
     expect(result.weights[0]).toBeInstanceOf(WeightedChoice);
     expect(result.weights[0].choice).toBe('test');
@@ -471,7 +233,7 @@ describe('parseReplacements', function() {
   it('parses call replacers with weights', function() {
     let testString = 'call test 5}';
     let lexer = new Lexer(testString);
-    let result = parseReplacements(lexer, false);
+    let result = parseReplacements(lexer);
     expect(result.weights.length).toBe(1);
     expect(result.weights[0]).toBeInstanceOf(WeightedChoice);
     expect(result.weights[0].choice).toBeInstanceOf(FunctionCall);
@@ -483,7 +245,7 @@ describe('parseReplacements', function() {
   it('parses many replacers with and without weights', function() {
     let testString = 'call test 5, (test2), (test3) 3}';
     let lexer = new Lexer(testString);
-    let result = parseReplacements(lexer, false);
+    let result = parseReplacements(lexer);
     expect(result.weights.length).toBe(3);
 
     expect(result.weights[0]).toBeInstanceOf(WeightedChoice);
@@ -503,10 +265,10 @@ describe('parseReplacements', function() {
   });
 
   it('fails when two choices are not separated by a comma', function() {
-    let testString = '(test) (part of next rule)';
+    let testString = '(test) (test 2)';
     let lexer = new Lexer(testString);
     expect(() => {
-      parseReplacements(lexer, false);
+      parseReplacements(lexer);
     }).toThrowError(BMLSyntaxError);
   });
 });

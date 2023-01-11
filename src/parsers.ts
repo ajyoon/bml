@@ -1,53 +1,39 @@
 import { EvalBlock } from './evalBlock';
 import { FunctionCall } from './functionCall';
-import { Mode, ModeMap } from './mode';
 import { WeightedChoice, Choice } from './weightedChoice';
 import { Lexer } from './lexer';
 import { TokenType } from './tokenType';
-import { Rule } from './rule';
 import { Replacer } from './replacer';
 import { BackReference } from './backReference';
-import noOp from './noOp';
 import {
   IllegalStateError,
-  UnknownTransformError,
   JavascriptSyntaxError,
   BMLSyntaxError,
   BMLDuplicatedRefIndexError,
-  ModeNameError,
 } from './errors';
-import { escapeRegExp } from './stringUtils';
 
 
 /**
  * Parse an `eval` block
  *
- * @param lexer - A lexer whose next token is KW_EVAL. This will be
+ * @param lexer - A lexer whose next token is OPEN_BRACKET. This will be
  *     mutated in place such that when the method returns, the lexer's
- *     next token will be after the closing brace of the block.
+ *     next token will be after the closing bracket of the block.
  *
  * @return The string of Javascript code extracted from the eval block
- *
- * @throws {BMLSyntaxError} If the lexer is not at an eval block
  *
  * @throws {JavascriptSyntaxError} If the javascript snippet inside the eval
  *     block contains a syntax error which makes parsing it impossible.
  */
 export function parseEval(lexer: Lexer): string {
-  if (lexer.next()?.tokenType !== TokenType.KW_EVAL) {
-    throw new IllegalStateError('parseEval started with non-KW_EVAL');
-  }
-
-  if (lexer.nextNonWhitespace()?.tokenType !== TokenType.OPEN_BRACE) {
-    throw new BMLSyntaxError(
-      'eval blocks must be opened with a curly brace ("{")',
-      lexer.str, lexer.index);
+  if (lexer.next()?.tokenType !== TokenType.OPEN_BRACKET) {
+    throw new IllegalStateError('parseEval started with non-OPEN_BRACKET');
   }
 
   let state = 'code';
   let index = lexer.index;
   let startIndex = index;
-  let openBraceCount = 1;
+  let openBracketCount = 1;
   let token;
   while ((token = lexer.next()) !== null) {
     switch (state) {
@@ -87,12 +73,12 @@ export function parseEval(lexer: Lexer): string {
         break;
       case 'code':
         switch (token.tokenType) {
-          case TokenType.OPEN_BRACE:
-            openBraceCount++;
+          case TokenType.OPEN_BRACKET:
+            openBracketCount++;
             break;
-          case TokenType.CLOSE_BRACE:
-            openBraceCount--;
-            if (openBraceCount < 1) {
+          case TokenType.CLOSE_BRACKET:
+            openBracketCount--;
+            if (openBracketCount < 1) {
               return lexer.str.slice(startIndex, lexer.index - 1);
             }
             break;
@@ -122,75 +108,14 @@ export function parseEval(lexer: Lexer): string {
         throw new Error(`Invalid state: ${state}`);
     }
   }
-  throw new BMLSyntaxError('could not find end of `eval` block',
-    lexer.str, startIndex);
+  throw new JavascriptSyntaxError('could not find end of javascript code block',
+    startIndex);
 }
 
-export function parseMatchers(lexer: Lexer): RegExp[] {
-  let startIndex = lexer.index;
-  let token;
-  let acceptMatcher = true;
-  let matchers = [];
-  while ((token = lexer.peek()) !== null) {
-    switch (token.tokenType) {
-      case TokenType.WHITESPACE:
-      case TokenType.NEW_LINE:
-        break;
-      case TokenType.ARROW:
-        return matchers;
-      case TokenType.SLASH:
-        if (acceptMatcher) {
-          matchers.push(parseRegexMatcher(lexer));
-          acceptMatcher = false;
-          // break out of loop since the string literal token
-          // stream has already been consumed.
-          continue;
-        } else {
-          throw new BMLSyntaxError('unexpected regex literal.',
-            lexer.str, token.index);
-        }
-      case TokenType.OPEN_PAREN:
-        if (acceptMatcher) {
-          let strMatcher = parseReplacementWithLexer(lexer);
-          let matcher = new RegExp(escapeRegExp(strMatcher), 'y');
-          matchers.push(matcher);
-          acceptMatcher = false;
-          // break out of loop since the string literal token
-          // stream has already been consumed.
-          continue;
-        } else {
-          throw new BMLSyntaxError('unexpected string literal.',
-            lexer.str, token.index);
-        }
-      case TokenType.COMMA:
-        acceptMatcher = true;
-        break;
-      default:
-        throw new BMLSyntaxError(`Unexpected token ${token}`,
-          lexer.str, token.index);
-    }
-    // If we haven't broken out or thrown an error by now, consume this token.
-    lexer.next();
-  }
-  throw new BMLSyntaxError('Could not find end of matcher.',
-    lexer.str, startIndex);
-}
-
-export function parseCall(lexer: Lexer): FunctionCall {
-  let callRe = /call\s+([_$a-zA-Z\xA0-\uFFFF][_$a-zA-Z0-9\xA0-\uFFFF]*)/y;
-  callRe.lastIndex = lexer.index;
-  let callMatch = callRe.exec(lexer.str);
-  if (callMatch === null) {
-    throw new BMLSyntaxError('invalid call statement',
-      lexer.str, lexer.index);
-  }
-  lexer.overrideIndex(lexer.index + callMatch[0].length);
-  return new FunctionCall(callMatch[1]);
-}
 
 // Expects the lexer's current token immediately follows the
 // replacement list open braace.
-export function parseReplacements(lexer: Lexer, forRule: boolean): Replacer {
+export function parseReplacements(lexer: Lexer): Replacer {
   let startIndex = lexer.index;
   let token;
   let choices = [];
@@ -198,7 +123,6 @@ export function parseReplacements(lexer: Lexer, forRule: boolean): Replacer {
   let acceptWeight = false;
   let acceptComma = false;
   let acceptReplacerEnd = false;
-  let matchReplacementFound = false;
 
   // I think this will fail if there is a linebreak or
   // comments after open brace but before identifier
@@ -208,10 +132,6 @@ export function parseReplacements(lexer: Lexer, forRule: boolean): Replacer {
   identifierRe.lastIndex = lexer.index;
   let identifierMatch = identifierRe.exec(lexer.str);
   if (identifierMatch) {
-    if (forRule) {
-      throw new BMLSyntaxError('Choice identifiers are not allowed in rules',
-        lexer.str, lexer.index);
-    }
     identifier = identifierMatch[2];
     if (identifierMatch[1]) {
       isSilent = true;
@@ -225,31 +145,6 @@ export function parseReplacements(lexer: Lexer, forRule: boolean): Replacer {
       case TokenType.NEW_LINE:
         break;
       case TokenType.OPEN_PAREN:
-      case TokenType.KW_MATCH:
-        if (acceptReplacement) {
-          acceptReplacement = false;
-          acceptWeight = true;
-          acceptComma = true;
-          acceptReplacerEnd = true;
-          if (token.tokenType == TokenType.KW_MATCH) {
-            if (matchReplacementFound) {
-              throw new BMLSyntaxError('Rules may have at most one special `match` choice',
-                lexer.str, token.index);
-            }
-            matchReplacementFound = true;
-            choices.push(new WeightedChoice(noOp, null));
-          } else {
-            choices.push(new WeightedChoice(
-              parseReplacementWithLexer(lexer), null));
-            // Replacement parser consumes tokens, so skip that in
-            // this loop
-            continue;
-          }
-        } else {
-          throw new BMLSyntaxError('unexpected token',
-            lexer.str, token.index);
-        }
-        break;
       case TokenType.CLOSE_BRACE:
         if (acceptReplacerEnd) {
           lexer.next(); // Consume close brace
@@ -259,13 +154,16 @@ export function parseReplacements(lexer: Lexer, forRule: boolean): Replacer {
             `unexpected end of replacer: ${token.tokenType}`,
             lexer.str, token.index);
         }
-      case TokenType.KW_CALL:
+      case TokenType.OPEN_BRACKET:
         if (acceptReplacement) {
           acceptReplacement = false;
           acceptWeight = true;
           acceptComma = true;
           acceptReplacerEnd = true;
-          choices.push(new WeightedChoice(parseCall(lexer), null));
+          // TODO make WeightedChoice support `EvalBlock`s.
+          // Need to merge the functionality of `FunctionCall` with it.
+          let evalBlock = parseEval(lexer);
+          choices.push(new WeightedChoice(evalBlock, null));
         } else {
           throw new BMLSyntaxError('unexpected call statement.',
             lexer.str, token.index);
@@ -306,140 +204,6 @@ export function parseReplacements(lexer: Lexer, forRule: boolean): Replacer {
 }
 
 
-export function parseRule(lexer: Lexer): Rule {
-  let matchers = parseMatchers(lexer);
-  if (lexer.nextNonWhitespace()?.tokenType !== TokenType.ARROW) {
-    throw new BMLSyntaxError('matchers must be followed by an arrow (->)',
-      lexer.str, lexer.index);
-  }
-  if (lexer.nextNonWhitespace()?.tokenType !== TokenType.OPEN_BRACE) {
-    throw new BMLSyntaxError('rule replacers must be surrounded by braces',
-      lexer.str, lexer.index);
-  }
-  let replacements = parseReplacements(lexer, true);
-  return new Rule(matchers, replacements);
-}
-
-export function parseMode(lexer: Lexer): Mode {
-  let startIndex = lexer.index;
-  if (lexer.peek()?.tokenType !== TokenType.KW_MODE) {
-    throw new BMLSyntaxError('modes must begin with keyword "mode"',
-      lexer.str, lexer.index);
-  }
-  let token = lexer.next();  // consume KW_MODE
-  let modeNameRe = /(\s*(\w+)\s*)/y;
-  modeNameRe.lastIndex = lexer.index;
-  let modeNameMatch = modeNameRe.exec(lexer.str);
-  if (!modeNameMatch) {
-    throw new BMLSyntaxError('mode name is absent or invalid',
-      lexer.str, lexer.index);
-  }
-  let modeName = modeNameMatch[2];
-  if (modeName === 'none') {
-    throw new ModeNameError('none', 'It shadows the built-in "none" pseudo-mode.',
-      lexer.str, lexer.index);
-  }
-  let mode = new Mode(modeName);
-  lexer.overrideIndex(lexer.index + modeNameMatch[1].length);
-
-  if (lexer.peek()?.tokenType !== TokenType.OPEN_BRACE) {
-    throw new BMLSyntaxError('modes must be opened with a curly brace ("{")',
-      lexer.str, lexer.index);
-  }
-  lexer.next();  // consume open brace
-
-  while ((token = lexer.peek()) !== null) {
-    switch (token.tokenType) {
-      case TokenType.WHITESPACE:
-      case TokenType.NEW_LINE:
-        break;
-      case TokenType.OPEN_PAREN:
-      case TokenType.SLASH:
-        mode.rules.push(parseRule(lexer));
-        continue;
-      case TokenType.CLOSE_BRACE:
-        // consume closing brace
-        lexer.next();
-        return mode;
-      default:
-        throw new BMLSyntaxError(`Unexpected token ${token}`,
-          lexer.str, token.index);
-    }
-    // Accept and consume the token
-    lexer.next();
-  }
-  throw new BMLSyntaxError('Could not find end of mode',
-    lexer.str, startIndex);
-}
-
-/*
-    preludeEndIndex: lexer.index,
-    evalBlock: new EvalBlock(evalString),
-    modes: modes,
-
-*/
-type ParsePreludeResult = {
-  preludeEndIndex: number, evalBlock: EvalBlock, modes: ModeMap
-};
-
-export function parsePrelude(str: string): ParsePreludeResult {
-  let lexer = new Lexer(str);
-  let evalString = '';
-  let modes: ModeMap = {};
-  let token;
-  while ((token = lexer.peek()) !== null) {
-    switch (token.tokenType) {
-      case TokenType.WHITESPACE:
-      case TokenType.NEW_LINE:
-        break;
-      case TokenType.KW_EVAL:
-        evalString += parseEval(lexer) + '\n';
-        continue;
-      case TokenType.KW_MODE:
-        var newMode = parseMode(lexer);
-        modes[newMode.name] = newMode;
-        continue;
-      default:
-        return {
-          preludeEndIndex: lexer.index,
-          evalBlock: new EvalBlock(evalString),
-          modes: modes,
-        };
-    }
-    lexer.next();
-  }
-  // The prelude never ended in the document
-  return {
-    preludeEndIndex: lexer.index,
-    evalBlock: new EvalBlock(evalString),
-    modes: modes,
-  };
-}
-
-type ParseUseResult = {
-  blockEndIndex: number,
-  modeName: string
-};
-
-/**
- * Parse a `use` block of the form `{use modeName}`
- *
- * @returns The returned index is the index immediately
- * after the closing brace.
- */
-export function parseUse(str: string, openBraceIndex: number): ParseUseResult {
-  let useRe = /{use\s+(\w[\w\d]*)\s*}/y;
-  useRe.lastIndex = openBraceIndex;
-  let match = useRe.exec(str);
-  if (match === null) {
-    throw new UnknownTransformError(str, openBraceIndex);
-  }
-  return {
-    blockEndIndex: useRe.lastIndex,
-    modeName: match[1]
-  };
-}
-
 /**
  * @param lexer a lexer whose next token is TokenType.OPEN_PAREN
  *
@@ -462,28 +226,6 @@ export function parseReplacementWithLexer(lexer: Lexer): string {
           return stringLiteral;
         }
         break;
-    }
-    stringLiteral += token.str;
-  }
-  throw new BMLSyntaxError('Could not find end of replacement.',
-    lexer.str, startIndex);
-}
-
-/**
- * @param lexer a lexer whose next token is TokenType.SLASH
- */
-export function parseRegexMatcher(lexer: Lexer): RegExp {
-  lexer.next();
-  let startIndex = lexer.index;
-  let stringLiteral = '';
-  let token;
-  while ((token = lexer.next()) !== null) {
-    if (token.tokenType === TokenType.SLASH) {
-      return new RegExp(stringLiteral, 'y');
-    } else if (token.tokenType === TokenType.CLOSE_BLOCK_COMMENT) {
-      // A funny edge case where regexps ending with an asterisk are
-      // tokenized as close-block-comments.
-      return new RegExp(stringLiteral + '*', 'y');
     }
     stringLiteral += token.str;
   }
@@ -582,12 +324,12 @@ export function parseBackReference(lexer: Lexer): BackReference | null {
         }
         break;
       case TokenType.OPEN_PAREN:
-      case TokenType.KW_CALL:
+      case TokenType.OPEN_BRACKET:
         if (acceptReplacement) {
           if (token.tokenType === TokenType.OPEN_PAREN) {
             currentReplacement = parseReplacementWithLexer(lexer);
           } else {
-            currentReplacement = parseCall(lexer);
+            currentReplacement = parseEval(lexer);
           }
           if (currentChoiceIndexes.length) {
             for (let choiceIndex of currentChoiceIndexes) {

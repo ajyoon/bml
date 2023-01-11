@@ -3,7 +3,7 @@ import * as postprocessing from './postprocessing';
 import { defaultBMLSettings, defaultRenderSettings, mergeSettings, RenderSettings } from './settings';
 import { Mode, ModeMap } from './mode';
 import { BackReference } from './backReference';
-import { parsePrelude, parseUse, parseInlineCommand, } from './parsers';
+import { parseUse, parseInlineCommand, } from './parsers';
 import { UserDefs } from './userDefs';
 import { FunctionCall } from './functionCall';
 import { Lexer } from './lexer';

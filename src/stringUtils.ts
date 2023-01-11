@@ -29,7 +29,3 @@ export function isWhitespace(str: string): boolean {
   return str.trim() === '';
 }
 
-/* Escape all regex-special characters in a string */
-export function escapeRegExp(str: string): string {
-  return str.replace(/([.*+?^${}()|\[\]\/\\])/g, '\\$1');
-}

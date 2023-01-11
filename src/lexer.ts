@@ -109,24 +109,15 @@ export class Lexer {
     } else if (this.str.slice(this.index, this.index + 2) === ']]') {
       tokenType = TokenType.CLOSE_DOUBLE_BRACKET;
       tokenString = ']]';
+    } else if (this.str[this.index] === '[') {
+      tokenType = TokenType.OPEN_BRACKET;
+      tokenString = '[';
+    } else if (this.str[this.index] === ']') {
+      tokenType = TokenType.CLOSE_BRACKET;
+      tokenString = ']';
     } else if (this.str.slice(this.index, this.index + 2) === '->') {
       tokenType = TokenType.ARROW;
       tokenString = '->';
-    } else if (this.str.slice(this.index, this.index + 4) === 'call') {
-      tokenType = TokenType.KW_CALL;
-      tokenString = 'call';
-    } else if (this.str.slice(this.index, this.index + 4) === 'eval') {
-      tokenType = TokenType.KW_EVAL;
-      tokenString = 'eval';
-    } else if (this.str.slice(this.index, this.index + 4) === 'mode') {
-      tokenType = TokenType.KW_MODE;
-      tokenString = 'mode';
-    } else if (this.str.slice(this.index, this.index + 3) === 'use') {
-      tokenType = TokenType.KW_USE;
-      tokenString = 'use';
-    } else if (this.str.slice(this.index, this.index + 5) === 'match') {
-      tokenType = TokenType.KW_MATCH;
-      tokenString = 'match';
     } else {
       tokenType = TokenType.TEXT;
       if (this.str[this.index] === '\\') {
