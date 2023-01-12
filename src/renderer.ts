@@ -1,6 +1,6 @@
 import * as rand from './rand';
 import * as postprocessing from './postprocessing';
-import { defaultRenderSettings, mergeSettings, RenderSettings } from './settings';
+import { defaultBMLSettings, defaultRenderSettings, mergeSettings, RenderSettings } from './settings';
 import { BackReference } from './backReference';
 import { parseDocument } from './parsers';
 import { UserDefs } from './userDefs';
@@ -95,13 +95,28 @@ class Renderer {
     return output;
   }
 
+  postprocess(text: string): string {
+    let documentSettings = mergeSettings(defaultBMLSettings, this.evalBindings.settings);
+    let output = text;
+    output = postprocessing.replaceVisualLineBreaks(output);
+    if (documentSettings.punctuationCleanup) {
+      output = postprocessing.punctuationCleanup(output);
+    }
+    if (documentSettings.capitalizationCleanup) {
+      output = postprocessing.capitalizationCleanup(output);
+    }
+    if (documentSettings.whitespaceCleanup) {
+      output = postprocessing.whitespaceCleanup(output);
+    }
+    return output;
+  }
+
+  renderAndPostProcess(ast: AstNode[]): string {
+    let renderedText = this.renderAst(ast);
+    return this.postprocess(renderedText);
+  }
 }
 
-function postprocess(text: string): string {
-  let output = text;
-  output = postprocessing.replaceVisualLineBreaks(output);
-  return output;
-}
 
 export function render(bmlDocumentString: string, renderSettings?: RenderSettings): string {
   // Resolve render settings
@@ -112,6 +127,5 @@ export function render(bmlDocumentString: string, renderSettings?: RenderSetting
 
   let lexer = new Lexer(bmlDocumentString);
   let ast = parseDocument(lexer, true);
-  let renderedText = new Renderer().renderAst(ast);
-  return postprocess(renderedText);
+  return new Renderer().renderAndPostProcess(ast);
 }

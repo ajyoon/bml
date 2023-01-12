@@ -112,7 +112,8 @@
 )}
 
 // And for test completeness, include features not demonstrated above:
-// An eval block
+
+// A function bound in one eval block then used and inserted in another
 {[
     bind({
         foo: () => {
@@ -120,4 +121,4 @@
         }
     });
 ]}
-{[insert(foo());]}
+{[insert(foo())]}
