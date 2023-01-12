@@ -380,4 +380,22 @@ describe('parseDocument', function() {
     let lexer = new Lexer(bmlScript);
     let _ = parseDocument(lexer, true);
   });
+
+  it('includes whitespace in plain text', function() {
+    let testString = 'testing 1 2\n3';
+    let lexer = new Lexer(testString);
+    let result = parseDocument(lexer, true);
+    expect(result).toHaveLength(1);
+    expect(result[0]).toBe('testing 1 2\n3')
+  });
+
+  it('preserves whitespace around forks', function() {
+    let testString = 'foo {(bar)} biz';
+    let lexer = new Lexer(testString);
+    let result = parseDocument(lexer, true);
+    expect(result).toHaveLength(3);
+    expect(result[0]).toBe('foo ');
+    expect(result[1]).toBeInstanceOf(Replacer);
+    expect(result[2]).toBe(' biz');
+  });
 });

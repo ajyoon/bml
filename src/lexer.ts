@@ -51,7 +51,7 @@ export class Lexer {
     } else if (visualNewLineMatch !== null) {
       tokenType = TokenType.VISUAL_NEW_LINE;
       tokenEndIndex = visualNewLineMatch.index + visualNewLineMatch[0].length;
-      tokenString = ' ';
+      tokenString = '\\\n';
     } else if (whitespaceMatch !== null) {
       tokenType = TokenType.WHITESPACE;
       tokenString = whitespaceMatch[0];

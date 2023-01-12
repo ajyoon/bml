@@ -6,9 +6,8 @@ import { parseDocument } from './parsers';
 import { UserDefs } from './userDefs';
 import { AstNode } from './ast';
 import { Lexer } from './lexer';
-import { TokenType } from './tokenType';
 import { Replacer } from './replacer';
-import { UnknownModeError, BMLDuplicatedRefError, IllegalStateError, } from './errors';
+import { BMLDuplicatedRefError, IllegalStateError, } from './errors';
 import { Choice } from './weightedChoice';
 import { isStr } from './stringUtils';
 
@@ -45,13 +44,27 @@ function renderChoice(choice: Choice, choiceResultMap: ChoiceResultMap): string 
 
 function renderAst(ast: AstNode[], choiceResultMap: ChoiceResultMap): string {
   let output = '';
-  for (let node of ast) {
+  for (let i = 0; i < ast.length; i++) {
+    let node = ast[i];
     if (isStr(node)) {
       output += node;
     } else if (node instanceof Replacer) {
       let { replacement, choiceIndex } = node.call();
       let renderedOutput = renderChoice(replacement, choiceResultMap);
-      if (!node.isSilent) {
+      if (node.isSilent) {
+        if (output.length && output[output.length - 1] == '\n') {
+          // This silent fork started a new line.
+          // If the next character is also a newline, skip it.
+          let nextNode = i < ast.length - 1 ? (ast[i + 1]) : null;
+          if (isStr(nextNode)) {
+            if (nextNode.startsWith('\n')) {
+              ast[i + 1] = nextNode.slice(1);
+            } else if (nextNode.startsWith('\r\n')) {
+              ast[i + 1] = nextNode.slice(2);
+            }
+          }
+        }
+      } else {
         output += renderedOutput;
       }
       if (node.identifier) {
@@ -65,6 +78,12 @@ function renderAst(ast: AstNode[], choiceResultMap: ChoiceResultMap): string {
   return output;
 }
 
+function postprocess(text: string): string {
+  let output = text;
+  output = postprocessing.replaceVisualLineBreaks(output);
+  return output;
+}
+
 export function render(bmlDocumentString: string, renderSettings?: RenderSettings): string {
   // Resolve render settings
   renderSettings = mergeSettings(defaultRenderSettings, renderSettings);
@@ -74,5 +93,6 @@ export function render(bmlDocumentString: string, renderSettings?: RenderSetting
 
   let lexer = new Lexer(bmlDocumentString);
   let ast = parseDocument(lexer, true);
-  return renderAst(ast, new Map());
+  let renderedText = renderAst(ast, new Map());
+  return postprocess(renderedText);
 }

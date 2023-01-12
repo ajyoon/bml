@@ -426,7 +426,8 @@ export function parseDocument(lexer: Lexer, isTopLevel: boolean): AstNode[] {
         }
         break;
       case TokenType.OPEN_BRACE:
-        astNodes = astNodes.concat(parseFork(lexer));
+        let fork = parseFork(lexer);
+        astNodes = astNodes.concat(fork);
         break;
       default:
         // Any other input is treated as a string
@@ -435,6 +436,8 @@ export function parseDocument(lexer: Lexer, isTopLevel: boolean): AstNode[] {
           let lastNode = astNodes[astNodes.length - 1];
           if (isStr(lastNode)) {
             astNodes[astNodes.length - 1] = lastNode.concat(token.str);
+          } else {
+            astNodes.push(token.str);
           }
         } else {
           astNodes.push(token.str);

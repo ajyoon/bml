@@ -48,58 +48,10 @@ export class BMLDuplicatedRefError extends Error {
   }
 }
 
-export class BMLNameError extends Error {
-  constructor(name: string, bmlDoc: string, errorIndex: number) {
-    let msg = 'Unknown name: "' + name + '" at '
-      + stringUtils.lineColumnString(bmlDoc, errorIndex);
-    super(msg);
-    this.name = 'BMLNameError';
-    Object.setPrototypeOf(this, BMLNameError.prototype);
-  }
-}
-
-export class UnknownModeError extends Error {
-  constructor(modeName: string, bmlDoc: string, errorIndex: number) {
-    let msg = 'Unknown mode \'' + modeName + '\' at '
-      + stringUtils.lineColumnString(bmlDoc, errorIndex);
-    super(msg);
-    this.name = 'UnknownModeError';
-    Object.setPrototypeOf(this, UnknownModeError.prototype);
-  }
-}
-
-export class FunctionNotFoundError extends Error {
-  constructor(functionName: string, bmlDoc: string, errorIndex: number) {
-    let msg = 'Attempted to call unknown function "' + functionName + '" at '
-      + stringUtils.lineColumnString(bmlDoc, errorIndex);
-    super(msg);
-    this.name = 'FunctionNotFoundError';
-    Object.setPrototypeOf(this, FunctionNotFoundError.prototype);
-  }
-}
-
-export class NotAFunctionError extends Error {
-  constructor(functionName: string, bmlDoc: string, errorIndex: number) {
-    let msg = 'Attempted to call non-function "' + functionName + '" at '
-      + stringUtils.lineColumnString(bmlDoc, errorIndex);
-    super(msg);
-    this.name = 'NotAFunctionError';
-    Object.setPrototypeOf(this, NotAFunctionError.prototype);
-  }
-}
-
 export class EvalProvidedSettingsError extends Error {
   constructor(field: string, value: any) {
     super(`Eval-provided field '${field}' of '${value}' is invalid`)
     this.name = 'EvalProvidedSettingsError';
     Object.setPrototypeOf(this, EvalProvidedSettingsError.prototype);
-  }
-}
-
-export class EvalProvideError extends Error {
-  constructor(msg: string) {
-    super(msg)
-    this.name = 'EvalProvideError';
-    Object.setPrototypeOf(this, EvalProvideError.prototype);
   }
 }
