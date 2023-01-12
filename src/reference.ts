@@ -1,15 +1,15 @@
 import { Choice, WeightedChoice } from './weightedChoice';
 import { Replacer } from './replacer';
 
-export type BackReferenceMap = Map<number, Choice>;
+export type ReferenceMap = Map<number, Choice>;
 
-export class BackReference {
+export class Reference {
 
   referredIdentifier: string;
-  choiceMap: BackReferenceMap;
+  choiceMap: ReferenceMap;
   fallbackReplacer: Replacer | null;
 
-  constructor(referredIdentifier: string, choiceMap: BackReferenceMap, fallbackChocies: WeightedChoice[]) {
+  constructor(referredIdentifier: string, choiceMap: ReferenceMap, fallbackChocies: WeightedChoice[]) {
     this.referredIdentifier = referredIdentifier;
     this.choiceMap = choiceMap;
     if (fallbackChocies.length) {

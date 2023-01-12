@@ -5,7 +5,7 @@ import path from 'path'
 import { Replacer } from '../src/replacer';
 import { Lexer } from '../src/lexer';
 import { WeightedChoice } from '../src/weightedChoice';
-import { BackReference } from '../src/backReference';
+import { Reference } from '../src/reference';
 import { AstNode } from '../src/ast';
 
 import {
@@ -159,16 +159,16 @@ describe('parseFork', function() {
     expect((result as Replacer).isSilent).toBe(true);
   });
 
-  it('allows back references', function() {
+  it('allows references', function() {
     let lexer = new Lexer('@TestChoice: 0 -> (foo)}');
     let result = parseFork(lexer);
     let expectedChoiceMap = new Map();
     expectedChoiceMap.set(0, ['foo']);
-    expect(result).toBeInstanceOf(BackReference);
-    expect(result).toEqual(new BackReference('TestChoice', expectedChoiceMap, []));
+    expect(result).toBeInstanceOf(Reference);
+    expect(result).toEqual(new Reference('TestChoice', expectedChoiceMap, []));
   });
 
-  it('allows grouped back references', function() {
+  it('allows grouped mappings in references', function() {
     let lexer = new Lexer('@TestChoice: 0, 1 -> (foo), 2, 3 -> (bar), (baz)}');
     let result = parseFork(lexer);
     let expectedChoiceMap = new Map();
@@ -176,22 +176,22 @@ describe('parseFork', function() {
     expectedChoiceMap.set(1, ['foo']);
     expectedChoiceMap.set(2, ['bar']);
     expectedChoiceMap.set(3, ['bar']);
-    expect(result).toBeInstanceOf(BackReference);
-    expect(result).toEqual(new BackReference(
+    expect(result).toBeInstanceOf(Reference);
+    expect(result).toEqual(new Reference(
       'TestChoice', expectedChoiceMap, [new WeightedChoice(['baz'], 100)]));
   });
 
-  it('allows multiple fallback branches in back references', function() {
+  it('allows multiple fallback branches in references', function() {
     let lexer = new Lexer('@TestChoice: 0 -> (foo), (bar) 60, (baz)}');
     let result = parseFork(lexer);
     let expectedChoiceMap = new Map();
     expectedChoiceMap.set(0, ['foo']);
-    expect(result).toBeInstanceOf(BackReference);
+    expect(result).toBeInstanceOf(Reference);
     let expectedWeights = [
       new WeightedChoice(['bar'], 60),
       new WeightedChoice(['baz'], 40),
     ];
-    expect(result).toEqual(new BackReference(
+    expect(result).toEqual(new Reference(
       'TestChoice', expectedChoiceMap, expectedWeights));
   })
 
@@ -320,7 +320,7 @@ describe('parseFork', function() {
   it('parses a simple case with a single string branch and no fallback', function() {
     let testString = '@TestRef: 0 -> (foo)}';
     let lexer = new Lexer(testString);
-    let result = parseFork(lexer)! as BackReference;
+    let result = parseFork(lexer)! as Reference;
     expect(result.referredIdentifier).toBe('TestRef');
     expect(result.choiceMap.size).toBe(1);
     expect(result.choiceMap.get(0)).toStrictEqual(['foo']);
@@ -328,7 +328,7 @@ describe('parseFork', function() {
 
   it('parses a simple case with a single eval block branch and no fallback', function() {
     let testString = '@TestRef: 0 -> [some js]}';
-    let result = parseFork(new Lexer(testString)) as BackReference;
+    let result = parseFork(new Lexer(testString)) as Reference;
     expect(result.referredIdentifier).toBe('TestRef');
     expect(result.choiceMap.size).toBe(1);
     expect(result.choiceMap.get(0)).toBeInstanceOf(EvalBlock);
@@ -337,7 +337,7 @@ describe('parseFork', function() {
 
   it('allows a single branch with a fallback', function() {
     let testString = '@TestRef: 0 -> [some js], (fallback)}';
-    let result = parseFork(new Lexer(testString))! as BackReference;
+    let result = parseFork(new Lexer(testString))! as Reference;
     expect(result.referredIdentifier).toBe('TestRef');
     expect(result.choiceMap.size).toBe(1);
     expect(result.choiceMap.get(0)).toBeInstanceOf(EvalBlock);
@@ -350,7 +350,7 @@ describe('parseFork', function() {
 
   it('parses multiple branches of all types with fallback', function() {
     let testString = '@TestRef: 0 -> (foo), 1 -> [some js], 2 -> (bar), [some more js]}';
-    let result = parseFork(new Lexer(testString)) as BackReference;
+    let result = parseFork(new Lexer(testString)) as Reference;
 
     expect(result.referredIdentifier).toBe('TestRef');
     expect(result.choiceMap.size).toBe(3);
@@ -371,8 +371,8 @@ describe('parseFork', function() {
   it('parses copy refs', function() {
     let testString = '@TestRef}';
     let lexer = new Lexer(testString);
-    let result = parseFork(lexer)! as BackReference;
-    expect(result).toBeInstanceOf(BackReference);
+    let result = parseFork(lexer)! as Reference;
+    expect(result).toBeInstanceOf(Reference);
     expect(result.referredIdentifier).toBe('TestRef');
     expect(result.choiceMap.size).toBe(0);
     expect(result.fallbackReplacer).toBeNull();

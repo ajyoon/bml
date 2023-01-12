@@ -3,7 +3,7 @@ import { WeightedChoice } from './weightedChoice';
 import { Lexer } from './lexer';
 import { TokenType } from './tokenType';
 import { Replacer } from './replacer';
-import { BackReference } from './backReference';
+import { Reference } from './reference';
 import {
   IllegalStateError,
   JavascriptSyntaxError,
@@ -120,7 +120,7 @@ export function parseEval(lexer: Lexer): EvalBlock {
  * Expects the lexer's previous token to be the opening curly brace,
  * and the next token whatever comes next.
  */
-export function parseFork(lexer: Lexer): Replacer | BackReference {
+export function parseFork(lexer: Lexer): Replacer | Reference {
   let startIndex = lexer.index;
 
   let mappedChoices = new Map();
@@ -129,7 +129,7 @@ export function parseFork(lexer: Lexer): Replacer | BackReference {
   let idRe = /([@#]?)(\w+):?/y;
 
   let id = null;
-  let isBackReference = false;
+  let isReference = false;
   let isSilent = false;
 
   let acceptId = true;
@@ -233,8 +233,8 @@ export function parseFork(lexer: Lexer): Replacer | BackReference {
       case TokenType.CLOSE_BRACE:
         if (acceptBlockEnd) {
           lexer.next();  // consume close brace
-          if (isBackReference) {
-            return new BackReference(id!, mappedChoices, unmappedChoices);
+          if (isReference) {
+            return new Reference(id!, mappedChoices, unmappedChoices);
           } else {
             return new Replacer(unmappedChoices, id, isSilent)
           }
@@ -254,7 +254,7 @@ export function parseFork(lexer: Lexer): Replacer | BackReference {
           let typeSlug = idMatch[1];
           id = idMatch[2];
           if (typeSlug == '@') {
-            isBackReference = true;
+            isReference = true;
             acceptChoiceIndex = true;
           } else if (typeSlug == '#') {
             isSilent = true;

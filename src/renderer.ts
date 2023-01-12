@@ -1,7 +1,7 @@
 import * as rand from './rand';
 import * as postprocessing from './postprocessing';
 import { defaultBMLSettings, defaultRenderSettings, mergeSettings, RenderSettings } from './settings';
-import { BackReference } from './backReference';
+import { Reference } from './reference';
 import { parseDocument } from './parsers';
 import { UserDefs } from './userDefs';
 import { AstNode } from './ast';
@@ -30,23 +30,23 @@ class Renderer {
     this.evalBindings = {};
   }
 
-  resolveBackReference(backReference: BackReference): Choice {
-    let referredChoiceResult = this.choiceResultMap.get(backReference.referredIdentifier);
+  resolveReference(reference: Reference): Choice {
+    let referredChoiceResult = this.choiceResultMap.get(reference.referredIdentifier);
     if (referredChoiceResult) {
-      if (!backReference.choiceMap.size && !backReference.fallbackReplacer) {
+      if (!reference.choiceMap.size && !reference.fallbackReplacer) {
         // this is a special "copy" backref
         return [referredChoiceResult.renderedOutput];
       }
-      let matchedBackReferenceResult = backReference.choiceMap.get(referredChoiceResult.choiceIndex);
-      if (matchedBackReferenceResult !== undefined) {
-        return matchedBackReferenceResult;
+      let matchedReferenceResult = reference.choiceMap.get(referredChoiceResult.choiceIndex);
+      if (matchedReferenceResult !== undefined) {
+        return matchedReferenceResult;
       }
     }
-    if (!backReference.fallbackReplacer) {
-      console.warn(`No matching reference or fallback found for ${backReference.referredIdentifier}`);
+    if (!reference.fallbackReplacer) {
+      console.warn(`No matching reference or fallback found for ${reference.referredIdentifier}`);
       return [''];
     }
-    return backReference.fallbackReplacer.call().replacement;
+    return reference.fallbackReplacer.call().replacement;
   }
 
   renderChoice(choice: Choice): string {
@@ -93,7 +93,7 @@ class Renderer {
           this.choiceResultMap.set(node.identifier, { choiceIndex, renderedOutput })
         }
       } else {
-        let backRefResult = this.resolveBackReference(node);
+        let backRefResult = this.resolveReference(node);
         output += this.renderChoice(backRefResult);
       }
     }

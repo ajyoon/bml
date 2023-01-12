@@ -1,4 +1,4 @@
 import { Replacer } from './replacer';
-import { BackReference } from './backReference'
+import { Reference } from './reference'
 
-export type AstNode = string | Replacer | BackReference
+export type AstNode = string | Replacer | Reference
