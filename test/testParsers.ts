@@ -2,7 +2,7 @@ import expect from 'expect';
 import fs from 'fs';
 import path from 'path'
 
-import { Replacer } from '../src/replacer';
+import { ChoiceFork } from '../src/choiceFork';
 import { Lexer } from '../src/lexer';
 import { WeightedChoice } from '../src/weightedChoice';
 import { Reference } from '../src/reference';
@@ -111,52 +111,52 @@ describe('parseFork', function() {
   it('allows a single unweighted item', function() {
     let lexer = new Lexer('(test)}');
     let result = parseFork(lexer);
-    expect(result).toBeInstanceOf(Replacer);
+    expect(result).toBeInstanceOf(ChoiceFork);
   });
 
   it('allows a single weighted item', function() {
     let lexer = new Lexer('(test) 100}');
     let result = parseFork(lexer);
-    expect(result).toBeInstanceOf(Replacer);
+    expect(result).toBeInstanceOf(ChoiceFork);
   });
 
   it('allows a single unweighted eval block item', function() {
     let lexer = new Lexer('[some js]}');
     let result = parseFork(lexer);
-    expect(result).toBeInstanceOf(Replacer);
+    expect(result).toBeInstanceOf(ChoiceFork);
   });
 
   it('allows a single weighted eval block item', function() {
     let lexer = new Lexer('[some js] 100}');
     let result = parseFork(lexer);
-    expect(result).toBeInstanceOf(Replacer);
+    expect(result).toBeInstanceOf(ChoiceFork);
   });
 
   it('allows a comma separated mix of literals and eval blocks', function() {
     let lexer = new Lexer('(test) 50, [some js] 40}');
     let result = parseFork(lexer);
-    expect(result).toBeInstanceOf(Replacer);
+    expect(result).toBeInstanceOf(ChoiceFork);
   });
 
   it('allows trailing commas', function() {
     let lexer = new Lexer('(foo), (bar),}');
     let result = parseFork(lexer);
-    expect(result).toBeInstanceOf(Replacer);
+    expect(result).toBeInstanceOf(ChoiceFork);
   });
 
   it('allows the choice to be prefixed by an identifier for reference in later choices', function() {
     let lexer = new Lexer('TestChoice: (test) 50, (test 2) 40}');
     let result = parseFork(lexer);
-    expect(result).toBeInstanceOf(Replacer);
-    expect((result as Replacer).identifier).toBe('TestChoice');
+    expect(result).toBeInstanceOf(ChoiceFork);
+    expect((result as ChoiceFork).identifier).toBe('TestChoice');
   });
 
   it('allows blocks with identifiers to be marked silent with # prefix', function() {
     let lexer = new Lexer('#TestChoice: (test)}');
     let result = parseFork(lexer);
-    expect(result).toBeInstanceOf(Replacer);
-    expect((result as Replacer).identifier).toBe('TestChoice');
-    expect((result as Replacer).isSilent).toBe(true);
+    expect(result).toBeInstanceOf(ChoiceFork);
+    expect((result as ChoiceFork).identifier).toBe('TestChoice');
+    expect((result as ChoiceFork).isSilent).toBe(true);
   });
 
   it('allows references', function() {
@@ -197,15 +197,15 @@ describe('parseFork', function() {
 
   it('allows forks to be used directly as branches', function() {
     let lexer = new Lexer('{(foo)} 60, (bar)}');
-    let result = parseFork(lexer) as Replacer;
-    let expectedResult = new Replacer([
+    let result = parseFork(lexer) as ChoiceFork;
+    let expectedResult = new ChoiceFork([
       new WeightedChoice([
-        // Nested replacer
-        new Replacer([
+        // Nested fork
+        new ChoiceFork([
           new WeightedChoice(['foo'], 100)
         ], null, false)
       ], 60),
-      // Alternate branch in outer replacer
+      // Alternate branch in outer fork
       new WeightedChoice(['bar'], 40)
     ], null, false);
     expect(result).toEqual(expectedResult);
@@ -234,10 +234,10 @@ describe('parseLiteralBlock', function() {
 
 
 describe('parseFork', function() {
-  it('parses a string literal replacer with braces', function() {
+  it('parses a choice fork with a single text branch', function() {
     let testString = '(test)}';
     let lexer = new Lexer(testString);
-    let result = parseFork(lexer) as Replacer;
+    let result = parseFork(lexer) as ChoiceFork;
     expect(result.weights.length).toBe(1);
     expect(result.weights[0]).toBeInstanceOf(WeightedChoice);
     expect(result.weights[0].choice).toStrictEqual(['test']);
@@ -245,10 +245,10 @@ describe('parseFork', function() {
     expect(lexer.index).toBe(testString.length);
   });
 
-  it('parses an eval block replacer', function() {
+  it('parses an eval block branch', function() {
     let testString = '[some js]}';
     let lexer = new Lexer(testString);
-    let result = parseFork(lexer) as Replacer;
+    let result = parseFork(lexer) as ChoiceFork;
     expect(result.weights.length).toBe(1);
     expect(result.weights[0]).toBeInstanceOf(WeightedChoice);
     expect(result.weights[0].weight).toBe(100);
@@ -260,7 +260,7 @@ describe('parseFork', function() {
   it('parses strings with weights', function() {
     let testString = '(test) 5}';
     let lexer = new Lexer(testString);
-    let result = parseFork(lexer) as Replacer;
+    let result = parseFork(lexer) as ChoiceFork;
     expect(result.weights.length).toBe(1);
     expect(result.weights[0]).toBeInstanceOf(WeightedChoice);
     expect(result.weights[0].choice).toStrictEqual(['test']);
@@ -268,10 +268,10 @@ describe('parseFork', function() {
     expect(lexer.index).toBe(testString.length);
   });
 
-  it('parses eval block replacers with weights', function() {
+  it('parses eval block branch with weight', function() {
     let testString = '[some js] 5}';
     let lexer = new Lexer(testString);
-    let result = parseFork(lexer) as Replacer;
+    let result = parseFork(lexer) as ChoiceFork;
     expect(result.weights.length).toBe(1);
     expect(result.weights[0]).toBeInstanceOf(WeightedChoice);
     expect(result.weights[0].weight).toBe(5);
@@ -280,10 +280,10 @@ describe('parseFork', function() {
     expect(evalBlock.contents).toBe('some js');
   });
 
-  it('parses many replacers with and without weights', function() {
+  it('parses many branches with and without weights', function() {
     let testString = '[some js] 5, (test2), (test3) 3}';
     let lexer = new Lexer(testString);
-    let result = parseFork(lexer) as Replacer;
+    let result = parseFork(lexer) as ChoiceFork;
     expect(result.weights.length).toBe(3);
 
     expect(result.weights[0]).toBeInstanceOf(WeightedChoice);
@@ -321,7 +321,7 @@ describe('parseFork', function() {
     let testString = '@TestRef: 0 -> (foo)}';
     let lexer = new Lexer(testString);
     let result = parseFork(lexer)! as Reference;
-    expect(result.referredIdentifier).toBe('TestRef');
+    expect(result.id).toBe('TestRef');
     expect(result.choiceMap.size).toBe(1);
     expect(result.choiceMap.get(0)).toStrictEqual(['foo']);
   });
@@ -329,7 +329,7 @@ describe('parseFork', function() {
   it('parses a simple case with a single eval block branch and no fallback', function() {
     let testString = '@TestRef: 0 -> [some js]}';
     let result = parseFork(new Lexer(testString)) as Reference;
-    expect(result.referredIdentifier).toBe('TestRef');
+    expect(result.id).toBe('TestRef');
     expect(result.choiceMap.size).toBe(1);
     expect(result.choiceMap.get(0)).toBeInstanceOf(EvalBlock);
     expect((result.choiceMap.get(0) as EvalBlock).contents).toBe('some js');
@@ -338,13 +338,13 @@ describe('parseFork', function() {
   it('allows a single branch with a fallback', function() {
     let testString = '@TestRef: 0 -> [some js], (fallback)}';
     let result = parseFork(new Lexer(testString))! as Reference;
-    expect(result.referredIdentifier).toBe('TestRef');
+    expect(result.id).toBe('TestRef');
     expect(result.choiceMap.size).toBe(1);
     expect(result.choiceMap.get(0)).toBeInstanceOf(EvalBlock);
     expect((result.choiceMap.get(0) as EvalBlock).contents).toBe('some js');
-    expect(result.fallbackReplacer!).not.toBeNull();
-    expect(result.fallbackReplacer!.weights).toHaveLength(1);
-    let fallbackChoice = result.fallbackReplacer!.weights[0].choice as AstNode[];
+    expect(result.fallbackChoiceFork!).not.toBeNull();
+    expect(result.fallbackChoiceFork!.weights).toHaveLength(1);
+    let fallbackChoice = result.fallbackChoiceFork!.weights[0].choice as AstNode[];
     expect(fallbackChoice).toStrictEqual(['fallback']);
   });
 
@@ -352,7 +352,7 @@ describe('parseFork', function() {
     let testString = '@TestRef: 0 -> (foo), 1 -> [some js], 2 -> (bar), [some more js]}';
     let result = parseFork(new Lexer(testString)) as Reference;
 
-    expect(result.referredIdentifier).toBe('TestRef');
+    expect(result.id).toBe('TestRef');
     expect(result.choiceMap.size).toBe(3);
     expect(result.choiceMap.get(0)).toStrictEqual(['foo']);
 
@@ -361,9 +361,9 @@ describe('parseFork', function() {
 
     expect(result.choiceMap.get(2)).toStrictEqual(['bar']);
 
-    expect(result.fallbackReplacer!).not.toBeNull();
-    expect(result.fallbackReplacer!.weights).toHaveLength(1);
-    let fallbackChoice = result.fallbackReplacer!.weights[0].choice as EvalBlock;
+    expect(result.fallbackChoiceFork!).not.toBeNull();
+    expect(result.fallbackChoiceFork!.weights).toHaveLength(1);
+    let fallbackChoice = result.fallbackChoiceFork!.weights[0].choice as EvalBlock;
     expect(fallbackChoice).toBeInstanceOf(EvalBlock);
     expect(fallbackChoice.contents).toBe('some more js');
   });
@@ -373,9 +373,9 @@ describe('parseFork', function() {
     let lexer = new Lexer(testString);
     let result = parseFork(lexer)! as Reference;
     expect(result).toBeInstanceOf(Reference);
-    expect(result.referredIdentifier).toBe('TestRef');
+    expect(result.id).toBe('TestRef');
     expect(result.choiceMap.size).toBe(0);
-    expect(result.fallbackReplacer).toBeNull();
+    expect(result.fallbackChoiceFork).toBeNull();
   });
 
   function testParseStrToGiveSyntaxError(backRefString: string) {
@@ -431,7 +431,7 @@ describe('parseDocument', function() {
     let result = parseDocument(lexer, true);
     expect(result).toHaveLength(3);
     expect(result[0]).toBe('foo ');
-    expect(result[1]).toBeInstanceOf(Replacer);
+    expect(result[1]).toBeInstanceOf(ChoiceFork);
     expect(result[2]).toBe(' biz');
   });
 

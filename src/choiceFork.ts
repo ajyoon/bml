@@ -4,12 +4,12 @@ import {
   weightedChoose
 } from './rand';
 
-export type ReplacerCallResult = {
+export type ChoiceForkCallResult = {
   replacement: Choice,
   choiceIndex: number
 }
 
-export class Replacer {
+export class ChoiceFork {
   weights: WeightedChoice[];
   identifier: string | null;
   isSilent: boolean;
@@ -23,13 +23,13 @@ export class Replacer {
   /**
    * returns an object of the form {replacement: String, choiceIndex: Int}
    */
-  call(): ReplacerCallResult {
+  call(): ChoiceForkCallResult {
     let result = weightedChoose(this.weights);
     return { replacement: result.choice, choiceIndex: result.choiceIndex };
   }
 
   toString(): string {
-    return `Replacer{weights: ${this.weights}, `
+    return `ChoiceFork{weights: ${this.weights}, `
       + `identifier: ${this.identifier}, isSilent: ${this.isSilent}}`;
   }
 }

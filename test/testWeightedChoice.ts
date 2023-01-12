@@ -3,7 +3,7 @@ import expect from 'expect';
 import { WeightedChoice } from '../src/weightedChoice';
 import { EvalBlock } from '../src/evalBlock';
 
-describe('Replacer', function() {
+describe('ChoiceFork', function() {
   it('has a useful toString for all choice types', function() {
     expect(new WeightedChoice(['foo'], 1).toString())
       .toBe('WeightedChoice{choice: foo, weight: 1}');

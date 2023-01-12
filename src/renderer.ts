@@ -6,7 +6,7 @@ import { parseDocument } from './parsers';
 import { UserDefs } from './userDefs';
 import { AstNode } from './ast';
 import { Lexer } from './lexer';
-import { Replacer } from './replacer';
+import { ChoiceFork } from './choiceFork.ts';
 import { Choice } from './weightedChoice';
 import { isStr } from './stringUtils';
 import { EvalBindingError } from './errors';
@@ -31,9 +31,9 @@ class Renderer {
   }
 
   resolveReference(reference: Reference): Choice {
-    let referredChoiceResult = this.choiceResultMap.get(reference.referredIdentifier);
+    let referredChoiceResult = this.choiceResultMap.get(reference.id);
     if (referredChoiceResult) {
-      if (!reference.choiceMap.size && !reference.fallbackReplacer) {
+      if (!reference.choiceMap.size && !reference.fallbackChoiceFork) {
         // this is a special "copy" backref
         return [referredChoiceResult.renderedOutput];
       }
@@ -42,11 +42,11 @@ class Renderer {
         return matchedReferenceResult;
       }
     }
-    if (!reference.fallbackReplacer) {
-      console.warn(`No matching reference or fallback found for ${reference.referredIdentifier}`);
+    if (!reference.fallbackChoiceFork) {
+      console.warn(`No matching reference or fallback found for ${reference.id}`);
       return [''];
     }
-    return reference.fallbackReplacer.call().replacement;
+    return reference.fallbackChoiceFork.call().replacement;
   }
 
   renderChoice(choice: Choice): string {
@@ -70,7 +70,7 @@ class Renderer {
       let node = ast[i];
       if (isStr(node)) {
         output += node;
-      } else if (node instanceof Replacer) {
+      } else if (node instanceof ChoiceFork) {
         let { replacement, choiceIndex } = node.call();
         let renderedOutput = this.renderChoice(replacement);
         if (node.isSilent) {

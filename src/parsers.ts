@@ -2,7 +2,7 @@ import { EvalBlock } from './evalBlock';
 import { WeightedChoice } from './weightedChoice';
 import { Lexer } from './lexer';
 import { TokenType } from './tokenType';
-import { Replacer } from './replacer';
+import { ChoiceFork } from './choiceFork.ts';
 import { Reference } from './reference';
 import {
   IllegalStateError,
@@ -120,7 +120,7 @@ export function parseEval(lexer: Lexer): EvalBlock {
  * Expects the lexer's previous token to be the opening curly brace,
  * and the next token whatever comes next.
  */
-export function parseFork(lexer: Lexer): Replacer | Reference {
+export function parseFork(lexer: Lexer): ChoiceFork | Reference {
   let startIndex = lexer.index;
 
   let mappedChoices = new Map();
@@ -236,7 +236,7 @@ export function parseFork(lexer: Lexer): Replacer | Reference {
           if (isReference) {
             return new Reference(id!, mappedChoices, unmappedChoices);
           } else {
-            return new Replacer(unmappedChoices, id, isSilent)
+            return new ChoiceFork(unmappedChoices, id, isSilent)
           }
         } else {
           throw new BMLSyntaxError('Unexpected close brace in fork',

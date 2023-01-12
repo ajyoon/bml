@@ -1,21 +1,21 @@
 import { Choice, WeightedChoice } from './weightedChoice';
-import { Replacer } from './replacer';
+import { ChoiceFork } from './choiceFork.ts';
 
 export type ReferenceMap = Map<number, Choice>;
 
 export class Reference {
 
-  referredIdentifier: string;
+  id: string;
   choiceMap: ReferenceMap;
-  fallbackReplacer: Replacer | null;
+  fallbackChoiceFork: ChoiceFork | null;
 
-  constructor(referredIdentifier: string, choiceMap: ReferenceMap, fallbackChocies: WeightedChoice[]) {
-    this.referredIdentifier = referredIdentifier;
+  constructor(id: string, choiceMap: ReferenceMap, fallbackChocies: WeightedChoice[]) {
+    this.id = id;
     this.choiceMap = choiceMap;
     if (fallbackChocies.length) {
-      this.fallbackReplacer = new Replacer(fallbackChocies, null, false);
+      this.fallbackChoiceFork = new ChoiceFork(fallbackChocies, null, false);
     } else {
-      this.fallbackReplacer = null;
+      this.fallbackChoiceFork = null;
     }
   }
 }
