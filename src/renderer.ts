@@ -33,11 +33,11 @@ class Renderer {
   resolveReference(reference: Reference): Choice {
     let referredChoiceResult = this.choiceResultMap.get(reference.id);
     if (referredChoiceResult) {
-      if (!reference.choiceMap.size && !reference.fallbackChoiceFork) {
+      if (!reference.referenceMap.size && !reference.fallbackChoiceFork) {
         // this is a special "copy" backref
         return [referredChoiceResult.renderedOutput];
       }
-      let matchedReferenceResult = reference.choiceMap.get(referredChoiceResult.choiceIndex);
+      let matchedReferenceResult = reference.referenceMap.get(referredChoiceResult.choiceIndex);
       if (matchedReferenceResult !== undefined) {
         return matchedReferenceResult;
       }

@@ -322,26 +322,26 @@ describe('parseFork', function() {
     let lexer = new Lexer(testString);
     let result = parseFork(lexer)! as Reference;
     expect(result.id).toBe('TestRef');
-    expect(result.choiceMap.size).toBe(1);
-    expect(result.choiceMap.get(0)).toStrictEqual(['foo']);
+    expect(result.referenceMap.size).toBe(1);
+    expect(result.referenceMap.get(0)).toStrictEqual(['foo']);
   });
 
   it('parses a simple case with a single eval block branch and no fallback', function() {
     let testString = '@TestRef: 0 -> [some js]}';
     let result = parseFork(new Lexer(testString)) as Reference;
     expect(result.id).toBe('TestRef');
-    expect(result.choiceMap.size).toBe(1);
-    expect(result.choiceMap.get(0)).toBeInstanceOf(EvalBlock);
-    expect((result.choiceMap.get(0) as EvalBlock).contents).toBe('some js');
+    expect(result.referenceMap.size).toBe(1);
+    expect(result.referenceMap.get(0)).toBeInstanceOf(EvalBlock);
+    expect((result.referenceMap.get(0) as EvalBlock).contents).toBe('some js');
   });
 
   it('allows a single branch with a fallback', function() {
     let testString = '@TestRef: 0 -> [some js], (fallback)}';
     let result = parseFork(new Lexer(testString))! as Reference;
     expect(result.id).toBe('TestRef');
-    expect(result.choiceMap.size).toBe(1);
-    expect(result.choiceMap.get(0)).toBeInstanceOf(EvalBlock);
-    expect((result.choiceMap.get(0) as EvalBlock).contents).toBe('some js');
+    expect(result.referenceMap.size).toBe(1);
+    expect(result.referenceMap.get(0)).toBeInstanceOf(EvalBlock);
+    expect((result.referenceMap.get(0) as EvalBlock).contents).toBe('some js');
     expect(result.fallbackChoiceFork!).not.toBeNull();
     expect(result.fallbackChoiceFork!.weights).toHaveLength(1);
     let fallbackChoice = result.fallbackChoiceFork!.weights[0].choice as AstNode[];
@@ -353,13 +353,13 @@ describe('parseFork', function() {
     let result = parseFork(new Lexer(testString)) as Reference;
 
     expect(result.id).toBe('TestRef');
-    expect(result.choiceMap.size).toBe(3);
-    expect(result.choiceMap.get(0)).toStrictEqual(['foo']);
+    expect(result.referenceMap.size).toBe(3);
+    expect(result.referenceMap.get(0)).toStrictEqual(['foo']);
 
-    expect(result.choiceMap.get(1)).toBeInstanceOf(EvalBlock);
-    expect((result.choiceMap.get(1) as EvalBlock).contents).toBe('some js');
+    expect(result.referenceMap.get(1)).toBeInstanceOf(EvalBlock);
+    expect((result.referenceMap.get(1) as EvalBlock).contents).toBe('some js');
 
-    expect(result.choiceMap.get(2)).toStrictEqual(['bar']);
+    expect(result.referenceMap.get(2)).toStrictEqual(['bar']);
 
     expect(result.fallbackChoiceFork!).not.toBeNull();
     expect(result.fallbackChoiceFork!.weights).toHaveLength(1);
@@ -374,7 +374,7 @@ describe('parseFork', function() {
     let result = parseFork(lexer)! as Reference;
     expect(result).toBeInstanceOf(Reference);
     expect(result.id).toBe('TestRef');
-    expect(result.choiceMap.size).toBe(0);
+    expect(result.referenceMap.size).toBe(0);
     expect(result.fallbackChoiceFork).toBeNull();
   });
 

@@ -6,12 +6,12 @@ export type ReferenceMap = Map<number, Choice>;
 export class Reference {
 
   id: string;
-  choiceMap: ReferenceMap;
+  referenceMap: ReferenceMap;
   fallbackChoiceFork: ChoiceFork | null;
 
   constructor(id: string, choiceMap: ReferenceMap, fallbackChocies: WeightedChoice[]) {
     this.id = id;
-    this.choiceMap = choiceMap;
+    this.referenceMap = choiceMap;
     if (fallbackChocies.length) {
       this.fallbackChoiceFork = new ChoiceFork(fallbackChocies, null, false);
     } else {
