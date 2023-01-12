@@ -1,5 +1,53 @@
 # Changelog
 
+### 0.1.0: MAJOR BREAKING CHANGE
+
+In this release, the language and parser have been largely rewritten,
+with substantial improvements and feature changes. The most commonly
+used features are unchanged, and many old programs should continue to
+work in this version.
+
+* Support for replacer rules and modes has been removed. This includes
+  things like the `mode` and `use` keywords. Users who want this
+  functionality should instead do this with a custom post-processor.
+* The document prelude section has been removed.
+* The language nomenclature has been changed to improve clarity:
+  * "Fork" refers to any curly-braces `{}` block, including common
+    replacers and references (formerly called "back references").
+  * "Branch" refers to any possible execution path a fork can go
+    down. This includes text blocks, eval blocks, and nested forks.
+  * "Reference" and "Ref" refer to what used to be called "back
+    reference" blocks, e.g. `{@foo: 0 -> (bar)}` and `{@foo}`.
+  * The labels that identify forks are now called "Ids" or "ForkIds".
+* Eval blocks have been completely overhauled
+  * The `eval` block has been changed to an eval directive usable only
+    as branches in forks, marked with single square brackets, for
+    example `{[js code]}`
+  * The `provide()` function has been replaced with a `bind()`
+    function that accepts any object where its keys are valid
+    javascript identifiers. Bound values are made available as local
+    variables in the scope of subsequent eval blocks, and mutations to
+    these values are persisted in the bound context.
+  * Document settings are now set through this `bind()` function using
+    the reserved key name `settings`. This can be bound anywhere,
+    though it is recommended to do so at the top of the document in a
+    bare choice block, e.g. `{[bind(settings: {...})]}`
+  * The `call` keyword syntax has been replaced with eval blocks. To
+    insert text from an eval block, use the new `insert()` function,
+    e.g. `{[insert('foo')]}`.
+  * Attempting to bind the same field more than once will result in an
+    error.
+* Reference blocks can now include multiple fallback branches,
+  including those with weights, which are grouped together and used to
+  make a fallback fork.
+* For more convenient nesting, forks can be used directly themselves
+  as branches. What used to be `{@foo: 0 -> ({(bar), (biz)})}` can now
+  be written `{@foo: 0 -> {(bar), (biz)}}`, omitting the branch parentheses.
+* The interpreter has been divided cleanly into a separate parser and
+  renderer, allowing proper static analysis. This will allow fairly
+  straightforward branch counting in the future.
+* Comments should now properly be well-supported in all contexts
+
 ### 0.0.35: BREAKING CHANGE
 * Make line comments emit a single newline. This fixes the behavior of
   lines which end in line comments. like `foo // comment\n`
