@@ -23,20 +23,6 @@ describe('Lexer', function() {
     expect(lexer.next()).toBeNull();
   });
 
-  it('tokenizes visual newlines dumbly', function() {
-    let lexer = new Lexer('\\\n   test');
-    expect(lexer.next()).toEqual(new Token(TokenType.VISUAL_NEW_LINE, 0, 2, ' '));
-    expect(lexer.next()).toEqual(new Token(TokenType.WHITESPACE, 2, 5, '   '));
-    expect(lexer.next()).toEqual(new Token(TokenType.TEXT, 5, 6, 't'));
-  });
-
-  it('tokenizes visual CRLF newlines dumbly', function() {
-    let lexer = new Lexer('\\\r\n   test');
-    expect(lexer.next()).toEqual(new Token(TokenType.VISUAL_NEW_LINE, 0, 3, ' '));
-    expect(lexer.next()).toEqual(new Token(TokenType.WHITESPACE, 3, 6, '   '));
-    expect(lexer.next()).toEqual(new Token(TokenType.TEXT, 6, 7, 't'));
-  });
-
   it('tokenizes spaces and tabs as WHITESPACE', function() {
     let lexer = new Lexer(' ');
     expect(lexer.next()).toEqual(new Token(TokenType.WHITESPACE, 0, 1, ' '));

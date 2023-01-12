@@ -1,5 +1,5 @@
 import { DocumentSettings } from './settings';
-import { EvalProvidedSettingsError } from './errors';
+import { EvalBoundSettingsError } from './errors';
 
 
 function nullOrUndefined<T>(object: T | undefined | null): object is T {
@@ -11,7 +11,7 @@ export type UserDefs = { [index: string]: any };
 function validateSettingField(settings: UserDefs, field: string, expectedType: string) {
   const value = settings[field];
   if (!nullOrUndefined(value) && typeof value !== expectedType) {
-    throw new EvalProvidedSettingsError('setting.' + field, value);
+    throw new EvalBoundSettingsError('setting.' + field, value);
   }
 }
 
@@ -21,6 +21,5 @@ export function validateUserDefs(userDefs: UserDefs) {
     validateSettingField(settings, 'whitespaceCleanup', 'boolean');
     validateSettingField(settings, 'punctuationCleanup', 'boolean');
     validateSettingField(settings, 'capitalizationCleanup', 'boolean');
-    validateSettingField(settings, 'version', 'string');
   }
 }

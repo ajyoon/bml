@@ -15,14 +15,6 @@ export interface DocumentSettings {
    * following sentence-ending punctuation.
    */
   capitalizationCleanup?: boolean | null;
-
-  /** 
-   * The expected BML version number
-   *
-   * BML will log a warning if this version number does not match the
-   * interpreter version.
-   */
-  version?: string | null;
 }
 
 export interface RenderSettings {
@@ -49,7 +41,6 @@ export const defaultBMLSettings: DocumentSettings = {
   whitespaceCleanup: true,
   punctuationCleanup: true,
   capitalizationCleanup: true,
-  version: null,
 };
 
 export const defaultRenderSettings: RenderSettings = {

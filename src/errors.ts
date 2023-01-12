@@ -48,10 +48,18 @@ export class BMLDuplicatedRefError extends Error {
   }
 }
 
-export class EvalProvidedSettingsError extends Error {
+export class EvalBoundSettingsError extends Error {
   constructor(field: string, value: any) {
-    super(`Eval-provided field '${field}' of '${value}' is invalid`)
-    this.name = 'EvalProvidedSettingsError';
-    Object.setPrototypeOf(this, EvalProvidedSettingsError.prototype);
+    super(`Eval binding of settings field '${field}' of '${value}' is invalid`)
+    this.name = 'EvalBoundSettingsError';
+    Object.setPrototypeOf(this, EvalBoundSettingsError.prototype);
+  }
+}
+
+export class EvalBindingError extends Error {
+  constructor(key: string) {
+    super(`Eval binding ${key} was bound multiple times.`)
+    this.name = 'EvalBindingError';
+    Object.setPrototypeOf(this, EvalBindingError.prototype);
   }
 }

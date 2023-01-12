@@ -9,6 +9,7 @@ import { Lexer } from './lexer';
 import { Replacer } from './replacer';
 import { Choice } from './weightedChoice';
 import { isStr } from './stringUtils';
+import { EvalBindingError } from './errors';
 
 
 export type ChoiceResult = { choiceIndex: number, renderedOutput: string };
@@ -53,7 +54,12 @@ class Renderer {
       return this.renderAst(choice);
     } else {
       let evalResult = choice.execute(this.evalBindings);
-      Object.assign(this.evalBindings, evalResult.bindings);
+      for (let [key, value] of Object.entries(evalResult.bindings)) {
+        if (this.evalBindings.hasOwnProperty(key)) {
+          throw new EvalBindingError(key);
+        }
+        this.evalBindings[key] = value;
+      }
       return evalResult.output;
     }
   }
