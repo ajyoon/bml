@@ -1,7 +1,19 @@
 import * as evalApi from './evalApi';
+import { UserDefs, validateUserDefs } from './userDefs';
 
 const evalFuncTemplate = `
   const bml = this;
+
+  const __new_bindings = {};
+
+  function bind(obj) {
+    for (let key in obj) {
+      __new_bindings[key] = obj[key];
+    }
+
+  }
+
+  ***USER DEFS BINDING SLOT**
 
   let __output = '';
 
@@ -15,8 +27,14 @@ const evalFuncTemplate = `
 
   ////////// end user code
 
-  return __output;
+  return {output: __output, bindings: __new_bindings};
 `;
+
+
+export type EvalResult = {
+  output: string;
+  bindings: UserDefs;
+};
 
 
 export class EvalBlock {
@@ -30,13 +48,28 @@ export class EvalBlock {
     return `EvalBlock('${this.contents}')`;
   }
 
-  toFunc(): Function {
-    let funcSrc = evalFuncTemplate.replace('***USER CODE SLOT***', this.contents);
-    return new Function(funcSrc).bind(evalApi.api);
+  generateBindingCode(userDefs: UserDefs): string {
+    let lines = [];
+    if (userDefs.settings) {
+      lines.push('const settings = __user_def_bindings.settings;');
+    }
+    for (let key in userDefs) {
+      lines.push(`const ${key} = __user_def_bindings.${key}`)
+    }
+    return lines.join('\n');
   }
 
-  execute(): string {
-    return this.toFunc()();
+  toFunc(userDefs: UserDefs): Function {
+    let funcSrc = evalFuncTemplate.replace('***USER CODE SLOT***', this.contents);
+    funcSrc = funcSrc.replace('***USER DEFS BINDING SLOT**', this.generateBindingCode(userDefs));
+    let funcContext = Object.assign({}, evalApi.api);
+    return new Function('__user_def_bindings', funcSrc).bind(funcContext);
+  }
+
+  execute(userDefs: UserDefs): EvalResult {
+    let result = this.toFunc(userDefs)(userDefs);
+    validateUserDefs(result.bindings);
+    return result;
   }
 }
 

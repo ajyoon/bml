@@ -113,4 +113,11 @@
 
 // And for test completeness, include features not demonstrated above:
 // An eval block
-{[insert('test')]}
+{[
+    bind({
+        foo: () => {
+            return 'function called';
+        }
+    });
+]}
+{[insert(foo());]}
