@@ -28,7 +28,7 @@
            }
          }
          var client = new HttpClient();
-         client.get('/test/randomSmokeTest.bml',
+         client.get('/test/lao_tzu_36.bml',
                     function(response) {
                       renderedContent = bml(response, { randomSeed: 1234 });
                       document.getElementById("bml-target").innerHTML = renderedContent;

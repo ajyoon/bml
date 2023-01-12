@@ -4,8 +4,11 @@ const { execSync } = require('child_process');
 const path = require('path');
 const assert = require('assert');
 const fs = require('fs');
+const expect = require('expect');
 
-const bmlScriptPath = path.resolve(__dirname, 'randomSmokeTest.bml');
+const bmlScriptPath = path.resolve(__dirname, 'lao_tzu_36.bml');
+const expectedOutputPath = path.resolve(
+  __dirname, 'lao_tzu_36_expected_output_seed_1234.bml');
 const distDir = path.resolve(__dirname, '../dist');
 const cliPath = path.resolve(distDir, 'cli.js');
 const webBundlePath = path.resolve(distDir, 'bml.bundle.js');
@@ -23,26 +26,24 @@ if (!(fs.existsSync(cliPath)
 
 const bmlScript = fs.readFileSync(bmlScriptPath).toString();
 const seed = 1234;
-const expectedOutput = `# test
+const expectedOutput = fs.readFileSync(expectedOutputPath).toString();
 
-some text for invoking the 'testslug' rule
-
-b523.4981419683454testslugtestslugtestslugtestslugbtestslugbtestslugtestslugbtestslugtestslugtestslugtestslugtestslugtestslug740.6337445493219btestslugtestslugtestslug245.99688499008326testslugtestslugtestslug433.4327642061682782.2418240111148testslugtestslug544.5038589904608558.8927263081487719.7560739724629850.8109344551675199.76264596237715916.5357903488035b401.83116949596956testslug694.721096404249testslug657.6225811962995btestslug789.6597683556548233.76282847557707testslugtestslug322.17461139681956btestslugtestslugtestslugbtestslug193.72036158607256testslugb328.57716749583636585.6329813535385testslugtestslugbtestslug884.6045033372823573.5445575868608btestslugb34.96438528956413429.0262536992861testslugtestslug362.4234468198231btestslug713.8859378126323testslug667.1074769011069testslugb676.1350788850746testslug280.09882205288886btestslugtestslugbtestslug1.8850598754446546btestslugbtestslugtestslugb
-
-a simple choice
-
-a recursive path
-
-just kidding
-`;
+function assertResult(result) {
+  if (result !== expectedOutput) {
+    console.error(
+      'Rendered output did not match expected. Expected:\n\n\n', expectedOutput,
+      '\n\n\n---------------------------\n\n\n', 'Got:\n', result);
+    throw new Error();
+  }
+}
 
 console.log('Checking CLI');
 let cliResult = execSync(`node ${cliPath} ${bmlScriptPath} --seed ${seed}`).toString();
-assert(cliResult === expectedOutput);
+assertResult(cliResult);
 
 console.log('Checking node library');
 const bmlLib = require(libraryPath);
 let libResult = bmlLib(bmlScript, { randomSeed: seed });
-assert(libResult === expectedOutput);
+assertResult(libResult);
 
 console.log('All smoke tests passed');

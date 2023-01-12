@@ -1,6 +1,5 @@
 import { EvalBlock } from './evalBlock';
-import { FunctionCall } from './functionCall';
-import { WeightedChoice, Choice } from './weightedChoice';
+import { WeightedChoice } from './weightedChoice';
 import { Lexer } from './lexer';
 import { TokenType } from './tokenType';
 import { Replacer } from './replacer';
