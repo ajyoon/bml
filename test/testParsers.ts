@@ -6,6 +6,7 @@ import { Replacer } from '../src/replacer';
 import { Lexer } from '../src/lexer';
 import { WeightedChoice } from '../src/weightedChoice';
 import { BackReference } from '../src/backReference';
+import { AstNode } from '../src/ast';
 
 import {
   JavascriptSyntaxError,
@@ -176,7 +177,38 @@ describe('parseFork', function() {
     expectedChoiceMap.set(2, ['bar']);
     expectedChoiceMap.set(3, ['bar']);
     expect(result).toBeInstanceOf(BackReference);
-    expect(result).toEqual(new BackReference('TestChoice', expectedChoiceMap, ['baz']));
+    expect(result).toEqual(new BackReference(
+      'TestChoice', expectedChoiceMap, [new WeightedChoice(['baz'], 100)]));
+  });
+
+  it('allows multiple fallback branches in back references', function() {
+    let lexer = new Lexer('@TestChoice: 0 -> (foo), (bar) 60, (baz)}');
+    let result = parseFork(lexer);
+    let expectedChoiceMap = new Map();
+    expectedChoiceMap.set(0, ['foo']);
+    expect(result).toBeInstanceOf(BackReference);
+    let expectedWeights = [
+      new WeightedChoice(['bar'], 60),
+      new WeightedChoice(['baz'], 40),
+    ];
+    expect(result).toEqual(new BackReference(
+      'TestChoice', expectedChoiceMap, expectedWeights));
+  })
+
+  it('allows forks to be used directly as branches', function() {
+    let lexer = new Lexer('{(foo)} 60, (bar)}');
+    let result = parseFork(lexer) as Replacer;
+    let expectedResult = new Replacer([
+      new WeightedChoice([
+        // Nested replacer
+        new Replacer([
+          new WeightedChoice(['foo'], 100)
+        ], null, false)
+      ], 60),
+      // Alternate branch in outer replacer
+      new WeightedChoice(['bar'], 40)
+    ], null, false);
+    expect(result).toEqual(expectedResult);
   });
 });
 
@@ -205,7 +237,7 @@ describe('parseFork', function() {
   it('parses a string literal replacer with braces', function() {
     let testString = '(test)}';
     let lexer = new Lexer(testString);
-    let result = parseFork(lexer);
+    let result = parseFork(lexer) as Replacer;
     expect(result.weights.length).toBe(1);
     expect(result.weights[0]).toBeInstanceOf(WeightedChoice);
     expect(result.weights[0].choice).toStrictEqual(['test']);
@@ -216,7 +248,7 @@ describe('parseFork', function() {
   it('parses an eval block replacer', function() {
     let testString = '[some js]}';
     let lexer = new Lexer(testString);
-    let result = parseFork(lexer);
+    let result = parseFork(lexer) as Replacer;
     expect(result.weights.length).toBe(1);
     expect(result.weights[0]).toBeInstanceOf(WeightedChoice);
     expect(result.weights[0].weight).toBe(100);
@@ -228,7 +260,7 @@ describe('parseFork', function() {
   it('parses strings with weights', function() {
     let testString = '(test) 5}';
     let lexer = new Lexer(testString);
-    let result = parseFork(lexer);
+    let result = parseFork(lexer) as Replacer;
     expect(result.weights.length).toBe(1);
     expect(result.weights[0]).toBeInstanceOf(WeightedChoice);
     expect(result.weights[0].choice).toStrictEqual(['test']);
@@ -239,7 +271,7 @@ describe('parseFork', function() {
   it('parses eval block replacers with weights', function() {
     let testString = '[some js] 5}';
     let lexer = new Lexer(testString);
-    let result = parseFork(lexer);
+    let result = parseFork(lexer) as Replacer;
     expect(result.weights.length).toBe(1);
     expect(result.weights[0]).toBeInstanceOf(WeightedChoice);
     expect(result.weights[0].weight).toBe(5);
@@ -251,7 +283,7 @@ describe('parseFork', function() {
   it('parses many replacers with and without weights', function() {
     let testString = '[some js] 5, (test2), (test3) 3}';
     let lexer = new Lexer(testString);
-    let result = parseFork(lexer);
+    let result = parseFork(lexer) as Replacer;
     expect(result.weights.length).toBe(3);
 
     expect(result.weights[0]).toBeInstanceOf(WeightedChoice);
@@ -285,16 +317,10 @@ describe('parseFork', function() {
 });
 
 describe('parseFork', function() {
-  it('errors on non-backref blocks', function() {
-    let testString = '(test) 5}';
-    let lexer = new Lexer(testString);
-    expect(() => parseFork(lexer)).toThrow(BMLSyntaxError);
-  });
-
   it('parses a simple case with a single string branch and no fallback', function() {
     let testString = '@TestRef: 0 -> (foo)}';
     let lexer = new Lexer(testString);
-    let result = parseFork(lexer)!;
+    let result = parseFork(lexer)! as BackReference;
     expect(result.referredIdentifier).toBe('TestRef');
     expect(result.choiceMap.size).toBe(1);
     expect(result.choiceMap.get(0)).toStrictEqual(['foo']);
@@ -302,7 +328,7 @@ describe('parseFork', function() {
 
   it('parses a simple case with a single eval block branch and no fallback', function() {
     let testString = '@TestRef: 0 -> [some js]}';
-    let result = parseFork(new Lexer(testString))!;
+    let result = parseFork(new Lexer(testString)) as BackReference;
     expect(result.referredIdentifier).toBe('TestRef');
     expect(result.choiceMap.size).toBe(1);
     expect(result.choiceMap.get(0)).toBeInstanceOf(EvalBlock);
@@ -311,17 +337,21 @@ describe('parseFork', function() {
 
   it('allows a single branch with a fallback', function() {
     let testString = '@TestRef: 0 -> [some js], (fallback)}';
-    let result = parseFork(new Lexer(testString))!;
+    let result = parseFork(new Lexer(testString))! as BackReference;
     expect(result.referredIdentifier).toBe('TestRef');
     expect(result.choiceMap.size).toBe(1);
     expect(result.choiceMap.get(0)).toBeInstanceOf(EvalBlock);
     expect((result.choiceMap.get(0) as EvalBlock).contents).toBe('some js');
-    expect(result.fallback).toStrictEqual(['fallback']);
+    expect(result.fallbackReplacer!).not.toBeNull();
+    expect(result.fallbackReplacer!.weights).toHaveLength(1);
+    let fallbackChoice = result.fallbackReplacer!.weights[0].choice as AstNode[];
+    expect(fallbackChoice).toStrictEqual(['fallback']);
   });
 
   it('parses multiple branches of all types with fallback', function() {
     let testString = '@TestRef: 0 -> (foo), 1 -> [some js], 2 -> (bar), [some more js]}';
-    let result = parseFork(new Lexer(testString))!;
+    let result = parseFork(new Lexer(testString)) as BackReference;
+
     expect(result.referredIdentifier).toBe('TestRef');
     expect(result.choiceMap.size).toBe(3);
     expect(result.choiceMap.get(0)).toStrictEqual(['foo']);
@@ -331,16 +361,21 @@ describe('parseFork', function() {
 
     expect(result.choiceMap.get(2)).toStrictEqual(['bar']);
 
-    expect(result.fallback!).toBeInstanceOf(EvalBlock);
-    expect((result.fallback! as EvalBlock).contents).toBe('some more js');
+    expect(result.fallbackReplacer!).not.toBeNull();
+    expect(result.fallbackReplacer!.weights).toHaveLength(1);
+    let fallbackChoice = result.fallbackReplacer!.weights[0].choice as EvalBlock;
+    expect(fallbackChoice).toBeInstanceOf(EvalBlock);
+    expect(fallbackChoice.contents).toBe('some more js');
   });
 
   it('parses copy refs', function() {
     let testString = '@TestRef}';
     let lexer = new Lexer(testString);
-    let result = parseFork(lexer)!;
+    let result = parseFork(lexer)! as BackReference;
+    expect(result).toBeInstanceOf(BackReference);
     expect(result.referredIdentifier).toBe('TestRef');
     expect(result.choiceMap.size).toBe(0);
+    expect(result.fallbackReplacer).toBeNull();
   });
 
   function testParseStrToGiveSyntaxError(backRefString: string) {
@@ -362,6 +397,9 @@ describe('parseFork', function() {
     testParseStrToGiveSyntaxError('@TestRef: 0 -> (foo), (bar)');
     testParseStrToGiveSyntaxError('@TestRef: 0 -> (foo), [some js]');
     testParseStrToGiveSyntaxError('@TestRef: 0 -> (foo), [some js], @TestRef2: 0 -> (foo)');
+
+    testParseStrToGiveSyntaxError('@TestRef: 0, (foo)');
+    testParseStrToGiveSyntaxError('@TestRef: (foo) 5, 2');
   });
 
   it('errors on repeated indexes', function() {
@@ -376,7 +414,7 @@ describe('parseDocument', function() {
     const bmlScriptPath = path.resolve(__dirname, 'lao_tzu_36.bml');
     const bmlScript = fs.readFileSync(bmlScriptPath).toString();
     let lexer = new Lexer(bmlScript);
-    let _ = parseDocument(lexer, true);
+    parseDocument(lexer, true);
   });
 
   it('includes whitespace in plain text', function() {

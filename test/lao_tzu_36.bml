@@ -125,3 +125,6 @@
 
 // A fork directly placed inside a fork branch
 {{(a fork directly inside a fork branch)}}
+
+// Multiple fallback options in a backref
+{@kuo: 0 -> (it), (a), (b)}

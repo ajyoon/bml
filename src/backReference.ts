@@ -7,13 +7,15 @@ export class BackReference {
 
   referredIdentifier: string;
   choiceMap: BackReferenceMap;
-  fallbackReplacer?: Replacer;
+  fallbackReplacer: Replacer | null;
 
   constructor(referredIdentifier: string, choiceMap: BackReferenceMap, fallbackChocies: WeightedChoice[]) {
     this.referredIdentifier = referredIdentifier;
     this.choiceMap = choiceMap;
     if (fallbackChocies.length) {
       this.fallbackReplacer = new Replacer(fallbackChocies, null, false);
+    } else {
+      this.fallbackReplacer = null;
     }
   }
 }
