@@ -3,13 +3,12 @@ import * as postprocessing from './postprocessing';
 import { defaultBMLSettings, defaultRenderSettings, mergeSettings, RenderSettings } from './settings';
 import { Reference } from './reference';
 import { parseDocument } from './parsers';
-import { UserDefs } from './userDefs';
 import { AstNode } from './ast';
 import { Lexer } from './lexer';
 import { ChoiceFork } from './choiceFork';
 import { Choice } from './weightedChoice';
 import { isStr } from './stringUtils';
-import { EvalBindingError } from './errors';
+import { EvalDisabledError } from './errors';
 import { EvalContext } from './evalBlock';
 
 
@@ -23,10 +22,12 @@ export type ChoiceResultMap = Map<string, ChoiceResult>;
  */
 class Renderer {
 
+  settings: RenderSettings;
   choiceResultMap: ChoiceResultMap;
   evalContext: EvalContext;
 
-  constructor() {
+  constructor(settings: RenderSettings) {
+    this.settings = settings;
     this.choiceResultMap = new Map();
     this.evalContext = { bindings: {}, output: '' };
   }
@@ -54,6 +55,9 @@ class Renderer {
     if (choice instanceof Array) {
       return this.renderAst(choice);
     } else {
+      if (!this.settings.allowEval) {
+        throw new EvalDisabledError();
+      }
       choice.execute(this.evalContext);
       let output = this.evalContext.output;
       this.evalContext.output = '';
@@ -115,6 +119,9 @@ class Renderer {
   }
 
   renderAndPostProcess(ast: AstNode[]): string {
+    if (this.settings.randomSeed) {
+      rand.setRandomSeed(this.settings.randomSeed);
+    }
     let renderedText = this.renderAst(ast);
     return this.postprocess(renderedText);
   }
@@ -123,11 +130,7 @@ class Renderer {
 
 export function render(bmlDocumentString: string, renderSettings?: RenderSettings): string {
   renderSettings = mergeSettings(defaultRenderSettings, renderSettings);
-  if (renderSettings.randomSeed) {
-    rand.setRandomSeed(renderSettings.randomSeed);
-  }
-
   let lexer = new Lexer(bmlDocumentString);
   let ast = parseDocument(lexer, true);
-  return new Renderer().renderAndPostProcess(ast);
+  return new Renderer(renderSettings).renderAndPostProcess(ast);
 }

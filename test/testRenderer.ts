@@ -1,13 +1,9 @@
 import expect from 'expect';
-import fs from 'fs';
-import path from 'path'
 import * as rand from '../src/rand';
 
 import {
-  JavascriptSyntaxError,
-  BMLSyntaxError,
-  BMLDuplicatedRefIndexError,
   EvalBindingError,
+  EvalDisabledError
 } from '../src/errors';
 
 import { render } from '../src/renderer';
@@ -99,4 +95,10 @@ describe('render', function() {
 `;
     expect(render(testString)).toEqual('Foo\nbar\n');
   });
+
+  it('Allows disabling eval execution', function() {
+    let testString = `{[insert('foo')]}`;
+    expect(() => render(testString, { allowEval: false }))
+      .toThrow(EvalDisabledError);
+  })
 });

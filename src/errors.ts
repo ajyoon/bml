@@ -63,3 +63,11 @@ export class EvalBindingError extends Error {
     Object.setPrototypeOf(this, EvalBindingError.prototype);
   }
 }
+
+export class EvalDisabledError extends Error {
+  constructor() {
+    super(`This document includes eval blocks and cannot be rendered with allowEval=false.`)
+    this.name = 'EvalDisabledError';
+    Object.setPrototypeOf(this, EvalDisabledError.prototype);
+  }
+}
