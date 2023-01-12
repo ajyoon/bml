@@ -83,4 +83,20 @@ describe('render', function() {
 `;
     expect(render(testString)).toEqual('456\n');
   });
+
+  it('Allows calling insert within bound functions', function() {
+    let testString = `
+{[
+    bind({
+        someValue: 'bar',
+        myFunc: (value) => {
+            insert(value);
+        }
+    });
+]}
+{[myFunc('foo')]}
+{[myFunc(someValue)]}
+`;
+    expect(render(testString)).toEqual('Foo\nbar\n');
+  });
 });

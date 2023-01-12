@@ -10,6 +10,7 @@ import { ChoiceFork } from './choiceFork';
 import { Choice } from './weightedChoice';
 import { isStr } from './stringUtils';
 import { EvalBindingError } from './errors';
+import { EvalContext } from './evalBlock';
 
 
 export type ChoiceResult = { choiceIndex: number, renderedOutput: string };
@@ -23,11 +24,11 @@ export type ChoiceResultMap = Map<string, ChoiceResult>;
 class Renderer {
 
   choiceResultMap: ChoiceResultMap;
-  evalBindings: UserDefs;
+  evalContext: EvalContext;
 
   constructor() {
     this.choiceResultMap = new Map();
-    this.evalBindings = {};
+    this.evalContext = { bindings: {}, output: '' };
   }
 
   resolveReference(reference: Reference): Choice {
@@ -53,14 +54,10 @@ class Renderer {
     if (choice instanceof Array) {
       return this.renderAst(choice);
     } else {
-      let evalResult = choice.execute(this.evalBindings);
-      for (let [key, value] of Object.entries(evalResult.bindings)) {
-        if (this.evalBindings.hasOwnProperty(key)) {
-          throw new EvalBindingError(key);
-        }
-        this.evalBindings[key] = value;
-      }
-      return evalResult.output;
+      choice.execute(this.evalContext);
+      let output = this.evalContext.output;
+      this.evalContext.output = '';
+      return output;
     }
   }
 
@@ -101,7 +98,8 @@ class Renderer {
   }
 
   postprocess(text: string): string {
-    let documentSettings = mergeSettings(defaultBMLSettings, this.evalBindings.settings);
+    let documentSettings = mergeSettings(
+      defaultBMLSettings, this.evalContext.bindings.settings);
     let output = text;
     output = postprocessing.replaceVisualLineBreaks(output);
     if (documentSettings.punctuationCleanup) {

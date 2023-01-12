@@ -1,5 +1,6 @@
 import * as evalApi from './evalApi';
 import { UserDefs, validateUserDefs } from './userDefs';
+import { EvalBindingError } from './errors';
 
 const evalFuncTemplate = `
   const bml = this;
@@ -15,10 +16,9 @@ const evalFuncTemplate = `
 
   ***USER DEFS BINDING SLOT***
 
-  let __output = '';
 
   function insert(str) {
-    __output += str;
+    __context.output += str;
   }
 
   ////////// start user code
@@ -29,14 +29,14 @@ const evalFuncTemplate = `
 
   ***SAVE USER MUTATIONS SLOT***
 
-  return {output: __output, bindings: __new_bindings};
+  return __new_bindings;
 `;
 
 
-export type EvalResult = {
-  output: string;
+export type EvalContext = {
   bindings: UserDefs;
-};
+  output: string;
+}
 
 
 export class EvalBlock {
@@ -53,10 +53,10 @@ export class EvalBlock {
   generateBindingCode(userDefs: UserDefs): string {
     let lines = [];
     if (userDefs.settings) {
-      lines.push('let settings = __user_def_bindings.settings;');
+      lines.push('let settings = __context.bindings.settings;');
     }
     for (let key in userDefs) {
-      lines.push(`let ${key} = __user_def_bindings.${key}`)
+      lines.push(`let ${key} = __context.bindings.${key}`)
     }
     return lines.join('\n');
   }
@@ -64,10 +64,10 @@ export class EvalBlock {
   generateSaveUserMutationsCode(userDefs: UserDefs): string {
     let lines = [];
     if (userDefs.settings) {
-      lines.push('__user_def_bindings.settings = settings;');
+      lines.push('__context.bindings.settings = settings;');
     }
     for (let key in userDefs) {
-      lines.push(`__user_def_bindings.${key} = ${key};`)
+      lines.push(`__context.bindings.${key} = ${key};`)
     }
     return lines.join('\n');
   }
@@ -79,13 +79,21 @@ export class EvalBlock {
     funcSrc = funcSrc.replace('***SAVE USER MUTATIONS SLOT***',
       this.generateSaveUserMutationsCode(userDefs));
     let funcContext = Object.assign({}, evalApi.api);
-    return new Function('__user_def_bindings', funcSrc).bind(funcContext);
+    return new Function('__context', funcSrc).bind(funcContext);
   }
 
-  execute(userDefs: UserDefs): EvalResult {
-    let result = this.toFunc(userDefs)(userDefs);
-    validateUserDefs(result.bindings);
-    return result;
+  /*
+   * Execution results are stored in the passed-in context
+   */
+  execute(context: EvalContext) {
+    let newBindings = this.toFunc(context.bindings)(context);
+    validateUserDefs(newBindings);
+    for (let [key, value] of Object.entries(newBindings)) {
+      if (context.bindings.hasOwnProperty(key)) {
+        throw new EvalBindingError(key);
+      }
+      context.bindings[key] = value;
+    }
   }
 }
 
