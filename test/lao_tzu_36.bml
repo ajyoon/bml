@@ -128,3 +128,8 @@
 
 // Multiple fallback options in a backref
 {@kuo: 0 -> (it), (a), (b)}
+
+// A literal block containing escaped code
+[[
+{(foo)}
+]]

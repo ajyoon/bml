@@ -317,6 +317,21 @@ export function parseDocument(lexer: Lexer, isTopLevel: boolean): AstNode[] {
   let token;
   let openParenCount = 1;
   let astNodes: AstNode[] = [];
+
+  function pushString(str: string) {
+    // To keep the AST more compact, sequential string nodes are joined together.
+    if (!astNodes.length) {
+      astNodes.push(str);
+      return;
+    }
+    let lastNode = astNodes[astNodes.length - 1];
+    if (isStr(lastNode)) {
+      astNodes[astNodes.length - 1] = lastNode.concat(str);
+    } else {
+      astNodes.push(str);
+    }
+  }
+
   while ((token = lexer.next()) !== null) {
     switch (token.tokenType) {
       case TokenType.OPEN_PAREN:
@@ -328,23 +343,20 @@ export function parseDocument(lexer: Lexer, isTopLevel: boolean): AstNode[] {
           return astNodes;
         }
         break;
+      case TokenType.OPEN_BRACKET:
+        if (lexer.peek()?.tokenType == TokenType.OPEN_BRACKET) {
+          pushString(parseLiteralBlock(lexer));
+        } else {
+          pushString(token.str);
+        }
+        break;
       case TokenType.OPEN_BRACE:
         let fork = parseFork(lexer);
         astNodes = astNodes.concat(fork);
         break;
       default:
         // Any other input is treated as a string
-        // To keep the AST more compact, sequential string nodes are joined together.
-        if (astNodes.length) {
-          let lastNode = astNodes[astNodes.length - 1];
-          if (isStr(lastNode)) {
-            astNodes[astNodes.length - 1] = lastNode.concat(token.str);
-          } else {
-            astNodes.push(token.str);
-          }
-        } else {
-          astNodes.push(token.str);
-        }
+        pushString(token.str);
     }
   }
   if (!isTopLevel) {

@@ -434,4 +434,12 @@ describe('parseDocument', function() {
     expect(result[1]).toBeInstanceOf(Replacer);
     expect(result[2]).toBe(' biz');
   });
+
+  it('provides literal blocks as plain strings', function() {
+    let testString = 'foo [[{(bar)}]]';
+    let lexer = new Lexer(testString);
+    let result = parseDocument(lexer, true);
+    expect(result).toHaveLength(1);
+    expect(result[0]).toBe('foo {(bar)}')
+  });
 });
