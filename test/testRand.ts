@@ -61,8 +61,8 @@ describe('randomInt', function() {
 describe('normalizeWeights', function() {
   it('should do nothing when all weights sum to 100', function() {
     let weights = [
-      new WeightedChoice('a', 40),
-      new WeightedChoice('b', 60),
+      new WeightedChoice(['a'], 40),
+      new WeightedChoice(['b'], 60),
     ];
     expect(rand.normalizeWeights(weights)).toEqual(weights);
   });
@@ -110,19 +110,19 @@ describe('weightedChoose', function() {
   });
   it('behaves on well-formed weights', function() {
     let weights = [
-      new WeightedChoice('foo', 40),
-      new WeightedChoice('bar', 60),
+      new WeightedChoice(['foo'], 40),
+      new WeightedChoice(['bar'], 60),
     ];
     let result = rand.weightedChoose(weights);
-    expect(result.choice).toBe('foo');
+    expect(result.choice).toStrictEqual(['foo']);
     expect(result.choiceIndex).toBe(0);
 
     result = rand.weightedChoose(weights);
-    expect(result.choice).toBe('foo');
+    expect(result.choice).toStrictEqual(['foo']);
     expect(result.choiceIndex).toBe(0);
 
     result = rand.weightedChoose(weights);
-    expect(result.choice).toBe('bar');
+    expect(result.choice).toStrictEqual(['bar']);
     expect(result.choiceIndex).toBe(1);
   });
 });

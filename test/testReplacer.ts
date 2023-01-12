@@ -11,19 +11,19 @@ describe('Replacer', function() {
 
   it('on call returns well-formed object', function() {
     let weights = [
-      new WeightedChoice('foo', 40),
-      new WeightedChoice('bar', 60),
+      new WeightedChoice(['foo'], 40),
+      new WeightedChoice(['bar'], 60),
     ];
     let replacer = new Replacer(weights, null, false);
     let result = replacer.call();
-    expect(result.replacement).toBe('foo');
+    expect(result.replacement).toStrictEqual(['foo']);
     expect(result.choiceIndex).toBe(0);
   });
 
   it('has a useful toString', function() {
     let weights = [
-      new WeightedChoice('foo', 40),
-      new WeightedChoice('bar', 60),
+      new WeightedChoice(['foo'], 40),
+      new WeightedChoice(['bar'], 60),
     ];
     let replacer = new Replacer(weights, 'identifier', true);
     expect(replacer.toString()).toBe(

@@ -51,7 +51,9 @@ function renderAst(ast: AstNode[], choiceResultMap: ChoiceResultMap): string {
     } else if (node instanceof Replacer) {
       let { replacement, choiceIndex } = node.call();
       let renderedOutput = renderChoice(replacement, choiceResultMap);
-      output += renderedOutput;
+      if (!node.isSilent) {
+        output += renderedOutput;
+      }
       if (node.identifier) {
         choiceResultMap.set(node.identifier, { choiceIndex, renderedOutput })
       }

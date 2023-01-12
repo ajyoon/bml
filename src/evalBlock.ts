@@ -35,7 +35,7 @@ export class EvalBlock {
     return new Function(funcSrc).bind(evalApi.api);
   }
 
-  execute(): UserDefs {
+  execute(): string {
     return this.toFunc()();
   }
 }

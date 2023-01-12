@@ -378,7 +378,6 @@ describe('parseDocument', function() {
     const bmlScriptPath = path.resolve(__dirname, 'lao_tzu_36.bml');
     const bmlScript = fs.readFileSync(bmlScriptPath).toString();
     let lexer = new Lexer(bmlScript);
-    let ast = parseDocument(lexer, true);
-    console.log(ast);
+    let _ = parseDocument(lexer, true);
   });
 });
