@@ -406,7 +406,7 @@ export function parseLiteralBlock(lexer: Lexer): string {
 /**
  * The top-level (or recursively called) parsing function. Returns an AST.
  *
- * If being recursively called, isTopLevel should be true and the
+ * If being recursively called, isTopLevel should be false and the
  * lexer's previous token should be an OPEN_PAREN.
  */
 export function parseDocument(lexer: Lexer, isTopLevel: boolean): AstNode[] {
