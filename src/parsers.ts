@@ -115,130 +115,29 @@ export function parseEval(lexer: Lexer): EvalBlock {
     startIndex);
 }
 
-
-// Expects the lexer's current token immediately follows the
-// replacement list open braace.
-export function parseReplacements(lexer: Lexer): Replacer {
+/**
+ * The main function for parsing {} blocks.
+ *
+ * Expects the lexer's previous token to be the opening curly brace,
+ * and the next token whatever comes next.
+ */
+export function parseFork(lexer: Lexer): Replacer | BackReference {
   let startIndex = lexer.index;
-  let token;
-  let choices = [];
-  let acceptReplacement = true;
-  let acceptWeight = false;
-  let acceptComma = false;
-  let acceptReplacerEnd = false;
 
-  // I think this will fail if there is a linebreak or
-  // comments after open brace but before identifier
-  let identifier = null;
+  let mappedChoices = new Map();
+  let unmappedChoices: WeightedChoice[] = [];
+
+  let idRe = /([@#]?)(\w+):?/y;
+
+  let id = null;
+  let isBackReference = false;
   let isSilent = false;
-  let identifierRe = /\s*(#?)(\w+):/y;
-  identifierRe.lastIndex = lexer.index;
-  let identifierMatch = identifierRe.exec(lexer.str);
-  if (identifierMatch) {
-    identifier = identifierMatch[2];
-    if (identifierMatch[1]) {
-      isSilent = true;
-    }
-    lexer.overrideIndex(lexer.index + identifierMatch[0].length);
-  }
 
-  while ((token = lexer.peek()) !== null) {
-    switch (token.tokenType) {
-      case TokenType.WHITESPACE:
-      case TokenType.NEW_LINE:
-        break;
-      case TokenType.OPEN_PAREN:
-        if (!acceptReplacement) {
-          throw new BMLSyntaxError('unexpected token',
-            lexer.str, token.index);
-        }
-        acceptReplacement = false;
-        acceptWeight = true;
-        acceptComma = true;
-        acceptReplacerEnd = true;
-        lexer.next();
-        let parsedSubAst = parseDocument(lexer, false);
-        choices.push(new WeightedChoice(parsedSubAst, null));
-        // Replacement parser consumes tokens, so skip that in
-        // this loop
-        continue;
-      case TokenType.CLOSE_BRACE:
-        if (acceptReplacerEnd) {
-          lexer.next(); // Consume close brace
-          return new Replacer(choices, identifier, isSilent);
-        } else {
-          throw new BMLSyntaxError(
-            `unexpected end of replacer: ${token.tokenType}`,
-            lexer.str, token.index);
-        }
-      case TokenType.OPEN_BRACKET:
-        if (acceptReplacement) {
-          acceptReplacement = false;
-          acceptWeight = true;
-          acceptComma = true;
-          acceptReplacerEnd = true;
-          choices.push(new WeightedChoice(parseEval(lexer), null));
-        } else {
-          throw new BMLSyntaxError('unexpected eval block.',
-            lexer.str, token.index);
-        }
-        continue;
-      case TokenType.NUMBER:
-        if (acceptWeight) {
-          acceptWeight = false;
-          acceptComma = true;
-          acceptReplacerEnd = true;
-          choices[choices.length - 1].weight = Number(token.str);
-        } else {
-          throw new BMLSyntaxError('unexpected number literal.',
-            lexer.str, token.index);
-        }
-        break;
-      case TokenType.COMMA:
-        if (acceptComma) {
-          acceptComma = false;
-          acceptReplacement = true;
-          acceptWeight = false;
-          acceptReplacerEnd = true;
-        } else {
-          throw new BMLSyntaxError('unexpected comma.',
-            lexer.str, token.index);
-        }
-        break;
-      default:
-        throw new BMLSyntaxError(`Unexpected token ${token}`,
-          lexer.str, token.index);
-    }
-
-    // If we haven't broken out or thrown an error by now, consume this token.
-    lexer.next();
-  }
-  throw new BMLSyntaxError('Could not find end of replacer.',
-    lexer.str, startIndex);
-}
-
-
-export function parseBackReference(lexer: Lexer): BackReference {
-  let startIndex = lexer.index;
-
-  // TODO I think this doesn't work if there's a comment or linebreak
-  // after the opening brace but before the identifier slug
-  let referredIdentifierRe = /\s*@(\w+)/y;
-  referredIdentifierRe.lastIndex = lexer.index;
-  let referredIdentifierMatch = referredIdentifierRe.exec(lexer.str);
-  if (!referredIdentifierMatch) {
-    throw new BMLSyntaxError(`No reference ID found when parsing back reference`, lexer.str, lexer.index)
-  }
-  let referredIdentifier = referredIdentifierMatch[1];
-  lexer.overrideIndex(lexer.index + referredIdentifierMatch[0].length);
-
-  let choiceMap = new Map();
-  let fallback: Choice | null = null;
-
-  let acceptColon = true;
+  let acceptId = true;
+  let acceptWeight = false;
   let acceptChoiceIndex = false;
   let acceptArrow = false;
-  let acceptReplacement = false;
+  let acceptReplacement = true;
   let acceptComma = false;
   let acceptBlockEnd = true;
 
@@ -251,24 +150,19 @@ export function parseBackReference(lexer: Lexer): BackReference {
       case TokenType.WHITESPACE:
       case TokenType.NEW_LINE:
         break;
-      case TokenType.COLON:
-        if (acceptColon) {
-          acceptColon = false;
-          acceptChoiceIndex = true;
-          acceptBlockEnd = false;
-        } else {
-          throw new BMLSyntaxError('Unexpected colon in back reference block',
-            lexer.str, token.index);
-        }
-        break;
       case TokenType.NUMBER:
         if (acceptChoiceIndex) {
           acceptChoiceIndex = false;
           acceptArrow = true;
           acceptComma = true;
           currentChoiceIndexes.push(Number(token.str));
+        } else if (acceptWeight) {
+          acceptWeight = false;
+          acceptComma = true;
+          acceptBlockEnd = true;
+          unmappedChoices[unmappedChoices.length - 1].weight = Number(token.str);
         } else {
-          throw new BMLSyntaxError('Unexpected number in back reference block',
+          throw new BMLSyntaxError('Unexpected number in fork',
             lexer.str, token.index);
         }
         break;
@@ -278,13 +172,14 @@ export function parseBackReference(lexer: Lexer): BackReference {
           acceptReplacement = true;
           acceptComma = false;
         } else {
-          throw new BMLSyntaxError('Unexpected arrow in back reference block',
+          throw new BMLSyntaxError('Unexpected arrow in fork',
             lexer.str, token.index);
         }
         break;
       case TokenType.OPEN_PAREN:
       case TokenType.OPEN_BRACKET:
         if (acceptReplacement) {
+          acceptChoiceIndex = false;
           if (token.tokenType === TokenType.OPEN_PAREN) {
             lexer.next();
             currentReplacement = parseDocument(lexer, false);
@@ -293,13 +188,13 @@ export function parseBackReference(lexer: Lexer): BackReference {
           }
           if (currentChoiceIndexes.length) {
             for (let choiceIndex of currentChoiceIndexes) {
-              if (choiceMap.has(choiceIndex)) {
+              if (mappedChoices.has(choiceIndex)) {
                 // it's not ideal to validate this here, but with the way it's currently
                 // built, if we don't it will just silently overwrite the key
                 throw new BMLDuplicatedRefIndexError(
-                  referredIdentifier, choiceIndex, lexer.str, token.index);
+                  id!, choiceIndex, lexer.str, token.index);
               }
-              choiceMap.set(choiceIndex, currentReplacement);
+              mappedChoices.set(choiceIndex, currentReplacement);
             }
             // Reset state for next choice
             acceptReplacement = false;
@@ -308,15 +203,15 @@ export function parseBackReference(lexer: Lexer): BackReference {
             currentChoiceIndexes = [];
             currentReplacement = null;
           } else {
-            // Since there is no current choice index, this must be a fallback choice
-            fallback = currentReplacement;
-            // Set state so the block must end here.
+            // Since there is no current choice index, this must be an unmapped choice
+            unmappedChoices.push(new WeightedChoice(currentReplacement, null));
             acceptReplacement = false;
-            acceptComma = false;
+            acceptComma = true;
+            acceptWeight = true;
             acceptBlockEnd = true;
           }
         } else {
-          throw new BMLSyntaxError('Unexpected replacement in back reference block',
+          throw new BMLSyntaxError('Unexpected replacement in fork',
             lexer.str, token.index);
         }
         continue;
@@ -324,19 +219,48 @@ export function parseBackReference(lexer: Lexer): BackReference {
         if (acceptComma) {
           acceptComma = false;
           acceptChoiceIndex = true;
-          // Replacements can directly follow commas if they are fallbacks
-          acceptReplacement = true;
+          if (!acceptArrow) {
+            acceptReplacement = true;
+          }
         } else {
-          throw new BMLSyntaxError('Unexpected comma in back reference block',
+          throw new BMLSyntaxError('Unexpected comma in fork',
             lexer.str, token.index);
         }
         break;
       case TokenType.CLOSE_BRACE:
         if (acceptBlockEnd) {
           lexer.next();  // consume close brace
-          return new BackReference(referredIdentifier, choiceMap, fallback);
+          if (isBackReference) {
+            return new BackReference(id!, mappedChoices, unmappedChoices);
+          } else {
+            return new Replacer(unmappedChoices, id, isSilent)
+          }
         } else {
-          throw new BMLSyntaxError('Unexpected close brace in back reference block',
+          throw new BMLSyntaxError('Unexpected close brace in fork',
+            lexer.str, token.index);
+        }
+      case TokenType.TEXT:
+      case TokenType.AT:
+        if (acceptId) {
+          idRe.lastIndex = lexer.index;
+          let idMatch = idRe.exec(lexer.str);
+          if (!idMatch) {
+            throw new BMLSyntaxError(`Unexpected token ${token}`,
+              lexer.str, token.index);
+          }
+          let typeSlug = idMatch[1];
+          id = idMatch[2];
+          if (typeSlug == '@') {
+            isBackReference = true;
+            acceptChoiceIndex = true;
+          } else if (typeSlug == '#') {
+            isSilent = true;
+          }
+          lexer.overrideIndex(lexer.index + idMatch[0].length);
+          acceptId = false;
+          continue;
+        } else {
+          throw new BMLSyntaxError(`Unexpected token ${token}`,
             lexer.str, token.index);
         }
       default:
@@ -346,33 +270,8 @@ export function parseBackReference(lexer: Lexer): BackReference {
     // If we haven't broken out or thrown an error by now, consume this token.
     lexer.next();
   }
-  throw new BMLSyntaxError('Could not find end of back reference block.',
+  throw new BMLSyntaxError('Could not find end of fork.',
     lexer.str, startIndex);
-}
-
-
-/**
- * The main function for parsing {} blocks.
- *
- * Expects the lexer's previous token to be the opening curly brace,
- * and the next token whatever comes next.
- */
-export function parseFork(lexer: Lexer): Replacer | BackReference {
-  let indexAfterOpenBrace = lexer.index;
-  // TODO this leaves a lot to be desired. It uses exceptions for
-  // control flow and also will never propagate backref parsing
-  // errors. Probably the best way to handle this would be to combine
-  // the two parsing functions.
-  try {
-    return parseReplacements(lexer);
-  } catch (parseReplacementsError) {
-    try {
-      lexer.overrideIndex(indexAfterOpenBrace);
-      return parseBackReference(lexer);
-    } catch (parseBackReferenceError) {
-      throw parseReplacementsError;
-    }
-  }
 }
 
 

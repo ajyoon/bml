@@ -7,7 +7,6 @@ import { UserDefs } from './userDefs';
 import { AstNode } from './ast';
 import { Lexer } from './lexer';
 import { Replacer } from './replacer';
-import { BMLDuplicatedRefError, IllegalStateError, } from './errors';
 import { Choice } from './weightedChoice';
 import { isStr } from './stringUtils';
 
@@ -33,7 +32,7 @@ class Renderer {
   resolveBackReference(backReference: BackReference): Choice {
     let referredChoiceResult = this.choiceResultMap.get(backReference.referredIdentifier);
     if (referredChoiceResult) {
-      if (backReference.choiceMap.size === 0 && backReference.fallback === null) {
+      if (!backReference.choiceMap.size && !backReference.fallbackReplacer) {
         // this is a special "copy" backref
         return [referredChoiceResult.renderedOutput];
       }
@@ -42,11 +41,11 @@ class Renderer {
         return matchedBackReferenceResult;
       }
     }
-    if (backReference.fallback === null) {
+    if (!backReference.fallbackReplacer) {
       console.warn(`No matching reference or fallback found for ${backReference.referredIdentifier}`);
       return [''];
     }
-    return backReference.fallback;
+    return backReference.fallbackReplacer.call().replacement;
   }
 
   renderChoice(choice: Choice): string {
@@ -119,7 +118,6 @@ class Renderer {
 
 
 export function render(bmlDocumentString: string, renderSettings?: RenderSettings): string {
-  // Resolve render settings
   renderSettings = mergeSettings(defaultRenderSettings, renderSettings);
   if (renderSettings.randomSeed) {
     rand.setRandomSeed(renderSettings.randomSeed);
