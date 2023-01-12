@@ -1,7 +1,7 @@
 import expect from 'expect';
 import * as rand from '../src/rand';
 import { WeightedChoice } from '../src/weightedChoice';
-import { ChoiceFork } from '../src/choiceFork.ts';
+import { ChoiceFork } from '../src/choiceFork';
 
 describe('ChoiceFork', function() {
 

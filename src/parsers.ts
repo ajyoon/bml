@@ -2,7 +2,7 @@ import { EvalBlock } from './evalBlock';
 import { WeightedChoice } from './weightedChoice';
 import { Lexer } from './lexer';
 import { TokenType } from './tokenType';
-import { ChoiceFork } from './choiceFork.ts';
+import { ChoiceFork } from './choiceFork';
 import { Reference } from './reference';
 import {
   IllegalStateError,

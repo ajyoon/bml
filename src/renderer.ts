@@ -6,7 +6,7 @@ import { parseDocument } from './parsers';
 import { UserDefs } from './userDefs';
 import { AstNode } from './ast';
 import { Lexer } from './lexer';
-import { ChoiceFork } from './choiceFork.ts';
+import { ChoiceFork } from './choiceFork';
 import { Choice } from './weightedChoice';
 import { isStr } from './stringUtils';
 import { EvalBindingError } from './errors';

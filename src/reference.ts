@@ -1,5 +1,5 @@
 import { Choice, WeightedChoice } from './weightedChoice';
-import { ChoiceFork } from './choiceFork.ts';
+import { ChoiceFork } from './choiceFork';
 
 export type ReferenceMap = Map<number, Choice>;
 
