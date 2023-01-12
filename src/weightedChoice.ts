@@ -1,8 +1,9 @@
 import { FunctionCall } from './functionCall';
 import { EvalBlock } from './evalBlock';
+import { AstNode } from './ast';
 
 
-export type Choice = string | EvalBlock;
+export type Choice = EvalBlock | AstNode[];
 
 /**
  * An outcome with a weight.

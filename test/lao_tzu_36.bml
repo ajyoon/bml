@@ -1,0 +1,116 @@
+{#form:
+    (That which [] must first []),
+    (If you would [] it, you must first []),
+    (If you want to [] something, you must first []),
+    (For something to [], it must first []),
+    (If you wish to [] it, you must certainly [] it),
+    (what seeks [] must first [])
+}
+{#endPunc: (\
+    {(.) 70, (;)} {(\n), ()}\
+)}
+{#cherishIt: (hold it dear), (cherish it), (hold it close), (exalt it), (keep it close)}
+{#beRaised: (be raised high), (have been raised)}
+{#weiMing:
+    (the {(small), (little)} dark light),
+    ({(subtle), (quiet), (mysterious)} {
+        (knowledge), (understanding), (insight), (discernment), (vision)}) 20,
+    (formless {(light), (sight)}),
+    (delicate {(mystery), (understanding), (insight)}),
+    (the mystery of discernment),
+    ({(perceiving the imperceptible), (discerning the indiscernable)}),
+    (the cause of cause),
+    (the illuminating shadow),
+    (the mist of reality)
+}
+{#sheng:
+    (overcomes),
+    (prevails over),
+    (conquers),
+    (subdues),
+    (defeats),
+    (passes by),
+    (leaves behind)
+}
+
+{@form:
+    0 -> (That which shrinks\nmust first {(grow), (have grown), (expand)}),
+    1 -> (If you would shrink it,\nyou must first grow it),
+    2 -> (If you want to shrink something,\nyou must first allow it to grow),
+    3 -> (For something to shrink,\nit must first {(have grown), (expand)}),
+    4 -> (If you wish to shrink it,\nyou must certainly grow it),
+    5 -> (What seeks to shrink\nmust first {(grow), (have grown), (expand)})
+}{@endPunc}
+{@form:
+    0 -> (That which weakens\nmust first {(be strong), (have strength)}),
+    1 -> (If you would weaken it,\nyou must first \
+        {(let it grow strong), (give it strength)}),
+    2 -> (If you want to weaken something,\nyou must first\
+        {(allow), (invite), (nurture)} its strength),
+    3 -> (For something to grow weak,\nit must first\
+        {(have grown strong), (have strength)}),
+    4 -> (If you wish to weaken it,\nyou must certainly\
+        {(strengthen), (reinforce)} it),
+    5 -> (What seeks weakness\nmust first {
+        (have strength), (have resolve), (have conviction),
+        (be strong), (be firm)})
+}{@endPunc}
+{@form:
+    0 -> (That which {(collapses), (falls)},\
+        \nmust first {@beRaised}),
+    1 -> (If you would {(abandon), (spurn), (discard), (forget)} it,\
+        \nyou must first {@cherishIt}),
+    2 -> (If you want to {
+            (abandon a thing), (cast a thing away), (leave a thing behind), (spurn a thing)
+        },\nyou must first {@cherishIt}),
+    3 -> (For something to {(collapse), (fall)},\nit must first {@beRaised}),
+    4 -> (If you wish to {(destroy), (crush), (wreck), (raze)} it, \
+        \nyou must certainly {(build it up), (construct it)}),
+    5 -> (What seeks {(oblivion), (obscurity), (to be forgotten)}, \
+        \nmust first {
+            (be far exalted), (be told in legend),
+            (be marked in history), (be widely regarded)
+        })
+}{@endPunc}
+{@form:
+    0 -> (That which is {(seized), (taken)}\nmust first be {(given), (granted)}),
+    1 -> (If you would {(seize), (take)} it,\nyou must first {(give), (grant)} it),
+    2 -> (What is stolen\nwas surely given),
+    3 -> ({(With), (Before)} receiving\nthere must be giving),
+    4 -> (If you wish to take it,\none must certainly give it),
+    5 -> (What seeks to take\nhas {(surely), (without doubt)} given)
+}.
+
+{desc:
+    (This is known as ), (Some call this ), (This is what is meant by ")
+}{@weiMing}{@desc: 2 -> (."), (.)}
+{
+    (The {(soft), (tender)}, the {(weak), (gentle), (yielding)} prevail\
+        \nover the {(hard), (steadfast), (rigid)}, the {(strong), (firm)}),
+    (The {(submissive), (weak), (gentle), (yielding)} {@sheng} \
+        the {(strong), (firm), (unyielding)}),
+    ({(Thus), (It is thus that)} the {(soft {@sheng} the hard), (weak {@sheng} the strong)})
+}.
+
+{#yuan: (deep waters), (the depths), (the abyss)}
+{#liChi: (sharp tools), (sharp weapons), (powerful tools), (exacting tools), (fine instruments), (coercive methods), (tools of enforcement), (methods of force)}
+{#jen: (its people), (others), (the people), (the outside)}
+{#kuo: (a country), (a nation), (an empire), (a ruler)}
+{#kuoPronoun: ({@kuo: 3 -> (their), (its)})}
+
+{() 30, /* Sometimes omit last section following Le Guin */
+ (
+{simile: (As), (So as), (And so as), ()} {
+    (fish cannot leave {@yuan}),
+    (fish must not be taken from {@yuan}),
+    (fish must not leave {@yuan})}{@simile: 3 -> ({@endPunc}), (,)}
+{
+    ({@kuo}'s {@liChi} must remain hidden from {@kuoPronoun} people),
+    ({@kuo}'s {@liChi} {(cannot be revealed), (must remain hidden), (must remain in the dark)}),
+    ({@kuo}'s {@liChi} cannot be revealed to others)
+}.
+)}
+
+// And for test completeness, include features not demonstrated above:
+// An eval block
+{[insert('test')]}

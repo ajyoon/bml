@@ -156,8 +156,9 @@ export function parseReplacements(lexer: Lexer): Replacer {
         acceptWeight = true;
         acceptComma = true;
         acceptReplacerEnd = true;
-        choices.push(new WeightedChoice(
-          parseReplacementWithLexer(lexer), null));
+        lexer.next();
+        let parsedSubAst = parseDocument(lexer, false);
+        choices.push(new WeightedChoice(parsedSubAst, null));
         // Replacement parser consumes tokens, so skip that in
         // this loop
         continue;
@@ -216,35 +217,6 @@ export function parseReplacements(lexer: Lexer): Replacer {
     lexer.str, startIndex);
 }
 
-
-/**
- * @param lexer a lexer whose next token is TokenType.OPEN_PAREN
- *
- * @return the parsed string literal replacement body
- */
-export function parseReplacementWithLexer(lexer: Lexer): string {
-  lexer.next();
-  let startIndex = lexer.index;
-  let stringLiteral = '';
-  let token;
-  let openParenCount = 1;
-  while ((token = lexer.next()) !== null) {
-    switch (token.tokenType) {
-      case TokenType.OPEN_PAREN:
-        openParenCount++;
-        break;
-      case TokenType.CLOSE_PAREN:
-        openParenCount--;
-        if (openParenCount < 1) {
-          return stringLiteral;
-        }
-        break;
-    }
-    stringLiteral += token.str;
-  }
-  throw new BMLSyntaxError('Could not find end of replacement.',
-    lexer.str, startIndex);
-}
 
 export function parseBackReference(lexer: Lexer): BackReference {
   let startIndex = lexer.index;
@@ -314,7 +286,8 @@ export function parseBackReference(lexer: Lexer): BackReference {
       case TokenType.OPEN_BRACKET:
         if (acceptReplacement) {
           if (token.tokenType === TokenType.OPEN_PAREN) {
-            currentReplacement = parseReplacementWithLexer(lexer);
+            lexer.next();
+            currentReplacement = parseDocument(lexer, false);
           } else {
             currentReplacement = parseEval(lexer);
           }
@@ -430,9 +403,11 @@ export function parseLiteralBlock(lexer: Lexer): string {
   throw new BMLSyntaxError('Could not find end of literal block', lexer.str, blockStartIndex);
 }
 
-
 /**
  * The top-level (or recursively called) parsing function. Returns an AST.
+ *
+ * If being recursively called, isTopLevel should be true and the
+ * lexer's previous token should be an OPEN_PAREN.
  */
 export function parseDocument(lexer: Lexer, isTopLevel: boolean): AstNode[] {
   let startIndex = lexer.index;
@@ -464,7 +439,6 @@ export function parseDocument(lexer: Lexer, isTopLevel: boolean): AstNode[] {
         } else {
           astNodes.push(token.str);
         }
-
     }
   }
   if (!isTopLevel) {

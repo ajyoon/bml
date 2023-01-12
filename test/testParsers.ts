@@ -1,5 +1,6 @@
 import expect from 'expect';
 import fs from 'fs';
+import path from 'path'
 
 import { Replacer } from '../src/replacer';
 import { Lexer } from '../src/lexer';
@@ -18,6 +19,7 @@ import {
   parseBackReference,
   parseFork,
   parseLiteralBlock,
+  parseDocument,
 } from '../src/parsers';
 import { EvalBlock } from '../src/evalBlock';
 
@@ -162,7 +164,7 @@ describe('parseFork', function() {
     let lexer = new Lexer('@TestChoice: 0 -> (foo)}');
     let result = parseFork(lexer);
     let expectedChoiceMap = new Map();
-    expectedChoiceMap.set(0, 'foo');
+    expectedChoiceMap.set(0, ['foo']);
     expect(result).toBeInstanceOf(BackReference);
     expect(result).toEqual(new BackReference('TestChoice', expectedChoiceMap, null));
   });
@@ -171,12 +173,12 @@ describe('parseFork', function() {
     let lexer = new Lexer('@TestChoice: 0, 1 -> (foo), 2, 3 -> (bar), (baz)}');
     let result = parseFork(lexer);
     let expectedChoiceMap = new Map();
-    expectedChoiceMap.set(0, 'foo');
-    expectedChoiceMap.set(1, 'foo');
-    expectedChoiceMap.set(2, 'bar');
-    expectedChoiceMap.set(3, 'bar');
+    expectedChoiceMap.set(0, ['foo']);
+    expectedChoiceMap.set(1, ['foo']);
+    expectedChoiceMap.set(2, ['bar']);
+    expectedChoiceMap.set(3, ['bar']);
     expect(result).toBeInstanceOf(BackReference);
-    expect(result).toEqual(new BackReference('TestChoice', expectedChoiceMap, 'baz'));
+    expect(result).toEqual(new BackReference('TestChoice', expectedChoiceMap, ['baz']));
   });
 });
 
@@ -208,7 +210,7 @@ describe('parseReplacements', function() {
     let result = parseReplacements(lexer);
     expect(result.weights.length).toBe(1);
     expect(result.weights[0]).toBeInstanceOf(WeightedChoice);
-    expect(result.weights[0].choice).toBe('test');
+    expect(result.weights[0].choice).toStrictEqual(['test']);
     expect(result.weights[0].weight).toBe(100);
     expect(lexer.index).toBe(testString.length);
   });
@@ -231,7 +233,7 @@ describe('parseReplacements', function() {
     let result = parseReplacements(lexer);
     expect(result.weights.length).toBe(1);
     expect(result.weights[0]).toBeInstanceOf(WeightedChoice);
-    expect(result.weights[0].choice).toBe('test');
+    expect(result.weights[0].choice).toStrictEqual(['test']);
     expect(result.weights[0].weight).toBe(5);
     expect(lexer.index).toBe(testString.length);
   });
@@ -265,11 +267,11 @@ describe('parseReplacements', function() {
     expect(result.weights[0].choice).toBeInstanceOf(EvalBlock);
 
     expect(result.weights[1]).toBeInstanceOf(WeightedChoice);
-    expect(result.weights[1].choice).toBe('test2');
+    expect(result.weights[1].choice).toStrictEqual(['test2']);
     expect(result.weights[1].weight).toBe(92);
 
     expect(result.weights[2]).toBeInstanceOf(WeightedChoice);
-    expect(result.weights[2].choice).toBe('test3');
+    expect(result.weights[2].choice).toStrictEqual(['test3']);
     expect(result.weights[2].weight).toBe(3);
 
     expect(lexer.index).toBe(testString.length);
@@ -297,7 +299,7 @@ describe('parseBackReference', function() {
     let result = parseBackReference(lexer)!;
     expect(result.referredIdentifier).toBe('TestRef');
     expect(result.choiceMap.size).toBe(1);
-    expect(result.choiceMap.get(0)).toBe('foo');
+    expect(result.choiceMap.get(0)).toStrictEqual(['foo']);
   });
 
   it('parses a simple case with a single eval block branch and no fallback', function() {
@@ -316,7 +318,7 @@ describe('parseBackReference', function() {
     expect(result.choiceMap.size).toBe(1);
     expect(result.choiceMap.get(0)).toBeInstanceOf(EvalBlock);
     expect((result.choiceMap.get(0) as EvalBlock).contents).toBe('some js');
-    expect(result.fallback).toBe('fallback');
+    expect(result.fallback).toStrictEqual(['fallback']);
   });
 
   it('parses multiple branches of all types with fallback', function() {
@@ -324,12 +326,12 @@ describe('parseBackReference', function() {
     let result = parseBackReference(new Lexer(testString))!;
     expect(result.referredIdentifier).toBe('TestRef');
     expect(result.choiceMap.size).toBe(3);
-    expect(result.choiceMap.get(0)).toBe('foo');
+    expect(result.choiceMap.get(0)).toStrictEqual(['foo']);
 
     expect(result.choiceMap.get(1)).toBeInstanceOf(EvalBlock);
     expect((result.choiceMap.get(1) as EvalBlock).contents).toBe('some js');
 
-    expect(result.choiceMap.get(2)).toBe('bar');
+    expect(result.choiceMap.get(2)).toStrictEqual(['bar']);
 
     expect(result.fallback!).toBeInstanceOf(EvalBlock);
     expect((result.fallback! as EvalBlock).contents).toBe('some more js');
@@ -368,5 +370,15 @@ describe('parseBackReference', function() {
     expect(() => {
       parseBackReference(new Lexer('@TestRef: 0 -> (foo), 1 -> (bar), 0 -> (biz)'));
     }).toThrowError(BMLDuplicatedRefIndexError);
+  });
+});
+
+describe('parseDocument', function() {
+  it('can parse the kitchen sink test script', function() {
+    const bmlScriptPath = path.resolve(__dirname, 'lao_tzu_36.bml');
+    const bmlScript = fs.readFileSync(bmlScriptPath).toString();
+    let lexer = new Lexer(bmlScript);
+    let ast = parseDocument(lexer, true);
+    console.log(ast);
   });
 });
