@@ -29,3 +29,6 @@ export function isWhitespace(str: string): boolean {
   return str.trim() === '';
 }
 
+export function isStr(obj: any): obj is string {
+  return obj instanceof String || typeof obj === "string";
+}

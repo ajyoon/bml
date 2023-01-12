@@ -135,25 +135,13 @@ describe('Lexer', function() {
     expect(lexer.next()).toBeNull();
   });
 
-  it('tokenizes open double bracket', function() {
-    let lexer = new Lexer('[[');
-    expect(lexer.next()).toEqual(new Token(TokenType.OPEN_DOUBLE_BRACKET, 0, 2, '[['));
-    expect(lexer.next()).toBeNull();
-  });
-
-  it('tokenizes close double bracket', function() {
-    let lexer = new Lexer(']]');
-    expect(lexer.next()).toEqual(new Token(TokenType.CLOSE_DOUBLE_BRACKET, 0, 2, ']]'));
-    expect(lexer.next()).toBeNull();
-  });
-
-  it('tokenizes open single bracket', function() {
+  it('tokenizes open bracket', function() {
     let lexer = new Lexer('[');
     expect(lexer.next()).toEqual(new Token(TokenType.OPEN_BRACKET, 0, 1, '['));
     expect(lexer.next()).toBeNull();
   });
 
-  it('tokenizes close single bracket', function() {
+  it('tokenizes close bracket', function() {
     let lexer = new Lexer(']');
     expect(lexer.next()).toEqual(new Token(TokenType.CLOSE_BRACKET, 0, 1, ']'));
     expect(lexer.next()).toBeNull();
@@ -209,6 +197,14 @@ describe('Lexer', function() {
 
     lexer = new Lexer('\\{');
     expect(lexer.next()).toEqual(new Token(TokenType.TEXT, 0, 2, '{'));
+    expect(lexer.next()).toBeNull();
+
+    lexer = new Lexer('\\]');
+    expect(lexer.next()).toEqual(new Token(TokenType.TEXT, 0, 2, ']'));
+    expect(lexer.next()).toBeNull();
+
+    lexer = new Lexer('\\)');
+    expect(lexer.next()).toEqual(new Token(TokenType.TEXT, 0, 2, ')'));
     expect(lexer.next()).toBeNull();
 
     lexer = new Lexer('\\n');

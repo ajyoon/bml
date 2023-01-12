@@ -11,6 +11,8 @@ import {
   BMLSyntaxError,
   BMLDuplicatedRefIndexError,
 } from './errors';
+import { AstNode } from './ast';
+import { isStr } from './stringUtils';
 
 
 /**
@@ -25,7 +27,7 @@ import {
  * @throws {JavascriptSyntaxError} If the javascript snippet inside the eval
  *     block contains a syntax error which makes parsing it impossible.
  */
-export function parseEval(lexer: Lexer): string {
+export function parseEval(lexer: Lexer): EvalBlock {
   if (lexer.next()?.tokenType !== TokenType.OPEN_BRACKET) {
     throw new IllegalStateError('parseEval started with non-OPEN_BRACKET');
   }
@@ -79,7 +81,8 @@ export function parseEval(lexer: Lexer): string {
           case TokenType.CLOSE_BRACKET:
             openBracketCount--;
             if (openBracketCount < 1) {
-              return lexer.str.slice(startIndex, lexer.index - 1);
+              let source = lexer.str.slice(startIndex, lexer.index - 1);
+              return new EvalBlock(source);
             }
             break;
           case TokenType.COMMENT:
@@ -145,6 +148,19 @@ export function parseReplacements(lexer: Lexer): Replacer {
       case TokenType.NEW_LINE:
         break;
       case TokenType.OPEN_PAREN:
+        if (!acceptReplacement) {
+          throw new BMLSyntaxError('unexpected token',
+            lexer.str, token.index);
+        }
+        acceptReplacement = false;
+        acceptWeight = true;
+        acceptComma = true;
+        acceptReplacerEnd = true;
+        choices.push(new WeightedChoice(
+          parseReplacementWithLexer(lexer), null));
+        // Replacement parser consumes tokens, so skip that in
+        // this loop
+        continue;
       case TokenType.CLOSE_BRACE:
         if (acceptReplacerEnd) {
           lexer.next(); // Consume close brace
@@ -230,33 +246,7 @@ export function parseReplacementWithLexer(lexer: Lexer): string {
     lexer.str, startIndex);
 }
 
-type ParseInlineCommandResult = {
-  blockEndIndex: number,
-  backReference: BackReference | null,
-  replacer: Replacer | null
-}
-
-// TODO turns out actually this name doesnt fully make sense.
-// the renderer uses an ahead-of-time regex before going into parsing
-// since it will parse a 'use' command differently from replacers/backrefs.
-// maybe refactor to combine these into one brace-command parser here?
-export function parseInlineCommand(str: string, openBraceIndex: number): ParseInlineCommandResult {
-  let lexer = new Lexer(str);
-  lexer.overrideIndex(openBraceIndex + 1);
-  let backReference = parseBackReference(lexer);
-  let replacer = null;
-  if (backReference == null) {
-    replacer = parseReplacements(lexer);
-  }
-  return {
-    blockEndIndex: lexer.index,
-    backReference: backReference,
-    replacer: replacer,
-  };
-}
-
-// Returns null if there is no backref slug at the beginning of the block
-export function parseBackReference(lexer: Lexer): BackReference | null {
+export function parseBackReference(lexer: Lexer): BackReference {
   let startIndex = lexer.index;
 
   // TODO I think this doesn't work if there's a comment or linebreak
@@ -265,7 +255,7 @@ export function parseBackReference(lexer: Lexer): BackReference | null {
   referredIdentifierRe.lastIndex = lexer.index;
   let referredIdentifierMatch = referredIdentifierRe.exec(lexer.str);
   if (!referredIdentifierMatch) {
-    return null;
+    throw new BMLSyntaxError(`No reference ID found when parsing back reference`, lexer.str, lexer.index)
   }
   let referredIdentifier = referredIdentifierMatch[1];
   lexer.overrideIndex(lexer.index + referredIdentifierMatch[0].length);
@@ -388,13 +378,98 @@ export function parseBackReference(lexer: Lexer): BackReference | null {
 }
 
 
-class SyntaxTree {
-
+/**
+ * The main function for parsing {} blocks.
+ *
+ * Expects the lexer's previous token to be the opening curly brace,
+ * and the next token whatever comes next.
+ */
+export function parseFork(lexer: Lexer): Replacer | BackReference {
+  let indexAfterOpenBrace = lexer.index;
+  // TODO this leaves a lot to be desired. It uses exceptions for
+  // control flow and also will never propagate backref parsing
+  // errors. Probably the best way to handle this would be to combine
+  // the two parsing functions.
+  try {
+    return parseReplacements(lexer);
+  } catch (parseReplacementsError) {
+    try {
+      lexer.overrideIndex(indexAfterOpenBrace);
+      return parseBackReference(lexer);
+    } catch (parseBackReferenceError) {
+      throw parseReplacementsError;
+    }
+  }
 }
 
-/**
- * The top-level parsing function. Returns an AST.
- */
-export function parseDocument(str: string, lexer: Lexer | null) {
 
+/**
+ * Parse a literal block expressed with double-brackets
+ *
+ * Expects the lexer's next token to be the second opening bracket.
+ * Upon returning, the lexer's next token is the one right after the final closing bracket.
+ */
+export function parseLiteralBlock(lexer: Lexer): string {
+  let blockStartIndex = lexer.index - 1;
+  if (lexer.next()?.tokenType !== TokenType.OPEN_BRACKET) {
+    throw new IllegalStateError('parseLiteralBlock started with non-OPEN_BRACKET');
+  }
+  let token;
+  let result = '';
+  while ((token = lexer.next()) !== null) {
+    switch (token.tokenType) {
+      case TokenType.CLOSE_BRACKET:
+        if (lexer.peek()?.tokenType == TokenType.CLOSE_BRACKET) {
+          lexer.next();
+          return result;
+        }
+      default:
+        result += token.str;
+    }
+  }
+  throw new BMLSyntaxError('Could not find end of literal block', lexer.str, blockStartIndex);
+}
+
+
+/**
+ * The top-level (or recursively called) parsing function. Returns an AST.
+ */
+export function parseDocument(lexer: Lexer, isTopLevel: boolean): AstNode[] {
+  let startIndex = lexer.index;
+  let token;
+  let openParenCount = 1;
+  let astNodes: AstNode[] = [];
+  while ((token = lexer.next()) !== null) {
+    switch (token.tokenType) {
+      case TokenType.OPEN_PAREN:
+        openParenCount++;
+        break;
+      case TokenType.CLOSE_PAREN:
+        openParenCount--;
+        if (openParenCount < 1) {
+          return astNodes;
+        }
+        break;
+      case TokenType.OPEN_BRACE:
+        astNodes = astNodes.concat(parseFork(lexer));
+        break;
+      default:
+        // Any other input is treated as a string
+        // To keep the AST more compact, sequential string nodes are joined together.
+        if (astNodes.length) {
+          let lastNode = astNodes[astNodes.length - 1];
+          if (isStr(lastNode)) {
+            astNodes[astNodes.length - 1] = lastNode.concat(token.str);
+          }
+        } else {
+          astNodes.push(token.str);
+        }
+
+    }
+  }
+  if (!isTopLevel) {
+    throw new BMLSyntaxError(`Reached end of document while parsing string.`,
+      lexer.str, startIndex)
+  }
+  return astNodes;
 }

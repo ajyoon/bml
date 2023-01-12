@@ -100,12 +100,6 @@ export class Lexer {
     } else if (this.str[this.index] === '@') {
       tokenType = TokenType.AT;
       tokenString = '@';
-    } else if (this.str.slice(this.index, this.index + 2) === '[[') {
-      tokenType = TokenType.OPEN_DOUBLE_BRACKET;
-      tokenString = '[[';
-    } else if (this.str.slice(this.index, this.index + 2) === ']]') {
-      tokenType = TokenType.CLOSE_DOUBLE_BRACKET;
-      tokenString = ']]';
     } else if (this.str[this.index] === '[') {
       tokenType = TokenType.OPEN_BRACKET;
       tokenString = '[';
@@ -119,7 +113,7 @@ export class Lexer {
       tokenType = TokenType.TEXT;
       if (this.str[this.index] === '\\') {
         let nextChar = this.str[this.index + 1];
-        if ('\\/[{'.includes(nextChar)) {
+        if ('\\/[{])'.includes(nextChar)) {
           tokenEndIndex = this.index + 2;
           tokenString = nextChar;
         } else if (nextChar === 'n') {

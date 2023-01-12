@@ -1,7 +1,6 @@
 import expect from 'expect';
 import fs from 'fs';
 
-import { FunctionCall } from '../src/functionCall';
 import { Replacer } from '../src/replacer';
 import { Lexer } from '../src/lexer';
 import { WeightedChoice } from '../src/weightedChoice';
@@ -15,184 +14,191 @@ import {
 
 import {
   parseEval,
-  parseInlineCommand, parseReplacements,
+  parseReplacements,
   parseBackReference,
+  parseFork,
+  parseLiteralBlock,
 } from '../src/parsers';
+import { EvalBlock } from '../src/evalBlock';
 
 
 
 describe('parseEval', function() {
   it('can parse an empty block', function() {
-    let testString = 'eval {}';
+    let testString = '[]';
     let lexer = new Lexer(testString);
     let block = parseEval(lexer);
-    expect(block).toBe('');
+    expect(block.contents).toBe('');
     expect(lexer.index).toBe(testString.length);
   });
 
-  it('should ignore braces in inline comments', function() {
-    let testString = 'eval { //}\n}';
+  it('should ignore brackets in line comments', function() {
+    let testString = '[ //]\n]';
     let lexer = new Lexer(testString);
     let block = parseEval(lexer);
-    expect(block).toBe(' //}\n');
+    expect(block.contents).toBe(' //]\n');
     expect(lexer.index).toBe(testString.length);
   });
 
-  it('should ignore braces in block comments', function() {
-    let testString = 'eval {4/*\n}*/}';
+  it('should ignore brackets in block comments', function() {
+    let testString = '[4/*\n]*/]';
     let lexer = new Lexer(testString);
     let block = parseEval(lexer);
-    expect(block).toBe('4/*\n}*/');
+    expect(block.contents).toBe('4/*\n]*/');
     expect(lexer.index).toBe(testString.length);
   });
 
-  it('should ignore braces in single-quote string literals', function() {
-    let testString = 'eval {\'}\'}';
+  it('should ignore brackets in single-quote string literals', function() {
+    let testString = '[\']\']';
     let lexer = new Lexer(testString);
     let block = parseEval(lexer);
-    expect(block).toBe('\'}\'');
+    expect(block.contents).toBe('\']\'');
     expect(lexer.index).toBe(testString.length);
   });
 
-  it('should ignore braces in double-quote string literals', function() {
-    let testString = 'eval {"}"}';
+  it('should ignore brackets in double-quote string literals', function() {
+    let testString = '["]"]';
     let lexer = new Lexer(testString);
     let block = parseEval(lexer);
-    expect(block).toBe('"}"');
+    expect(block.contents).toBe('"]"');
     expect(lexer.index).toBe(testString.length);
   });
 
   it('should error on newline before matching single-quote', function() {
-    let testString = 'eval {\'\n';
+    let testString = '[\'\n';
     let lexer = new Lexer(testString);
     expect(() => parseEval(lexer)).toThrowError(JavascriptSyntaxError);
   });
 
   it('should error on newline before matching double-quote', function() {
-    let testString = 'eval {"\n';
+    let testString = '["\n';
     let lexer = new Lexer(testString);
     expect(() => parseEval(lexer)).toThrowError(JavascriptSyntaxError);
   });
 
-  it('should ignore braces in backtick string literals', function() {
-    let testString = 'eval {`\n}`}';
+  it('should ignore brackets in backtick string literals', function() {
+    let testString = '[`\n]`]';
     let lexer = new Lexer(testString);
     let block = parseEval(lexer);
-    expect(block).toBe('`\n}`');
+    expect(block.contents).toBe('`\n]`');
     expect(lexer.index).toBe(testString.length);
   });
 
-  it('should handle braces in javascript', function() {
-    let testString = 'eval {{{{}}}}';
+  it('should handle matching brackets in javascript', function() {
+    let testString = '[[[]]]';
     let lexer = new Lexer(testString);
     let block = parseEval(lexer);
-    expect(block).toBe('{{{}}}');
+    expect(block.contents).toBe('[[]]');
     expect(lexer.index).toBe(testString.length);
   });
 
   it('should be able to read itself (very meta)', function() {
+    // Test the parser with a lot of real javascript (typescript, close enough)
+    // by reading this file
     const parsersFilePath = require.resolve('../src/parsers.ts');
     let parsersFileContents = ('' + fs.readFileSync(parsersFilePath));
-    let testString = 'eval {' + parsersFileContents + '}';
+    let testString = '[' + parsersFileContents + ']';
     let lexer = new Lexer(testString);
     let block = parseEval(lexer);
-    expect(block).toBe(parsersFileContents);
+    expect(block.contents).toBe(parsersFileContents);
     expect(lexer.index).toBe(testString.length);
   });
 });
 
 
-describe('parseInlineCommand', function() {
+describe('parseFork', function() {
   it('allows a single unweighted item', function() {
-    let testString = '{(test)}';
-    let result = parseInlineCommand(testString, 0);
-    expect(result.blockEndIndex).toBe(testString.length);
-    expect(result.backReference).toBeNull();
-    expect(result.replacer).toBeInstanceOf(Replacer);
+    let lexer = new Lexer('(test)}');
+    let result = parseFork(lexer);
+    expect(result).toBeInstanceOf(Replacer);
   });
 
   it('allows a single weighted item', function() {
-    let testString = '{(test) 100}';
-    let result = parseInlineCommand(testString, 0);
-    expect(result.blockEndIndex).toBe(testString.length);
-    expect(result.backReference).toBeNull();
-    expect(result.replacer).toBeInstanceOf(Replacer);
+    let lexer = new Lexer('(test) 100}');
+    let result = parseFork(lexer);
+    expect(result).toBeInstanceOf(Replacer);
   });
 
-  it('allows a single unweighted call item', function() {
-    let testString = '{call someFunc}';
-    let result = parseInlineCommand(testString, 0);
-    expect(result.blockEndIndex).toBe(testString.length);
-    expect(result.backReference).toBeNull();
-    expect(result.replacer).toBeInstanceOf(Replacer);
+  it('allows a single unweighted eval block item', function() {
+    let lexer = new Lexer('[some js]}');
+    let result = parseFork(lexer);
+    expect(result).toBeInstanceOf(Replacer);
   });
 
-  it('allows a single weighted call item', function() {
-    let testString = '{call someFunc 100}';
-    let result = parseInlineCommand(testString, 0);
-    expect(result.blockEndIndex).toBe(testString.length);
-    expect(result.backReference).toBeNull();
-    expect(result.replacer).toBeInstanceOf(Replacer);
+  it('allows a single weighted eval block item', function() {
+    let lexer = new Lexer('[some js] 100}');
+    let result = parseFork(lexer);
+    expect(result).toBeInstanceOf(Replacer);
   });
 
-  it('allows a comma separated mix of literals and calls', function() {
-    let testString = '{(test) 50, call someFunc 40}';
-    let result = parseInlineCommand(testString, 0);
-    expect(result.blockEndIndex).toBe(testString.length);
-    expect(result.backReference).toBeNull();
-    expect(result.replacer).toBeInstanceOf(Replacer);
+  it('allows a comma separated mix of literals and eval blocks', function() {
+    let lexer = new Lexer('(test) 50, [some js] 40}');
+    let result = parseFork(lexer);
+    expect(result).toBeInstanceOf(Replacer);
   });
 
   it('allows trailing commas', function() {
-    let testString = '{(foo), (bar),}';
-    let result = parseInlineCommand(testString, 0);
-    expect(result.blockEndIndex).toBe(testString.length);
-    expect(result.backReference).toBeNull();
-    expect(result.replacer).toBeInstanceOf(Replacer);
+    let lexer = new Lexer('(foo), (bar),}');
+    let result = parseFork(lexer);
+    expect(result).toBeInstanceOf(Replacer);
   });
 
   it('allows the choice to be prefixed by an identifier for reference in later choices', function() {
-    let testString = '{TestChoice: (test) 50, call someFunc 40}';
-    let result = parseInlineCommand(testString, 0);
-    expect(result.replacer).toBeInstanceOf(Replacer);
-    expect(result.blockEndIndex).toBe(testString.length);
-    expect(result.backReference).toBeNull();
-    expect(result.replacer!.identifier).toBe('TestChoice');
+    let lexer = new Lexer('TestChoice: (test) 50, (test 2) 40}');
+    let result = parseFork(lexer);
+    expect(result).toBeInstanceOf(Replacer);
+    expect((result as Replacer).identifier).toBe('TestChoice');
   });
 
   it('allows blocks with identifiers to be marked silent with # prefix', function() {
-    let testString = '{#TestChoice: (test)}';
-    let result = parseInlineCommand(testString, 0);
-    expect(result.replacer).toBeInstanceOf(Replacer);
-    expect(result.blockEndIndex).toBe(testString.length);
-    expect(result.backReference).toBeNull();
-    expect(result.replacer!.identifier).toBe('TestChoice');
-    expect(result.replacer!.isSilent).toBe(true);
+    let lexer = new Lexer('#TestChoice: (test)}');
+    let result = parseFork(lexer);
+    expect(result).toBeInstanceOf(Replacer);
+    expect((result as Replacer).identifier).toBe('TestChoice');
+    expect((result as Replacer).isSilent).toBe(true);
   });
 
   it('allows back references', function() {
-    let testString = '{@TestChoice: 0 -> (foo)}';
-    let result = parseInlineCommand(testString, 0);
-    expect(result.blockEndIndex).toBe(testString.length);
+    let lexer = new Lexer('@TestChoice: 0 -> (foo)}');
+    let result = parseFork(lexer);
     let expectedChoiceMap = new Map();
     expectedChoiceMap.set(0, 'foo');
-    expect(result.backReference).toEqual(new BackReference('TestChoice', expectedChoiceMap, null));
-    expect(result.replacer).toBeNull();
+    expect(result).toBeInstanceOf(BackReference);
+    expect(result).toEqual(new BackReference('TestChoice', expectedChoiceMap, null));
   });
 
   it('allows grouped back references', function() {
-    let testString = '{@TestChoice: 0, 1 -> (foo), 2, 3 -> (bar), (baz)}';
-    let result = parseInlineCommand(testString, 0);
-    expect(result.blockEndIndex).toBe(testString.length);
+    let lexer = new Lexer('@TestChoice: 0, 1 -> (foo), 2, 3 -> (bar), (baz)}');
+    let result = parseFork(lexer);
     let expectedChoiceMap = new Map();
     expectedChoiceMap.set(0, 'foo');
     expectedChoiceMap.set(1, 'foo');
     expectedChoiceMap.set(2, 'bar');
     expectedChoiceMap.set(3, 'bar');
-    expect(result.backReference).toEqual(new BackReference('TestChoice', expectedChoiceMap, 'baz'));
-    expect(result.replacer).toBeNull();
+    expect(result).toBeInstanceOf(BackReference);
+    expect(result).toEqual(new BackReference('TestChoice', expectedChoiceMap, 'baz'));
   });
 });
+
+describe('parseLiteralBlock', function() {
+  it('parses a simple literal block', function() {
+    let lexer = new Lexer('[some literal text]]');
+    let result = parseLiteralBlock(lexer);
+    expect(result).toBe('some literal text');
+  })
+
+  it('parses a literal block containing a would-be fork', function() {
+    let lexer = new Lexer('[some {(would-be fork)}]]');
+    let result = parseLiteralBlock(lexer);
+    expect(result).toBe('some {(would-be fork)}');
+  })
+
+  it('allows escaping square brackets', function() {
+    let lexer = new Lexer('[escaped \\]] brackets]]');
+    let result = parseLiteralBlock(lexer);
+    expect(result).toBe('escaped ]] brackets');
+  })
+})
 
 
 describe('parseReplacements', function() {
@@ -207,16 +213,16 @@ describe('parseReplacements', function() {
     expect(lexer.index).toBe(testString.length);
   });
 
-  it('parses a call replacer', function() {
-    let testString = 'call test}';
+  it('parses an eval block replacer', function() {
+    let testString = '[some js]}';
     let lexer = new Lexer(testString);
     let result = parseReplacements(lexer);
     expect(result.weights.length).toBe(1);
     expect(result.weights[0]).toBeInstanceOf(WeightedChoice);
-    expect(result.weights[0].choice).toBeInstanceOf(FunctionCall);
-    expect((result.weights[0].choice as FunctionCall).functionName).toBe('test');
     expect(result.weights[0].weight).toBe(100);
-    expect(lexer.index).toBe(testString.length);
+    expect(result.weights[0].choice).toBeInstanceOf(EvalBlock);
+    let evalBlock = result.weights[0].choice as EvalBlock;
+    expect(evalBlock.contents).toBe('some js');
   });
 
   it('parses strings with weights', function() {
@@ -230,28 +236,33 @@ describe('parseReplacements', function() {
     expect(lexer.index).toBe(testString.length);
   });
 
-  it('parses call replacers with weights', function() {
-    let testString = 'call test 5}';
+  it('parses eval block replacers with weights', function() {
+    let testString = '[some js] 5}';
     let lexer = new Lexer(testString);
     let result = parseReplacements(lexer);
     expect(result.weights.length).toBe(1);
     expect(result.weights[0]).toBeInstanceOf(WeightedChoice);
-    expect(result.weights[0].choice).toBeInstanceOf(FunctionCall);
-    expect((result.weights[0].choice as FunctionCall).functionName).toBe('test');
     expect(result.weights[0].weight).toBe(5);
-    expect(lexer.index).toBe(testString.length);
+    expect(result.weights[0].choice).toBeInstanceOf(EvalBlock);
+    let evalBlock = result.weights[0].choice as EvalBlock;
+    expect(evalBlock.contents).toBe('some js');
   });
 
   it('parses many replacers with and without weights', function() {
-    let testString = 'call test 5, (test2), (test3) 3}';
+    let testString = '[some js] 5, (test2), (test3) 3}';
     let lexer = new Lexer(testString);
     let result = parseReplacements(lexer);
     expect(result.weights.length).toBe(3);
 
     expect(result.weights[0]).toBeInstanceOf(WeightedChoice);
-    expect(result.weights[0].choice).toBeInstanceOf(FunctionCall);
-    expect((result.weights[0].choice as FunctionCall).functionName).toBe('test');
     expect(result.weights[0].weight).toBe(5);
+    expect(result.weights[0].choice).toBeInstanceOf(EvalBlock);
+    let evalBlock = result.weights[0].choice as EvalBlock;
+    expect(evalBlock.contents).toBe('some js');
+
+    expect(result.weights[0]).toBeInstanceOf(WeightedChoice);
+    expect(result.weights[0].weight).toBe(5);
+    expect(result.weights[0].choice).toBeInstanceOf(EvalBlock);
 
     expect(result.weights[1]).toBeInstanceOf(WeightedChoice);
     expect(result.weights[1].choice).toBe('test2');
@@ -274,11 +285,10 @@ describe('parseReplacements', function() {
 });
 
 describe('parseBackReference', function() {
-  it('returns null on non-backref blocks', function() {
+  it('errors on non-backref blocks', function() {
     let testString = '(test) 5}';
     let lexer = new Lexer(testString);
-    let result = parseBackReference(lexer)!;
-    expect(result).toBeNull();
+    expect(() => parseBackReference(lexer)).toThrow(BMLSyntaxError);
   });
 
   it('parses a simple case with a single string branch and no fallback', function() {
@@ -290,36 +300,39 @@ describe('parseBackReference', function() {
     expect(result.choiceMap.get(0)).toBe('foo');
   });
 
-  it('parses a simple case with a single call branch and no fallback', function() {
-    let testString = '@TestRef: 0 -> call foo}';
+  it('parses a simple case with a single eval block branch and no fallback', function() {
+    let testString = '@TestRef: 0 -> [some js]}';
     let result = parseBackReference(new Lexer(testString))!;
     expect(result.referredIdentifier).toBe('TestRef');
     expect(result.choiceMap.size).toBe(1);
-    expect(result.choiceMap.get(0)).toBeInstanceOf(FunctionCall);
-    expect((result.choiceMap.get(0) as FunctionCall).functionName).toBe('foo');
+    expect(result.choiceMap.get(0)).toBeInstanceOf(EvalBlock);
+    expect((result.choiceMap.get(0) as EvalBlock).contents).toBe('some js');
   });
 
   it('allows a single branch with a fallback', function() {
-    let testString = '@TestRef: 0 -> call foo, (fallback)}';
+    let testString = '@TestRef: 0 -> [some js], (fallback)}';
     let result = parseBackReference(new Lexer(testString))!;
     expect(result.referredIdentifier).toBe('TestRef');
     expect(result.choiceMap.size).toBe(1);
-    expect(result.choiceMap.get(0)).toBeInstanceOf(FunctionCall);
-    expect((result.choiceMap.get(0) as FunctionCall).functionName).toBe('foo');
+    expect(result.choiceMap.get(0)).toBeInstanceOf(EvalBlock);
+    expect((result.choiceMap.get(0) as EvalBlock).contents).toBe('some js');
     expect(result.fallback).toBe('fallback');
   });
 
   it('parses multiple branches of all types with fallback', function() {
-    let testString = '@TestRef: 0 -> (foo), 1 -> call someFunc, 2 -> (bar), call fallbackFunc}';
+    let testString = '@TestRef: 0 -> (foo), 1 -> [some js], 2 -> (bar), [some more js]}';
     let result = parseBackReference(new Lexer(testString))!;
     expect(result.referredIdentifier).toBe('TestRef');
     expect(result.choiceMap.size).toBe(3);
     expect(result.choiceMap.get(0)).toBe('foo');
-    expect(result.choiceMap.get(1)).toBeInstanceOf(FunctionCall);
-    expect((result.choiceMap.get(1) as FunctionCall).functionName).toBe('someFunc');
+
+    expect(result.choiceMap.get(1)).toBeInstanceOf(EvalBlock);
+    expect((result.choiceMap.get(1) as EvalBlock).contents).toBe('some js');
+
     expect(result.choiceMap.get(2)).toBe('bar');
-    expect(result.fallback!).toBeInstanceOf(FunctionCall);
-    expect((result.fallback! as FunctionCall).functionName).toBe('fallbackFunc');
+
+    expect(result.fallback!).toBeInstanceOf(EvalBlock);
+    expect((result.fallback! as EvalBlock).contents).toBe('some more js');
   });
 
   it('parses copy refs', function() {
@@ -347,8 +360,8 @@ describe('parseBackReference', function() {
     testParseStrToGiveSyntaxError('@TestRef: 0,,2 -> (foo), 1 -> (bar)');
     testParseStrToGiveSyntaxError('@TestRef: 0, 1');
     testParseStrToGiveSyntaxError('@TestRef: 0 -> (foo), (bar)');
-    testParseStrToGiveSyntaxError('@TestRef: 0 -> (foo), call bar');
-    testParseStrToGiveSyntaxError('@TestRef: 0 -> (foo), call bar, @TestRef2: 0 -> (foo)');
+    testParseStrToGiveSyntaxError('@TestRef: 0 -> (foo), [some js]');
+    testParseStrToGiveSyntaxError('@TestRef: 0 -> (foo), [some js], @TestRef2: 0 -> (foo)');
   });
 
   it('errors on repeated indexes', function() {
