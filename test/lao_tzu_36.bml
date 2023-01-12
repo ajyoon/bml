@@ -6,9 +6,9 @@
     (If you wish to [] it, you must certainly [] it),
     (what seeks [] must first [])
 }
-{#endPunc: (\
-    {(.) 70, (;)} {(\n), ()}\
-)}
+{#endPunc:
+    ({(.) 70, (;)} {(\n), ()})
+}
 {#cherishIt: (hold it dear), (cherish it), (hold it close), (exalt it), (keep it close)}
 {#beRaised: (be raised high), (have been raised)}
 {#weiMing:
@@ -122,3 +122,6 @@
     });
 ]}
 {[insert(foo())]}
+
+// A fork directly placed inside a fork branch
+{{(a fork directly inside a fork branch)}}

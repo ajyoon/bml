@@ -15,8 +15,6 @@ import {
 
 import {
   parseEval,
-  parseReplacements,
-  parseBackReference,
   parseFork,
   parseLiteralBlock,
   parseDocument,
@@ -166,7 +164,7 @@ describe('parseFork', function() {
     let expectedChoiceMap = new Map();
     expectedChoiceMap.set(0, ['foo']);
     expect(result).toBeInstanceOf(BackReference);
-    expect(result).toEqual(new BackReference('TestChoice', expectedChoiceMap, null));
+    expect(result).toEqual(new BackReference('TestChoice', expectedChoiceMap, []));
   });
 
   it('allows grouped back references', function() {
@@ -203,11 +201,11 @@ describe('parseLiteralBlock', function() {
 })
 
 
-describe('parseReplacements', function() {
+describe('parseFork', function() {
   it('parses a string literal replacer with braces', function() {
     let testString = '(test)}';
     let lexer = new Lexer(testString);
-    let result = parseReplacements(lexer);
+    let result = parseFork(lexer);
     expect(result.weights.length).toBe(1);
     expect(result.weights[0]).toBeInstanceOf(WeightedChoice);
     expect(result.weights[0].choice).toStrictEqual(['test']);
@@ -218,7 +216,7 @@ describe('parseReplacements', function() {
   it('parses an eval block replacer', function() {
     let testString = '[some js]}';
     let lexer = new Lexer(testString);
-    let result = parseReplacements(lexer);
+    let result = parseFork(lexer);
     expect(result.weights.length).toBe(1);
     expect(result.weights[0]).toBeInstanceOf(WeightedChoice);
     expect(result.weights[0].weight).toBe(100);
@@ -230,7 +228,7 @@ describe('parseReplacements', function() {
   it('parses strings with weights', function() {
     let testString = '(test) 5}';
     let lexer = new Lexer(testString);
-    let result = parseReplacements(lexer);
+    let result = parseFork(lexer);
     expect(result.weights.length).toBe(1);
     expect(result.weights[0]).toBeInstanceOf(WeightedChoice);
     expect(result.weights[0].choice).toStrictEqual(['test']);
@@ -241,7 +239,7 @@ describe('parseReplacements', function() {
   it('parses eval block replacers with weights', function() {
     let testString = '[some js] 5}';
     let lexer = new Lexer(testString);
-    let result = parseReplacements(lexer);
+    let result = parseFork(lexer);
     expect(result.weights.length).toBe(1);
     expect(result.weights[0]).toBeInstanceOf(WeightedChoice);
     expect(result.weights[0].weight).toBe(5);
@@ -253,7 +251,7 @@ describe('parseReplacements', function() {
   it('parses many replacers with and without weights', function() {
     let testString = '[some js] 5, (test2), (test3) 3}';
     let lexer = new Lexer(testString);
-    let result = parseReplacements(lexer);
+    let result = parseFork(lexer);
     expect(result.weights.length).toBe(3);
 
     expect(result.weights[0]).toBeInstanceOf(WeightedChoice);
@@ -281,22 +279,22 @@ describe('parseReplacements', function() {
     let testString = '(test) (test 2)';
     let lexer = new Lexer(testString);
     expect(() => {
-      parseReplacements(lexer);
+      parseFork(lexer);
     }).toThrowError(BMLSyntaxError);
   });
 });
 
-describe('parseBackReference', function() {
+describe('parseFork', function() {
   it('errors on non-backref blocks', function() {
     let testString = '(test) 5}';
     let lexer = new Lexer(testString);
-    expect(() => parseBackReference(lexer)).toThrow(BMLSyntaxError);
+    expect(() => parseFork(lexer)).toThrow(BMLSyntaxError);
   });
 
   it('parses a simple case with a single string branch and no fallback', function() {
     let testString = '@TestRef: 0 -> (foo)}';
     let lexer = new Lexer(testString);
-    let result = parseBackReference(lexer)!;
+    let result = parseFork(lexer)!;
     expect(result.referredIdentifier).toBe('TestRef');
     expect(result.choiceMap.size).toBe(1);
     expect(result.choiceMap.get(0)).toStrictEqual(['foo']);
@@ -304,7 +302,7 @@ describe('parseBackReference', function() {
 
   it('parses a simple case with a single eval block branch and no fallback', function() {
     let testString = '@TestRef: 0 -> [some js]}';
-    let result = parseBackReference(new Lexer(testString))!;
+    let result = parseFork(new Lexer(testString))!;
     expect(result.referredIdentifier).toBe('TestRef');
     expect(result.choiceMap.size).toBe(1);
     expect(result.choiceMap.get(0)).toBeInstanceOf(EvalBlock);
@@ -313,7 +311,7 @@ describe('parseBackReference', function() {
 
   it('allows a single branch with a fallback', function() {
     let testString = '@TestRef: 0 -> [some js], (fallback)}';
-    let result = parseBackReference(new Lexer(testString))!;
+    let result = parseFork(new Lexer(testString))!;
     expect(result.referredIdentifier).toBe('TestRef');
     expect(result.choiceMap.size).toBe(1);
     expect(result.choiceMap.get(0)).toBeInstanceOf(EvalBlock);
@@ -323,7 +321,7 @@ describe('parseBackReference', function() {
 
   it('parses multiple branches of all types with fallback', function() {
     let testString = '@TestRef: 0 -> (foo), 1 -> [some js], 2 -> (bar), [some more js]}';
-    let result = parseBackReference(new Lexer(testString))!;
+    let result = parseFork(new Lexer(testString))!;
     expect(result.referredIdentifier).toBe('TestRef');
     expect(result.choiceMap.size).toBe(3);
     expect(result.choiceMap.get(0)).toStrictEqual(['foo']);
@@ -340,14 +338,14 @@ describe('parseBackReference', function() {
   it('parses copy refs', function() {
     let testString = '@TestRef}';
     let lexer = new Lexer(testString);
-    let result = parseBackReference(lexer)!;
+    let result = parseFork(lexer)!;
     expect(result.referredIdentifier).toBe('TestRef');
     expect(result.choiceMap.size).toBe(0);
   });
 
   function testParseStrToGiveSyntaxError(backRefString: string) {
     expect(() => {
-      parseBackReference(new Lexer(backRefString));
+      parseFork(new Lexer(backRefString));
     }).toThrowError(BMLSyntaxError);
   }
 
@@ -368,7 +366,7 @@ describe('parseBackReference', function() {
 
   it('errors on repeated indexes', function() {
     expect(() => {
-      parseBackReference(new Lexer('@TestRef: 0 -> (foo), 1 -> (bar), 0 -> (biz)'));
+      parseFork(new Lexer('@TestRef: 0 -> (foo), 1 -> (bar), 0 -> (biz)'));
     }).toThrowError(BMLDuplicatedRefIndexError);
   });
 });

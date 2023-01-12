@@ -178,13 +178,17 @@ export function parseFork(lexer: Lexer): Replacer | BackReference {
         break;
       case TokenType.OPEN_PAREN:
       case TokenType.OPEN_BRACKET:
+      case TokenType.OPEN_BRACE:
         if (acceptReplacement) {
           acceptChoiceIndex = false;
           if (token.tokenType === TokenType.OPEN_PAREN) {
             lexer.next();
             currentReplacement = parseDocument(lexer, false);
-          } else {
+          } else if (token.tokenType === TokenType.OPEN_BRACKET) {
             currentReplacement = parseEval(lexer);
+          } else {
+            lexer.next();
+            currentReplacement = [parseFork(lexer)];
           }
           if (currentChoiceIndexes.length) {
             for (let choiceIndex of currentChoiceIndexes) {
