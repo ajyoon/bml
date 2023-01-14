@@ -183,7 +183,7 @@ export function determineAction(args: string[]): Action {
     } else {
       return {
         function: executeFromStdin,
-        args: [settings, analyze]
+        args: [settings]
       }
     }
   } else {
