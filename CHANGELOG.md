@@ -1,5 +1,10 @@
 # Changelog
 
+### 0.1.1
+
+* Add support for static branch-counting analysis. This can be done
+  with the cli using `--analyze` and through the library with `bml.analyze`
+
 ### 0.1.0: MAJOR BREAKING CHANGE
 
 In this release, the language and parser have been largely rewritten,
