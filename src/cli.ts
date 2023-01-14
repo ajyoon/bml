@@ -2,6 +2,7 @@
 import fs from 'fs';
 import process from 'process';
 import { RenderSettings } from './settings';
+import { analyze } from './analysis';
 
 const packageJson = require('../package.json');
 // Seems this needs to use `require` to bundle correctly. No idea why.
@@ -13,32 +14,43 @@ export const HELP_SWITCHES = ['-h', '--h', '-help', '--help'];
 export const VERSION_SWITCHES = ['-v', '--version'];
 export const SEED_SWITCHES = ['--seed'];
 export const NO_EVAL_SWITCHES = ['--no-eval'];
+export const ANALYZE_SWITCHES = ['--analyze'];
 export const ALL_SWITCHES = ([] as string[]).concat(
   HELP_SWITCHES, VERSION_SWITCHES,
-  SEED_SWITCHES, NO_EVAL_SWITCHES);
+  SEED_SWITCHES, NO_EVAL_SWITCHES, ANALYZE_SWITCHES);
 
 export type BMLArgs = { bmlSource: string, settings: RenderSettings };
 export type Action = { function: Function, args: any[] };
 
-export function readFromStdin(settings: RenderSettings): BMLArgs {
+function readFile(path: string) {
+  if (!fs.existsSync(path)) {
+    handleNonexistingPath(path);
+    process.exit(1);
+  }
+  return '' + fs.readFileSync(path);
+}
+
+export function executeFromStdin(settings: RenderSettings): BMLArgs {
   return {
     bmlSource: fs.readFileSync(0, 'utf8'), // STDIN_FILENO = 0
     settings
   };
 }
 
-
-export function readFromPath(path: string, settings: RenderSettings): BMLArgs {
-  if (!fs.existsSync(path)) {
-    handleNonexistingPath(path);
-    process.exit(1);
-  }
+export function executeFromPath(path: string, settings: RenderSettings): BMLArgs {
   return {
-    bmlSource: '' + fs.readFileSync(path),
+    bmlSource: readFile(path),
     settings
   }
 }
 
+export function analyzeFromStdin(): string {
+  return fs.readFileSync(0, 'utf8'); // STDIN_FILENO = 0
+}
+
+export function analyzeFromPath(path: string): string {
+  return readFile(path);
+}
 
 export function handleNonexistingPath(path: string) {
   console.log(`Could not read from ${path}`);
@@ -65,6 +77,7 @@ export function printHelp() {
 
     ${SEED_SWITCHES} INTEGER             set the random seed for the bml render
     ${NO_EVAL_SWITCHES}                  disable Javascript evaluation
+    ${ANALYZE_SWITCHES}                  analyze the document instead of executing
 
   Source Code at https://github.com/ajyoon/bml
   Report Bugs at https://github.com/ajyoon/bml/issues
@@ -115,6 +128,7 @@ export function determineAction(args: string[]): Action {
   let file = null;
   let noEval = false;
   let seed = null;
+  let analyze = false;
 
   for (let arg of args) {
     if (expectSeed) {
@@ -139,6 +153,8 @@ export function determineAction(args: string[]): Action {
       noEval = true;
     } else if (SEED_SWITCHES.includes(arg)) {
       expectSeed = true;
+    } else if (ANALYZE_SWITCHES.includes(arg)) {
+      analyze = true;
     } else {
       if (file !== null) {
         console.error('More than one path provided.');
@@ -159,14 +175,28 @@ export function determineAction(args: string[]): Action {
   };
 
   if (file === null) {
-    return {
-      function: readFromStdin,
-      args: [settings]
+    if (analyze) {
+      return {
+        function: analyzeFromStdin,
+        args: []
+      }
+    } else {
+      return {
+        function: executeFromStdin,
+        args: [settings, analyze]
+      }
     }
   } else {
-    return {
-      function: readFromPath,
-      args: [file, settings]
+    if (analyze) {
+      return {
+        function: analyzeFromPath,
+        args: [file]
+      }
+    } else {
+      return {
+        function: executeFromPath,
+        args: [file, settings]
+      }
     }
   }
 }
@@ -200,6 +230,12 @@ function main() {
   } else if (action.function == printHelpForError) {
     action.function();
     process.exit(1);
+  } else if (action.function == analyzeFromPath || action.function == analyzeFromStdin) {
+    let bmlSource = action.function(...action.args);
+    let analysisResult = analyze(bmlSource);
+    let formattedCount = analysisResult.possibleOutcomes.toLocaleString();
+    process.stdout.write(`Total possible branches: ${formattedCount}\n`);
+    process.exit(0);
   } else {
     let { bmlSource, settings } = action.function(...action.args);
     let renderedContent = runBmlWithErrorCheck(bmlSource, settings);

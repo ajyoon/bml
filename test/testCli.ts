@@ -29,13 +29,13 @@ describe('cli', function() {
   it('reads from a path when given an argument', function() {
     let path = 'some path';
     let action = cli.determineAction([path]);
-    expect(action.function).toBe(cli.readFromPath);
+    expect(action.function).toBe(cli.executeFromPath);
     expect(action.args).toEqual([path, defaultRenderSettings]);
   });
 
   it('reads from stdin when not given any arguments', function() {
     let action = cli.determineAction([]);
-    expect(action.function).toBe(cli.readFromStdin);
+    expect(action.function).toBe(cli.executeFromStdin);
     expect(action.args).toEqual([defaultRenderSettings]);
   });
 
@@ -68,7 +68,7 @@ describe('cli', function() {
 
   it('supports negative seeds', function() {
     let action = cli.determineAction(['--seed', '-123']);
-    expect(action.function).toBe(cli.readFromStdin);
+    expect(action.function).toBe(cli.executeFromStdin);
   });
 
   it('fails on unknown flags', function() {
@@ -81,6 +81,18 @@ describe('cli', function() {
     expect(action.function).toBe(cli.printHelpForError);
   });
 
+  it('supports analysis mode from stdin', function() {
+    let action = cli.determineAction(['--analyze']);
+    expect(action.function).toBe(cli.analyzeFromStdin);
+    expect(action.args).toEqual([]);
+  });
+
+  it('supports analysis mode from path', function() {
+    let action = cli.determineAction(['--analyze', '1.bml']);
+    expect(action.function).toBe(cli.analyzeFromPath);
+    expect(action.args).toEqual(['1.bml']);
+  });
+
   it('supports all settings', function() {
     let path = 'foo.bml';
     let action = cli.determineAction([
@@ -89,7 +101,7 @@ describe('cli', function() {
       randomSeed: 123,
       allowEval: false,
     };
-    expect(action.function).toBe(cli.readFromPath);
+    expect(action.function).toBe(cli.executeFromPath);
     expect(action.args).toEqual([path, expectedSettings]);
   });
 });

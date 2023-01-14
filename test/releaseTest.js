@@ -46,4 +46,7 @@ const bmlLib = require(libraryPath);
 let libResult = bmlLib(bmlScript, { randomSeed: seed });
 assertResult(libResult);
 
+// Check that the analysis function is accessible to the public API.
+bmlLib.analyze(bmlScript);
+
 console.log('All smoke tests passed');
