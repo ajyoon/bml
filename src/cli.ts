@@ -3,6 +3,7 @@ import fs from 'fs';
 import process from 'process';
 import { RenderSettings } from './settings';
 import { analyze } from './analysis';
+import { launchInteractive } from './interactive';
 
 const packageJson = require('../package.json');
 // Seems this needs to use `require` to bundle correctly. No idea why.
@@ -15,9 +16,11 @@ export const VERSION_SWITCHES = ['-v', '--version'];
 export const SEED_SWITCHES = ['--seed'];
 export const NO_EVAL_SWITCHES = ['--no-eval'];
 export const ANALYZE_SWITCHES = ['--analyze'];
+export const INTERACTIVE_SWITCHES = ['-i', '--interactive'];
 export const ALL_SWITCHES = ([] as string[]).concat(
   HELP_SWITCHES, VERSION_SWITCHES,
-  SEED_SWITCHES, NO_EVAL_SWITCHES, ANALYZE_SWITCHES);
+  SEED_SWITCHES, NO_EVAL_SWITCHES,
+  ANALYZE_SWITCHES, INTERACTIVE_SWITCHES);
 
 export type BMLArgs = { bmlSource: string, settings: RenderSettings };
 export type Action = { function: Function, args: any[] };
@@ -78,6 +81,7 @@ export function printHelp() {
     ${SEED_SWITCHES} INTEGER             set the random seed for the bml render
     ${NO_EVAL_SWITCHES}                  disable Javascript evaluation
     ${ANALYZE_SWITCHES}                  analyze the document instead of executing
+    ${INTERACTIVE_SWITCHES}              run BML interactively
 
   Source Code at https://github.com/ajyoon/bml
   Report Bugs at https://github.com/ajyoon/bml/issues
@@ -129,6 +133,7 @@ export function determineAction(args: string[]): Action {
   let noEval = false;
   let seed = null;
   let analyze = false;
+  let interactive = false;
 
   for (let arg of args) {
     if (expectSeed) {
@@ -155,6 +160,8 @@ export function determineAction(args: string[]): Action {
       expectSeed = true;
     } else if (ANALYZE_SWITCHES.includes(arg)) {
       analyze = true;
+    } else if (INTERACTIVE_SWITCHES.includes(arg)) {
+      interactive = true;
     } else {
       if (file !== null) {
         console.error('More than one path provided.');
@@ -173,6 +180,17 @@ export function determineAction(args: string[]): Action {
     randomSeed: seed,
     allowEval: !noEval,
   };
+
+  if (interactive) {
+    if (file === null) {
+      console.error('Interactive mode requires a file name')
+      return errorAction;
+    }
+    return {
+      function: executeInteractively,
+      args: [file, settings]
+    };
+  }
 
   if (file === null) {
     if (analyze) {
@@ -220,6 +238,10 @@ export function runBmlWithErrorCheck(bmlSource: string, settings: RenderSettings
 }
 
 
+export function executeInteractively(path: string, settings: RenderSettings) {
+  launchInteractive(path, settings);
+}
+
 function main() {
   let strippedArgs = stripArgs(process.argv);
   let action = determineAction(strippedArgs);
@@ -230,6 +252,8 @@ function main() {
   } else if (action.function == printHelpForError) {
     action.function();
     process.exit(1);
+  } else if (action.function == executeInteractively) {
+    action.function(...action.args);
   } else if (action.function == analyzeFromPath || action.function == analyzeFromStdin) {
     let bmlSource = action.function(...action.args);
     let analysisResult = analyze(bmlSource);

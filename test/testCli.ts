@@ -93,6 +93,22 @@ describe('cli', function() {
     expect(action.args).toEqual(['1.bml']);
   });
 
+  it('does not support interactive mode from stdin', function() {
+    let action = cli.determineAction(['--interactive']);
+    expect(action.function).toBe(cli.printHelpForError);
+    action = cli.determineAction(['-i']);
+    expect(action.function).toBe(cli.printHelpForError);
+  });
+
+  it('supports interactive mode from path', function() {
+    let action = cli.determineAction(['--interactive', '1.bml']);
+    expect(action.function).toBe(cli.executeInteractively);
+    expect(action.args).toEqual(['1.bml', defaultRenderSettings]);
+    action = cli.determineAction(['-i', '1.bml']);
+    expect(action.function).toBe(cli.executeInteractively);
+    expect(action.args).toEqual(['1.bml', defaultRenderSettings]);
+  });
+
   it('supports all settings', function() {
     let path = 'foo.bml';
     let action = cli.determineAction([

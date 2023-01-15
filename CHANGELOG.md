@@ -1,5 +1,9 @@
 # Changelog
 
+### 0.1.2
+
+* Add an interactive mode in the CLI with `--interactive`.
+
 ### 0.1.1
 
 * Add support for static branch-counting analysis. This can be done
