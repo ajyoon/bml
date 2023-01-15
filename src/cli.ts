@@ -81,7 +81,7 @@ export function printHelp() {
     ${SEED_SWITCHES} INTEGER             set the random seed for the bml render
     ${NO_EVAL_SWITCHES}                  disable Javascript evaluation
     ${ANALYZE_SWITCHES}                  analyze the document instead of executing
-    ${INTERACTIVE_SWITCHES}              run BML interactively
+    ${INTERACTIVE_SWITCHES}           run BML interactively
 
   Source Code at https://github.com/ajyoon/bml
   Report Bugs at https://github.com/ajyoon/bml/issues
