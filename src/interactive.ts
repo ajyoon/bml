@@ -1,16 +1,15 @@
 import { render } from './renderer';
 import * as blessed from 'blessed';
 import { RenderSettings } from './settings';
-// Old-school require is needed to prevent weird build breakage
+// Old-school require is needed for some deps to prevent weird build breakage
 const fs = require('fs');
+const clipboard = require('clipboardy');
 
 
 export function launchInteractive(path: string, settings: RenderSettings) {
   const screen = blessed.screen({
     smartCSR: true
   });
-
-  screen.title = 'BML Interactive Runner';
 
   const infoBox = blessed.box({
     width: '100%',
@@ -48,19 +47,34 @@ export function launchInteractive(path: string, settings: RenderSettings) {
 
   screen.append(renderBox);
 
+  const alertPopup = blessed.message({
+    left: 'center',
+    top: 'center',
+    width: 'shrink',
+    height: 'shrink',
+    border: {
+      type: 'line',
+    },
+    hidden: true,
+  });
+
+  screen.append(alertPopup);
+
   let state: {
     refreshTimeoutId: NodeJS.Timeout | null,
     refreshIntervalSecs: number,
     scriptLastModTime: Date,
+    currentRender: string,
   } = {
     refreshTimeoutId: null,
     refreshIntervalSecs: 10,
-    scriptLastModTime: new Date()
+    scriptLastModTime: new Date(),
+    currentRender: ''
   }
 
   function formatInfoBoxText() {
     return `Source: ${path} | Refresh delay: ${state.refreshIntervalSecs}s\n`
-      + `R: Refresh | Ctrl-Up/Dwn: Change refresh delay`
+      + `R: Refresh | C: Copy | Ctrl-Up/Dwn: Change refresh delay`
 
   }
 
@@ -73,12 +87,20 @@ export function launchInteractive(path: string, settings: RenderSettings) {
     let statResult = fs.statSync(path);
     state.scriptLastModTime = statResult.mtime;
     let bmlSource = '' + fs.readFileSync(path);
-    let result = render(bmlSource, settings);
+    let result = '';
+    try {
+      result = render(bmlSource, settings);
+    } catch (e: any) {
+      // Also need to capture warnings somehow and print them out.
+      // Currently when a missing ref is found it gets printed weirdly over the TUI
+      result = e.stack.toString();
+    }
     renderBox.setContent(result);
     infoBox.setContent(formatInfoBoxText());
     screen.render();
     state.refreshTimeoutId = setTimeout(
       refresh, state.refreshIntervalSecs * 1000);
+    state.currentRender = result;
   }
 
   // If the file changes, trigger a refresh
@@ -89,8 +111,17 @@ export function launchInteractive(path: string, settings: RenderSettings) {
     }
   }, 500);
 
+  // TODO
+  // - Support pausing the refresher
+
   // Attach key listener for force-refresh
-  screen.key(['r', 'R'], interruptingRefresh);
+  screen.key(['r', 'S-r'], interruptingRefresh);
+
+  // Attach key listener for copying render output
+  screen.key(['c', 'S-c'], function(ch, key) {
+    clipboard.writeSync(state.currentRender);
+    alertPopup.display('Copied to clipboard', 1);
+  });
 
   // Attach key listeners for changing refresh interval
   screen.key(['C-up'], function(ch, key) {

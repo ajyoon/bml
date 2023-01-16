@@ -1,5 +1,10 @@
 # Changelog
 
+### 0.1.3
+
+* Interactive view improvements
+  * Support copying last render to clipboard
+
 ### 0.1.2
 
 * Add an interactive mode in the CLI with `--interactive`.

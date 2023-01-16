@@ -65,6 +65,7 @@
   },
   "dependencies": {
     "blessed": "^0.1.81",
+    "clipboardy": "^2.3.0",
     "seedrandom": "2.4.4"
   },
   "license": "BSD-3-Clause"
