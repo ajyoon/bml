@@ -126,7 +126,7 @@ export function parseFork(lexer: Lexer): ChoiceFork | Reference {
   let mappedChoices = new Map();
   let unmappedChoices: WeightedChoice[] = [];
 
-  let idRe = /([@#]?)(\w+):?/y;
+  let idRe = /([@#]?)(\w+)(:?)/y;
 
   let id = null;
   let isReference = false;
@@ -138,7 +138,7 @@ export function parseFork(lexer: Lexer): ChoiceFork | Reference {
   let acceptArrow = false;
   let acceptReplacement = true;
   let acceptComma = false;
-  let acceptBlockEnd = true;
+  let acceptBlockEnd = false;
 
   let currentChoiceIndexes = [];
   let currentReplacement = null;
@@ -154,6 +154,7 @@ export function parseFork(lexer: Lexer): ChoiceFork | Reference {
           acceptChoiceIndex = false;
           acceptArrow = true;
           acceptComma = true;
+          acceptBlockEnd = false;
           currentChoiceIndexes.push(Number(token.str));
         } else if (acceptWeight) {
           acceptWeight = false;
@@ -253,9 +254,14 @@ export function parseFork(lexer: Lexer): ChoiceFork | Reference {
           }
           let typeSlug = idMatch[1];
           id = idMatch[2];
+          let includesColon = !!idMatch[3];
           if (typeSlug == '@') {
             isReference = true;
-            acceptChoiceIndex = true;
+            if (includesColon) {
+              acceptChoiceIndex = true;
+            } else {
+              acceptBlockEnd = true;
+            }
           } else if (typeSlug == '#') {
             isSilent = true;
           }

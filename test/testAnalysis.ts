@@ -106,4 +106,10 @@ test {id: (a), (b), (c)}
       .toEqual(BigInt(3 + 2 + 2));
   });
 
+  it('counts a bare ref as adding no branches', function() {
+    let testString = `{id: (a), (b)} {@id}`;
+    expect(analyze(testString).possibleOutcomes)
+      .toEqual(BigInt(2));
+  });
+
 });

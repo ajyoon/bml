@@ -23,6 +23,12 @@ import {
 import { EvalBlock } from '../src/evalBlock';
 
 
+function assertParseForkGivesSyntaxError(forkSrc: string) {
+  expect(() => {
+    parseFork(new Lexer(forkSrc));
+  }).toThrowError(BMLSyntaxError);
+}
+
 
 describe('parseEval', function() {
   it('can parse an empty block', function() {
@@ -149,6 +155,11 @@ describe('parseFork', function() {
     let result = parseFork(lexer);
     expect(result).toBeInstanceOf(ChoiceFork);
     expect((result as ChoiceFork).identifier).toBe('TestChoice');
+  });
+
+  it('errors on a bare id with no branches', function() {
+    assertParseForkGivesSyntaxError('TestChoice:}');
+    assertParseForkGivesSyntaxError('TestChoice}');
   });
 
   it('allows blocks with identifiers to be marked silent with # prefix', function() {
@@ -308,11 +319,7 @@ describe('parseFork', function() {
   });
 
   it('fails when two choices are not separated by a comma', function() {
-    let testString = '(test) (test 2)';
-    let lexer = new Lexer(testString);
-    expect(() => {
-      parseFork(lexer);
-    }).toThrowError(BMLSyntaxError);
+    assertParseForkGivesSyntaxError('(test) (test 2)}');
   });
 });
 
@@ -378,28 +385,16 @@ describe('parseFork', function() {
     expect(result.fallbackChoiceFork).toBeNull();
   });
 
-  function testParseStrToGiveSyntaxError(backRefString: string) {
-    expect(() => {
-      parseFork(new Lexer(backRefString));
-    }).toThrowError(BMLSyntaxError);
-  }
-
   it('throws an error when invalid syntax is used', function() {
-    testParseStrToGiveSyntaxError('@TestRef: aaskfj');
-    testParseStrToGiveSyntaxError('@TestRef: 0 - > (foo)');
-    testParseStrToGiveSyntaxError('@TestRef: 0 -> {foo}');
-    testParseStrToGiveSyntaxError('@TestRef: (foo) -> {foo}');
-    testParseStrToGiveSyntaxError('@TestRef: (foo)');
-    testParseStrToGiveSyntaxError('@TestRef: (foo) 10');
-    testParseStrToGiveSyntaxError('@TestRef: 0 -> (foo),, 1 -> (bar)');
-    testParseStrToGiveSyntaxError('@TestRef: 0,,2 -> (foo), 1 -> (bar)');
-    testParseStrToGiveSyntaxError('@TestRef: 0, 1');
-    testParseStrToGiveSyntaxError('@TestRef: 0 -> (foo), (bar)');
-    testParseStrToGiveSyntaxError('@TestRef: 0 -> (foo), [some js]');
-    testParseStrToGiveSyntaxError('@TestRef: 0 -> (foo), [some js], @TestRef2: 0 -> (foo)');
-
-    testParseStrToGiveSyntaxError('@TestRef: 0, (foo)');
-    testParseStrToGiveSyntaxError('@TestRef: (foo) 5, 2');
+    assertParseForkGivesSyntaxError('@TestRef:}');
+    assertParseForkGivesSyntaxError('@TestRef: aaskfj}');
+    assertParseForkGivesSyntaxError('@TestRef: 0 - > (foo)}');
+    assertParseForkGivesSyntaxError('@TestRef: (foo) -> {foo}}');
+    assertParseForkGivesSyntaxError('@TestRef: 0 -> (foo),, 1 -> (bar)}');
+    assertParseForkGivesSyntaxError('@TestRef: 0,,2 -> (foo), 1 -> (bar)}');
+    assertParseForkGivesSyntaxError('@TestRef: 0, 1}');
+    assertParseForkGivesSyntaxError('@TestRef: 0 -> (foo), [some js], @TestRef2: 0 -> (foo)}');
+    assertParseForkGivesSyntaxError('@TestRef: (foo) 5, 2}');
   });
 
   it('errors on repeated indexes', function() {
