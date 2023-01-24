@@ -1,4 +1,5 @@
 import { render } from './renderer';
+import { analyze } from './analysis';
 import * as blessed from 'blessed';
 import { RenderSettings } from './settings';
 // Old-school require is needed for some deps to prevent weird build breakage
@@ -24,6 +25,7 @@ export function launchInteractive(path: string, settings: RenderSettings) {
 
   const renderBox = blessed.box({
     top: 4,
+    bottom: 3,
     border: {
       type: 'line',
     },
@@ -46,6 +48,18 @@ export function launchInteractive(path: string, settings: RenderSettings) {
   });
 
   screen.append(renderBox);
+
+  const analysisBox = blessed.box({
+    top: '100%-3',
+    bottom: 0,
+    border: {
+      type: 'line',
+    },
+    content: 'analysis goes here',
+  });
+
+  screen.append(analysisBox);
+
 
   const alertPopup = blessed.message({
     left: 'center',
@@ -78,6 +92,19 @@ export function launchInteractive(path: string, settings: RenderSettings) {
 
   }
 
+  function updateAnalysis() {
+    let bmlSource = '' + fs.readFileSync(path);
+    let text;
+    try {
+      let { possibleOutcomes } = analyze(bmlSource);
+      text = `Possible outcomes: ${possibleOutcomes.toLocaleString()}`
+    } catch (e) {
+      text = '[error]'
+    }
+    analysisBox.setContent(text);
+    // Don't trigger screen render, let the re-render do it
+  }
+
   function interruptingRefresh() {
     clearTimeout(state.refreshTimeoutId!);
     refresh()
@@ -107,6 +134,7 @@ export function launchInteractive(path: string, settings: RenderSettings) {
   setInterval(() => {
     let statResult = fs.statSync(path);
     if (statResult.mtime.getTime() !== state.scriptLastModTime.getTime()) {
+      updateAnalysis();
       interruptingRefresh();
     }
   }, 500);
@@ -144,6 +172,7 @@ export function launchInteractive(path: string, settings: RenderSettings) {
   renderBox.enableInput();
   renderBox.focus();
 
+  updateAnalysis();
   refresh();
 }
 
