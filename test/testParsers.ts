@@ -157,6 +157,18 @@ describe('parseFork', function() {
     expect((result as ChoiceFork).identifier).toBe('TestChoice');
   });
 
+  it('allows identifiers using non-ascii characters', function() {
+    // Some characters from Tao Te Ching 15, where I ran into this bug
+    let lexer = new Lexer('微: (foo)}');
+    let result = parseFork(lexer);
+    expect(result).toBeInstanceOf(ChoiceFork);
+    expect((result as ChoiceFork).identifier).toBe('微');
+    lexer = new Lexer('微妙玄通: (foo)}');
+    result = parseFork(lexer);
+    expect(result).toBeInstanceOf(ChoiceFork);
+    expect((result as ChoiceFork).identifier).toBe('微妙玄通');
+  });
+
   it('errors on a bare id with no branches', function() {
     assertParseForkGivesSyntaxError('TestChoice:}');
     assertParseForkGivesSyntaxError('TestChoice}');

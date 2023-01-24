@@ -4,6 +4,7 @@
 
 * Interactive view improvements
   * Support copying last render to clipboard
+* Support non-ascii characters in fork ids
 
 ### 0.1.2
 

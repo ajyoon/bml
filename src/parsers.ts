@@ -126,7 +126,9 @@ export function parseFork(lexer: Lexer): ChoiceFork | Reference {
   let mappedChoices = new Map();
   let unmappedChoices: WeightedChoice[] = [];
 
-  let idRe = /([@#]?)(\w+)(:?)/y;
+  // Big blob in 2nd capture is for identifiers inclusive of non-ascii chars
+  // It's an approximation of JS identifiers.
+  let idRe = /([@#]?)([_a-zA-Z\xA0-\uFFFF][_a-zA-Z0-9\xA0-\uFFFF]*)(:?)/y;
 
   let id = null;
   let isReference = false;
