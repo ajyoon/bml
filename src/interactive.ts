@@ -120,7 +120,7 @@ export function launchInteractive(path: string, settings: RenderSettings) {
   // Attach key listener for copying render output
   screen.key(['c', 'S-c'], function(ch, key) {
     clipboard.writeSync(state.currentRender);
-    alertPopup.display('Copied to clipboard', 1);
+    alertPopup.display('Copied to clipboard', 1, () => { });
   });
 
   // Attach key listeners for changing refresh interval
