@@ -4,10 +4,29 @@ import * as blessed from 'blessed';
 import { RenderSettings } from './settings';
 // Old-school require is needed for some deps to prevent weird build breakage
 const fs = require('fs');
+const process = require('process');
 const clipboard = require('clipboardy');
 
 
 export function launchInteractive(path: string, settings: RenderSettings) {
+  let state: {
+    refreshTimeoutId: NodeJS.Timeout | null,
+    refreshIntervalSecs: number,
+    scriptLastModTime: Date,
+    currentRender: string,
+    capturedErr: string,
+  } = {
+    refreshTimeoutId: null,
+    refreshIntervalSecs: 10,
+    scriptLastModTime: new Date(),
+    currentRender: '',
+    capturedErr: '',
+  };
+
+  process.stderr.write = (data: any) => {
+    state.capturedErr += data;
+  };
+
   const screen = blessed.screen({
     smartCSR: true
   });
@@ -74,18 +93,6 @@ export function launchInteractive(path: string, settings: RenderSettings) {
 
   screen.append(alertPopup);
 
-  let state: {
-    refreshTimeoutId: NodeJS.Timeout | null,
-    refreshIntervalSecs: number,
-    scriptLastModTime: Date,
-    currentRender: string,
-  } = {
-    refreshTimeoutId: null,
-    refreshIntervalSecs: 10,
-    scriptLastModTime: new Date(),
-    currentRender: ''
-  }
-
   function formatInfoBoxText() {
     return `Source: ${path} | Refresh delay: ${state.refreshIntervalSecs}s\n`
       + `R: Refresh | C: Copy | Ctrl-Up/Dwn: Change refresh delay`
@@ -111,6 +118,7 @@ export function launchInteractive(path: string, settings: RenderSettings) {
   }
 
   function refresh() {
+    state.capturedErr = '';  // Clear stderr output
     let statResult = fs.statSync(path);
     state.scriptLastModTime = statResult.mtime;
     let bmlSource = '' + fs.readFileSync(path);
@@ -121,6 +129,9 @@ export function launchInteractive(path: string, settings: RenderSettings) {
       // Also need to capture warnings somehow and print them out.
       // Currently when a missing ref is found it gets printed weirdly over the TUI
       result = e.stack.toString();
+    }
+    if (state.capturedErr) {
+      result += '\n////////////////////\n\nWarning:\n' + state.capturedErr;
     }
     renderBox.setContent(result);
     infoBox.setContent(formatInfoBoxText());
