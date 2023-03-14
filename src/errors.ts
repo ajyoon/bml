@@ -19,9 +19,12 @@ export class JavascriptSyntaxError extends Error {
 }
 
 export class BMLSyntaxError extends Error {
-  constructor(message: string | null, bmlDoc: string, errorIndex: number) {
+  constructor(message: string | null, bmlDoc: string, errorIndex: number, hint?: string) {
     let resolvedMsg = (message || 'Syntax error found while parsing bml') +
       ' at ' + stringUtils.lineColumnString(bmlDoc, errorIndex);
+    if (hint) {
+      resolvedMsg += '\n' + hint;
+    }
     super(resolvedMsg);
     this.name = 'BMLSyntaxError';
     Object.setPrototypeOf(this, BMLSyntaxError.prototype);

@@ -242,6 +242,16 @@ export function parseFork(lexer: Lexer): ChoiceFork | Reference {
             return new ChoiceFork(unmappedChoices, id, isSilent)
           }
         } else {
+          if (!mappedChoices.size && !unmappedChoices.length) {
+            // Special case for a common mistake
+            if (id) {
+              throw new BMLSyntaxError(`Fork '${id}' has no branches`,
+                lexer.str, token.index, `Did you mean '{@${id}}'?`);
+            } else {
+              throw new BMLSyntaxError('Fork has no branches',
+                lexer.str, token.index);
+            }
+          }
           throw new BMLSyntaxError('Unexpected close brace in fork',
             lexer.str, token.index);
         }
