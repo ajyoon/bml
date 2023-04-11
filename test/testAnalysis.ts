@@ -112,4 +112,10 @@ test {id: (a), (b), (c)}
       .toEqual(BigInt(2));
   });
 
+  xit('counts silent forks only where referenced', function() {
+    let testString = '{#foo: (a), (b)} {#bar: (x), (y), (z)} {{@foo}, {@bar}}';
+    expect(analyze(testString).possibleOutcomes)
+      .toEqual(BigInt(5));
+  })
+
 });
