@@ -1,6 +1,7 @@
 import * as evalApi from './evalApi';
 import { UserDefs, validateUserDefs } from './userDefs';
 import { EvalBindingError } from './errors';
+import type { Renderer } from './renderer';
 
 const evalFuncTemplate = `
   const bml = this;
@@ -11,7 +12,6 @@ const evalFuncTemplate = `
     for (let key in obj) {
       __new_bindings[key] = obj[key];
     }
-
   }
 
   ***USER DEFS BINDING SLOT***
@@ -19,6 +19,11 @@ const evalFuncTemplate = `
 
   function insert(str) {
     __context.output += str;
+  }
+
+  function include(includePath) {
+    let result = __context.renderer.renderInclude(includePath);
+    insert(result);
   }
 
   ////////// start user code
@@ -35,6 +40,7 @@ const evalFuncTemplate = `
 
 export type EvalContext = {
   bindings: UserDefs;
+  renderer: Renderer;
   output: string;
 }
 

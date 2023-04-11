@@ -74,3 +74,11 @@ export class EvalDisabledError extends Error {
     Object.setPrototypeOf(this, EvalDisabledError.prototype);
   }
 }
+
+export class IncludeError extends Error {
+  constructor(includePath: string, message: string) {
+    super(`Include failed for '${includePath}': ${message}`)
+    this.name = 'IncludeError';
+    Object.setPrototypeOf(this, IncludeError.prototype);
+  }
+}

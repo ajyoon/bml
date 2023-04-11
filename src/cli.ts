@@ -1,9 +1,9 @@
 #!/usr/bin/env node
-import fs from 'fs';
 import process from 'process';
 import { RenderSettings } from './settings';
 import { analyze } from './analysis';
 import { launchInteractive } from './interactive';
+import * as fileUtils from './fileUtils';
 
 const packageJson = require('../package.json');
 // Seems this needs to use `require` to bundle correctly. No idea why.
@@ -25,17 +25,18 @@ export const ALL_SWITCHES = ([] as string[]).concat(
 export type BMLArgs = { bmlSource: string, settings: RenderSettings };
 export type Action = { function: Function, args: any[] };
 
-function readFile(path: string) {
-  if (!fs.existsSync(path)) {
+function readFile(path: string): string {
+  try {
+    return fileUtils.readFile(path);
+  } catch {
     handleNonexistingPath(path);
     process.exit(1);
   }
-  return '' + fs.readFileSync(path);
 }
 
 export function executeFromStdin(settings: RenderSettings): BMLArgs {
   return {
-    bmlSource: fs.readFileSync(0, 'utf8'), // STDIN_FILENO = 0
+    bmlSource: fileUtils.readStdin(),
     settings
   };
 }
@@ -48,7 +49,7 @@ export function executeFromPath(path: string, settings: RenderSettings): BMLArgs
 }
 
 export function analyzeFromStdin(): string {
-  return fs.readFileSync(0, 'utf8'); // STDIN_FILENO = 0
+  return fileUtils.readStdin()
 }
 
 export function analyzeFromPath(path: string): string {

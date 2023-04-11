@@ -1,11 +1,12 @@
 import expect from 'expect';
-import * as rand from '../src/rand';
+import * as tmp from 'tmp';
+import fs from 'fs';
 
+import * as rand from '../src/rand';
 import {
   EvalBindingError,
   EvalDisabledError
 } from '../src/errors';
-
 import { render } from '../src/renderer';
 
 
@@ -101,4 +102,63 @@ describe('render', function() {
     expect(() => render(testString, { allowEval: false }))
       .toThrow(EvalDisabledError);
   })
+
+  function createTmpFile(contents: string): string {
+    let path = tmp.fileSync().name;
+    fs.writeFileSync(path, contents);
+    return path;
+  }
+
+  it('Supports including a simple BML script', function() {
+    let tmpScript = createTmpFile(`foo`)
+    let testString = `
+{[include('${tmpScript}')]}
+`;
+    expect(render(testString)).toEqual('Foo\n');
+  });
+
+  it('Retains eval bindings in includes', function() {
+    let tmpScript = createTmpFile(`
+      {[
+        bind({
+          test: 'foo'
+        });
+      ]}
+    `);
+    // Note that included bindings are NOT available within the same eval block.
+    // To access the included binding 'test', a new eval block must be opened.
+    // This is an internal limitation which could be fixed if needed.
+    let testString = `
+{[include('${tmpScript}')]}
+{[insert(test)]}
+`;
+    expect(render(testString)).toEqual('Foo\n');
+  });
+
+
+  it('Retains choice references in includes', function() {
+    let tmpScript = createTmpFile(`
+      {#foo: (x), (y)}
+    `);
+    let testString = `
+{[include('${tmpScript}')]}
+{@foo}
+{@foo: 0 -> (bar), 1 -> (biz)}
+`;
+    expect(render(testString)).toEqual('X\nbar\n');
+  });
+
+  it('Preserves RNG state around includes', function() {
+    // I suspect this doesn't actually test RNG state restoration
+    // but at least it pins some stability around the RNG behavior
+    // before/during/after includes which contain rng use.
+    let tmpScript = createTmpFile(`{foo: (x), (y)}`);
+    let testString = `
+{(a), (b), (c), (d), (e), (f), (g), (h), (i), (j), (k), (l), (m), (n), (o), (p)}
+{[include('${tmpScript}')]}
+{(a), (b), (c), (d), (e), (f), (g), (h), (i), (j), (k), (l), (m), (n), (o), (p)}
+`;
+    expect(render(testString)).toEqual('A\ny\nj\n');
+  });
 });
+

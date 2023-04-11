@@ -8,8 +8,9 @@ import { Lexer } from './lexer';
 import { ChoiceFork } from './choiceFork';
 import { Choice } from './weightedChoice';
 import { isStr } from './stringUtils';
-import { EvalDisabledError } from './errors';
+import { EvalDisabledError, IncludeError } from './errors';
 import { EvalContext } from './evalBlock';
+import * as fileUtils from './fileUtils';
 
 
 export type ChoiceResult = { choiceIndex: number, renderedOutput: string };
@@ -20,7 +21,7 @@ export type ChoiceResultMap = Map<string, ChoiceResult>;
  *
  * This is meant to be used only once per render.
  */
-class Renderer {
+export class Renderer {
 
   settings: RenderSettings;
   choiceResultMap: ChoiceResultMap;
@@ -29,7 +30,7 @@ class Renderer {
   constructor(settings: RenderSettings) {
     this.settings = settings;
     this.choiceResultMap = new Map();
-    this.evalContext = { bindings: {}, output: '' };
+    this.evalContext = { bindings: {}, output: '', renderer: this };
   }
 
   resolveReference(reference: Reference): Choice {
@@ -118,15 +119,53 @@ class Renderer {
     return output;
   }
 
-  renderAndPostProcess(ast: AstNode[]): string {
+  renderWithoutPostProcess(ast: AstNode[]): string {
     if (this.settings.randomSeed) {
       rand.setRandomSeed(this.settings.randomSeed);
     }
-    let renderedText = this.renderAst(ast);
-    return this.postprocess(renderedText);
+    return this.renderAst(ast);
+  }
+
+  renderAndPostProcess(ast: AstNode[]): string {
+    return this.postprocess(this.renderWithoutPostProcess(ast));
+  }
+
+  /* Load and render a given BML file path,
+   * merging its eval context and fork map this renderer's.
+   */
+  renderInclude(includePath: string): string {
+    let rngState = rand.saveRngState();
+    let bmlDocumentString;
+    try {
+      bmlDocumentString = fileUtils.readFile(includePath);
+    } catch (e) {
+      if (typeof window !== 'undefined') {
+        throw new IncludeError(includePath, `Includes can't be used in browsers`);
+      }
+      throw e;
+    }
+
+    let lexer = new Lexer(bmlDocumentString);
+    let ast = parseDocument(lexer, true);
+    let subRenderer = new Renderer(this.settings);
+    let result = subRenderer.renderWithoutPostProcess(ast);
+    // Merge state from subrenderer into this renderer
+    for (let [key, value] of Object.entries(subRenderer.evalContext.bindings)) {
+      if (this.evalContext.bindings.hasOwnProperty(key)) {
+        throw new IncludeError(includePath, `Eval binding '${key}' is already bound`);
+      }
+      this.evalContext.bindings[key] = value;
+    }
+    for (let [key, value] of subRenderer.choiceResultMap) {
+      if (this.choiceResultMap.has(key)) {
+        throw new IncludeError(includePath, `Fork id '${key}' is already defined`);
+      }
+      this.choiceResultMap.set(key, value);
+    }
+    rand.restoreRngState(rngState);
+    return result;
   }
 }
-
 
 export function render(bmlDocumentString: string, renderSettings?: RenderSettings): string {
   renderSettings = mergeSettings(defaultRenderSettings, renderSettings);
@@ -134,3 +173,4 @@ export function render(bmlDocumentString: string, renderSettings?: RenderSetting
   let ast = parseDocument(lexer, true);
   return new Renderer(renderSettings).renderAndPostProcess(ast);
 }
+

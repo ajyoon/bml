@@ -3,10 +3,22 @@ import seedrandom from 'seedrandom';
 
 // A module-local seedable random number generator
 // The selected seed will be random unless `setRandomSeed()` is called.
-let rng = seedrandom();
+// @ts-ignore
+let rng = seedrandom(null, { state: true });
+
+export function saveRngState(): Object {
+  // @ts-ignore
+  return rng.state();
+}
+
+export function restoreRngState(state: Object) {
+  // @ts-ignore
+  rng = seedrandom(null, { state: state });
+}
 
 export function setRandomSeed(seed: number) {
-  rng = seedrandom(seed);
+  // @ts-ignore
+  rng = seedrandom(seed, { state: true });
 }
 
 export function normalizeWeights(weightedChoices: WeightedChoice[]): WeightedChoice[] {

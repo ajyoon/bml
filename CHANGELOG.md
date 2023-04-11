@@ -1,5 +1,10 @@
 # Changelog
 
+### 0.1.4
+
+* Support including other BML scripts using the function `include`
+  exposed in eval blocks.
+
 ### 0.1.3
 
 * Interactive view improvements
