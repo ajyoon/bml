@@ -230,9 +230,9 @@ export function runBmlWithErrorCheck(bmlSource: string, settings: RenderSettings
   try {
     return bml(bmlSource, settings);
   } catch (e: any) {
-    console.error('Uh-oh! Something bad happened while rendering bml text.\n'
-      + 'If you think this is a bug, please file one at '
-      + packageJson.bugs.url + '\nError details:\n', e.stack);
+    console.error('BML rendering failed with error:\n'
+      + e.stack + '\n\n'
+      + 'If you think this is a bug, please file one at ' + packageJson.bugs.url);
     process.exit(1);
   }
 }
