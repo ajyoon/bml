@@ -51,6 +51,12 @@ describe('render', function() {
     expect(render(testString)).toEqual('Foo bar buzz\n');
   });
 
+  // Document significant bug
+  xit('preserves plaintext parentheses', function() {
+    let testString = 'foo (bar)';
+    expect(render(testString)).toEqual('Foo (bar)\n');
+  })
+
   it('skips line break after silent fork on its own line', function() {
     let testString = 'foo\n{#id: (bar)}\nbiz';
     expect(render(testString)).toEqual('Foo\nbiz\n');

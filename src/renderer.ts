@@ -134,6 +134,8 @@ export class Renderer {
    * merging its eval context and fork map this renderer's.
    */
   renderInclude(includePath: string): string {
+    // TODO include paths are currently interpreted relative to the working directory,
+    // but this should probably be relative to the bml script.
     let rngState = rand.saveRngState();
     let bmlDocumentString;
     try {
