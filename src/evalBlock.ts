@@ -14,6 +14,10 @@ const evalFuncTemplate = `
     }
   }
 
+  // Note this feature is currently unstable. The final structure of forkMap
+  // is likely to change before stabilizing.
+  bml.forkMap = __context.renderer.choiceResultMap;
+
   ***USER DEFS BINDING SLOT***
 
 

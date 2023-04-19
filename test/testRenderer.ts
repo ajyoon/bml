@@ -103,6 +103,19 @@ describe('render', function() {
     expect(render(testString)).toEqual('Foo\nbar\n');
   });
 
+  // Note this feature is currently unstable. The final structure of `forkMap`
+  // is likely to change before stabilizing.
+  it('Allows accessing the choice result map in eval blocks', function() {
+    let testString = `
+{foo: (bar), (biz)}
+{[
+let forkResult = bml.forkMap.get('foo');
+insert('foo got index ' + forkResult.choiceIndex + ': ' + forkResult.renderedOutput);
+]}
+`;
+    expect(render(testString)).toEqual('Bar\nfoo got index 0: bar\n');
+  });
+
   it('Allows disabling eval execution', function() {
     let testString = `{[insert('foo')]}`;
     expect(() => render(testString, { allowEval: false }))
