@@ -353,11 +353,14 @@ export function parseDocument(lexer: Lexer, isTopLevel: boolean): AstNode[] {
     switch (token.tokenType) {
       case TokenType.OPEN_PAREN:
         openParenCount++;
+        pushString(token.str);
         break;
       case TokenType.CLOSE_PAREN:
         openParenCount--;
         if (openParenCount < 1) {
           return astNodes;
+        } else {
+          pushString(token.str);
         }
         break;
       case TokenType.OPEN_BRACKET:
