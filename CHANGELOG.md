@@ -1,5 +1,11 @@
 # Changelog
 
+### 0.1.5
+
+* Make `include` command paths relative to parent script's location
+* Fix bug with plaintext parentheses
+* _Experimentally_ expose fork results in eval blocks
+
 ### 0.1.4
 
 * Support including other BML scripts using the function `include`
