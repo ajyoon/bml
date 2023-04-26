@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import process from 'process';
+import path from 'path';
 import { RenderSettings } from './settings';
 import { analyze } from './analysis';
 import { launchInteractive } from './interactive';
@@ -22,12 +23,16 @@ export const ALL_SWITCHES = ([] as string[]).concat(
   SEED_SWITCHES, NO_EVAL_SWITCHES,
   ANALYZE_SWITCHES, INTERACTIVE_SWITCHES);
 
-export type BMLArgs = { bmlSource: string, settings: RenderSettings };
+export type BMLArgs = {
+  bmlSource: string,
+  settings: RenderSettings,
+  documentDir: string | null
+};
 export type Action = { function: Function, args: any[] };
 
 function readFile(path: string): string {
   try {
-    return fileUtils.readFile(path);
+    return fileUtils.readFile(path, null);
   } catch {
     handleNonexistingPath(path);
     process.exit(1);
@@ -37,14 +42,16 @@ function readFile(path: string): string {
 export function executeFromStdin(settings: RenderSettings): BMLArgs {
   return {
     bmlSource: fileUtils.readStdin(),
-    settings
+    settings: settings,
+    documentDir: null
   };
 }
 
-export function executeFromPath(path: string, settings: RenderSettings): BMLArgs {
+export function executeFromPath(scriptPath: string, settings: RenderSettings): BMLArgs {
   return {
-    bmlSource: readFile(path),
-    settings
+    bmlSource: readFile(scriptPath),
+    settings: settings,
+    documentDir: path.dirname(scriptPath)
   }
 }
 

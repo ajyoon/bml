@@ -1,6 +1,7 @@
 import expect from 'expect';
 import * as tmp from 'tmp';
 import fs from 'fs';
+import path from 'path';
 
 import * as rand from '../src/rand';
 import {
@@ -18,53 +19,53 @@ describe('render', function() {
 
   it('executes simple forks', function() {
     let testString = 'foo {(bar), (biz)}';
-    expect(render(testString)).toEqual('Foo bar\n');
+    expect(render(testString, null, null)).toEqual('Foo bar\n');
   });
 
   it('executes forks with eval blocks', function() {
     let testString = 'foo {[insert("eval")], (biz)}';
-    expect(render(testString)).toEqual('Foo eval\n');
+    expect(render(testString, null, null)).toEqual('Foo eval\n');
   });
 
   it('executes forks with weights', function() {
     let testString = 'foo {[insert("eval")], (biz) 99}';
-    expect(render(testString)).toEqual('Foo biz\n');
+    expect(render(testString, null, null)).toEqual('Foo biz\n');
   });
 
   it('executes nested forks', function() {
     let testString = 'foo {(bar {(nested branch), (other nested branch)}), (biz)}';
-    expect(render(testString)).toEqual('Foo bar nested branch\n');
+    expect(render(testString, null, null)).toEqual('Foo bar nested branch\n');
   });
 
   it('supports bare references', function() {
     let testString = 'foo {id: (bar), (biz)} {@id}';
-    expect(render(testString)).toEqual('Foo bar bar\n');
+    expect(render(testString, null, null)).toEqual('Foo bar bar\n');
   });
 
   it('supports silent fork references', function() {
     let testString = 'foo {#id: (bar), (biz)} {@id}';
-    expect(render(testString)).toEqual('Foo bar\n');
+    expect(render(testString, null, null)).toEqual('Foo bar\n');
   });
 
   it('supports mapped references', function() {
     let testString = 'foo {id: (bar), (biz)} {@id: 0 -> (buzz), (bazz)}';
-    expect(render(testString)).toEqual('Foo bar buzz\n');
+    expect(render(testString, null, null)).toEqual('Foo bar buzz\n');
   });
 
   it('preserves plaintext parentheses', function() {
     let testString = 'foo (bar)';
-    expect(render(testString)).toEqual('Foo (bar)\n');
+    expect(render(testString, null, null)).toEqual('Foo (bar)\n');
   });
 
   it('preserves plaintext parentheses in fork text', function() {
     let testString = 'foo (bar {((biz))})';
-    expect(render(testString)).toEqual('Foo (bar (biz))\n');
+    expect(render(testString, null, null)).toEqual('Foo (bar (biz))\n');
   });
 
 
   it('skips line break after silent fork on its own line', function() {
     let testString = 'foo\n{#id: (bar)}\nbiz';
-    expect(render(testString)).toEqual('Foo\nbiz\n');
+    expect(render(testString, null, null)).toEqual('Foo\nbiz\n');
   });
 
   it('errors on duplicate eval bindings', function() {
@@ -72,7 +73,7 @@ describe('render', function() {
 {[bind({foo: 123})]}
 {[bind({foo: 456})]}
 `;
-    expect(() => render(testString)).toThrow(EvalBindingError);
+    expect(() => render(testString, null, null)).toThrow(EvalBindingError);
   });
 
   it('Allows a value bound in one eval block to be accessed in others', function() {
@@ -80,7 +81,7 @@ describe('render', function() {
 {[bind({foo: 123})]}
 {[insert(foo)]}
 `;
-    expect(render(testString)).toEqual('123\n');
+    expect(render(testString, null, null)).toEqual('123\n');
   });
 
   it('Allows a value bound in one eval block to be mutated in others', function() {
@@ -89,7 +90,7 @@ describe('render', function() {
 {[foo = 456;]}
 {[insert(foo)]}
 `;
-    expect(render(testString)).toEqual('456\n');
+    expect(render(testString, null, null)).toEqual('456\n');
   });
 
   it('Allows calling insert within bound functions', function() {
@@ -105,7 +106,7 @@ describe('render', function() {
 {[myFunc('foo')]}
 {[myFunc(someValue)]}
 `;
-    expect(render(testString)).toEqual('Foo\nbar\n');
+    expect(render(testString, null, null)).toEqual('Foo\nbar\n');
   });
 
   // Note this feature is currently unstable. The final structure of `forkMap`
@@ -118,12 +119,12 @@ let forkResult = bml.forkMap.get('foo');
 insert('foo got index ' + forkResult.choiceIndex + ': ' + forkResult.renderedOutput);
 ]}
 `;
-    expect(render(testString)).toEqual('Bar\nfoo got index 0: bar\n');
+    expect(render(testString, null, null)).toEqual('Bar\nfoo got index 0: bar\n');
   });
 
   it('Allows disabling eval execution', function() {
     let testString = `{[insert('foo')]}`;
-    expect(() => render(testString, { allowEval: false }))
+    expect(() => render(testString, { allowEval: false }, null))
       .toThrow(EvalDisabledError);
   })
 
@@ -135,10 +136,13 @@ insert('foo got index ' + forkResult.choiceIndex + ': ' + forkResult.renderedOut
 
   it('Supports including a simple BML script', function() {
     let tmpScript = createTmpFile(`foo`)
+    let tmpDir = path.dirname(tmpScript);
+    let tmpFilename = path.basename(tmpScript);
     let testString = `
-{[include('${tmpScript}')]}
+{[include('${tmpFilename}')]}
 `;
-    expect(render(testString)).toEqual('Foo\n');
+
+    expect(render(testString, null, tmpDir)).toEqual('Foo\n');
   });
 
   it('Retains eval bindings in includes', function() {
@@ -156,7 +160,7 @@ insert('foo got index ' + forkResult.choiceIndex + ': ' + forkResult.renderedOut
 {[include('${tmpScript}')]}
 {[insert(test)]}
 `;
-    expect(render(testString)).toEqual('Foo\n');
+    expect(render(testString, null, null)).toEqual('Foo\n');
   });
 
 
@@ -169,7 +173,7 @@ insert('foo got index ' + forkResult.choiceIndex + ': ' + forkResult.renderedOut
 {@foo}
 {@foo: 0 -> (bar), 1 -> (biz)}
 `;
-    expect(render(testString)).toEqual('X\nbar\n');
+    expect(render(testString, null, null)).toEqual('X\nbar\n');
   });
 
   it('Preserves RNG state around includes', function() {
@@ -182,7 +186,7 @@ insert('foo got index ' + forkResult.choiceIndex + ': ' + forkResult.renderedOut
 {[include('${tmpScript}')]}
 {(a), (b), (c), (d), (e), (f), (g), (h), (i), (j), (k), (l), (m), (n), (o), (p)}
 `;
-    expect(render(testString)).toEqual('A\ny\nj\n');
+    expect(render(testString, null, null)).toEqual('A\ny\nj\n');
   });
 });
 

@@ -1,3 +1,4 @@
+import path from 'path';
 import * as rand from './rand';
 import * as postprocessing from './postprocessing';
 import { defaultBMLSettings, defaultRenderSettings, mergeSettings, RenderSettings } from './settings';
@@ -26,11 +27,13 @@ export class Renderer {
   settings: RenderSettings;
   choiceResultMap: ChoiceResultMap;
   evalContext: EvalContext;
+  documentDir: string | null;
 
-  constructor(settings: RenderSettings) {
+  constructor(settings: RenderSettings, documentDir: string | null) {
     this.settings = settings;
     this.choiceResultMap = new Map();
     this.evalContext = { bindings: {}, output: '', renderer: this };
+    this.documentDir = documentDir;
   }
 
   resolveReference(reference: Reference): Choice {
@@ -139,7 +142,7 @@ export class Renderer {
     let rngState = rand.saveRngState();
     let bmlDocumentString;
     try {
-      bmlDocumentString = fileUtils.readFile(includePath);
+      bmlDocumentString = fileUtils.readFile(includePath, this.documentDir);
     } catch (e) {
       if (typeof window !== 'undefined') {
         throw new IncludeError(includePath, `Includes can't be used in browsers`);
@@ -149,7 +152,7 @@ export class Renderer {
 
     let lexer = new Lexer(bmlDocumentString);
     let ast = parseDocument(lexer, true);
-    let subRenderer = new Renderer(this.settings);
+    let subRenderer = new Renderer(this.settings, path.dirname(includePath));
     let result = subRenderer.renderWithoutPostProcess(ast);
     // Merge state from subrenderer into this renderer
     for (let [key, value] of Object.entries(subRenderer.evalContext.bindings)) {
@@ -169,10 +172,11 @@ export class Renderer {
   }
 }
 
-export function render(bmlDocumentString: string, renderSettings?: RenderSettings): string {
+export function render(bmlDocumentString: string,
+  renderSettings: RenderSettings | null, documentDir: string | null): string {
   renderSettings = mergeSettings(defaultRenderSettings, renderSettings);
   let lexer = new Lexer(bmlDocumentString);
   let ast = parseDocument(lexer, true);
-  return new Renderer(renderSettings).renderAndPostProcess(ast);
+  return new Renderer(renderSettings, documentDir).renderAndPostProcess(ast);
 }
 

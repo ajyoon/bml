@@ -6,9 +6,10 @@ import { RenderSettings } from './settings';
 const fs = require('fs');
 const process = require('process');
 const clipboard = require('clipboardy');
+const path = require('path');
 
 
-export function launchInteractive(path: string, settings: RenderSettings) {
+export function launchInteractive(scriptPath: string, settings: RenderSettings) {
   let state: {
     refreshTimeoutId: NodeJS.Timeout | null,
     refreshIntervalSecs: number,
@@ -22,6 +23,9 @@ export function launchInteractive(path: string, settings: RenderSettings) {
     currentRender: '',
     capturedErr: '',
   };
+
+
+  const documentDir = path.dirname(scriptPath);
 
   process.stderr.write = (data: any) => {
     state.capturedErr += data;
@@ -94,13 +98,13 @@ export function launchInteractive(path: string, settings: RenderSettings) {
   screen.append(alertPopup);
 
   function formatInfoBoxText() {
-    return `Source: ${path} | Refresh delay: ${state.refreshIntervalSecs}s\n`
+    return `Source: ${scriptPath} | Refresh delay: ${state.refreshIntervalSecs}s\n`
       + `R: Refresh | C: Copy | Ctrl-Up/Dwn: Change refresh delay`
 
   }
 
   function updateAnalysis() {
-    let bmlSource = '' + fs.readFileSync(path);
+    let bmlSource = '' + fs.readFileSync(scriptPath);
     let text;
     try {
       let { possibleOutcomes } = analyze(bmlSource);
@@ -119,12 +123,12 @@ export function launchInteractive(path: string, settings: RenderSettings) {
 
   function refresh() {
     state.capturedErr = '';  // Clear stderr output
-    let statResult = fs.statSync(path);
+    let statResult = fs.statSync(scriptPath);
     state.scriptLastModTime = statResult.mtime;
-    let bmlSource = '' + fs.readFileSync(path);
+    let bmlSource = '' + fs.readFileSync(scriptPath);
     let result = '';
     try {
-      result = render(bmlSource, settings);
+      result = render(bmlSource, settings, documentDir);
     } catch (e: any) {
       // Also need to capture warnings somehow and print them out.
       // Currently when a missing ref is found it gets printed weirdly over the TUI
@@ -143,7 +147,7 @@ export function launchInteractive(path: string, settings: RenderSettings) {
 
   // If the file changes, trigger a refresh
   setInterval(() => {
-    let statResult = fs.statSync(path);
+    let statResult = fs.statSync(scriptPath);
     if (statResult.mtime.getTime() !== state.scriptLastModTime.getTime()) {
       updateAnalysis();
       interruptingRefresh();

@@ -4,8 +4,9 @@ import { RenderSettings } from './settings';
 import { analyze } from './analysis';
 
 // Wrap the main entrypoint function so we can attach further API parts to it
-export function entryFunc(bmlDocumentString: string, renderSettings?: RenderSettings): string {
-  return render(bmlDocumentString, renderSettings);
+export function entryFunc(bmlDocumentString: string,
+  renderSettings: RenderSettings | null, documentDir: string | null): string {
+  return render(bmlDocumentString, renderSettings, documentDir);
 }
 
 entryFunc.analyze = analyze;
