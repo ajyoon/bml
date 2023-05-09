@@ -95,6 +95,12 @@ function deriveForkNode(choiceFork: ChoiceFork, forkIdMap: ForkIdMap): ForkNode 
 }
 
 function deriveRefNode(ref: Reference, forkIdMap: ForkIdMap): RefNode {
+  let forkMapLookupResult = forkIdMap.get(ref.id);
+  if (!forkMapLookupResult) {
+    // Handle unmapped refs gracefully - this is expected
+    // for refs pointing to declarations in included files
+    return new RefNode(new ForkNode(), new Map());
+  }
   let forkNodeReferredTo = forkIdMap.get(ref.id)![0];
   let refNode = new RefNode(forkNodeReferredTo, new Map());
   forkNodeReferredTo.referencedBy.push(refNode);

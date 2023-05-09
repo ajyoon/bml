@@ -118,4 +118,10 @@ test {id: (a), (b), (c)}
       .toEqual(BigInt(5));
   })
 
+  it('Handles unresolved refs gracefully', function() {
+    let testString = `{@id}`;
+    expect(analyze(testString).possibleOutcomes)
+      .toEqual(BigInt(1));
+  })
+
 });
