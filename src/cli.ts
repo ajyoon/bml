@@ -266,7 +266,7 @@ function main() {
     let bmlSource = action.function(...action.args);
     let analysisResult = analyze(bmlSource);
     let formattedCount = analysisResult.possibleOutcomes.toLocaleString();
-    process.stdout.write(`Total possible branches: ${formattedCount}\n`);
+    process.stdout.write(`Approx possible branches: ${formattedCount}\n`);
     process.exit(0);
   } else {
     let { bmlSource, settings } = action.function(...action.args);

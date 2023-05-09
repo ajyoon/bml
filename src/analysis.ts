@@ -145,9 +145,10 @@ function deriveAnalysisTree(ast: AstNode[], forkIdMap: ForkIdMap): AnalysisTree 
 
 /**
  * Analyze a BML document without executing it
- *
- * This calculates the total number of possible branches in the document.
- * Any branches introduced within eval blocks are not counted.
+ * 
+ * This does a rough back-of-the-envelope approximation of the number of possible
+ * branches through the document. It has several shortcomings, especially when dealing
+ * with refs and silent forks.
  *
  * Note that if your document contains cyclical reference loops, this will hang.
  */
