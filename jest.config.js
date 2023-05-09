@@ -153,7 +153,8 @@ module.exports = {
   // An array of regexp pattern strings that are matched against all test paths, matched tests are skipped
   testPathIgnorePatterns: [
     "releaseTest.js",
-    "utils.ts"
+    "utils.ts",
+    "test/manual/"
   ],
 
   // The regexp pattern or array of patterns that Jest uses to detect test files

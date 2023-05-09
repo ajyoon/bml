@@ -6,6 +6,8 @@ const bml = require('bml');
  * with high branch counts.
  */
 
+const assert = require('assert');
+
 let bmlScript = `
 // {#foo: (x), (y)}
 // {#bar: (a), (b), (c)}
