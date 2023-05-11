@@ -81,3 +81,39 @@ describe('capitalizationCleanup', function() {
     expect(postprocessing.capitalizationCleanup(src)).toBe('Test. \nTest.');
   });
 });
+
+describe('correctIndefiniteArticles', function() {
+  function testCase(input: string, output: string) {
+    expect(postprocessing.correctIndefiniteArticles(input)).toBe(output);
+  }
+
+  it('Leaves correct cases intact', function() {
+    testCase('a dog', 'a dog');
+    testCase('an apple', 'an apple');
+    testCase('a union', 'a union');
+    testCase('a 10', 'a 10');
+    testCase('an 8', 'an 8');
+    testCase('a UFO', 'a UFO');
+  });
+
+  it('Corrects incorrect cases', function() {
+    testCase('an dog', 'a dog');
+    testCase('a apple', 'an apple');
+    testCase('an union', 'a union');
+    testCase('an 10', 'a 10');
+    testCase('a 8', 'an 8');
+    testCase('an UFO', 'a UFO');
+  });
+
+  it('Corrects multiple cases in a string', function() {
+    testCase('an dog\nand a apple', 'a dog\nand an apple');
+  });
+
+  it('Preserves capitalization schemes', function() {
+    testCase('An dog', 'A dog');
+    testCase('AN dog', 'A dog');
+    testCase('A apple', 'An apple');
+    testCase('a apple', 'an apple');
+    testCase('AN apple', 'AN apple');
+  });
+});

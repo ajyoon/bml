@@ -59,6 +59,7 @@
     "@types/node": "^18.11.18",
     "@types/sha.js": "^2.4.0",
     "@types/tmp": "^0.2.3",
+    "@types/indefinite": "2.3.1",
     "jest": "^27.4.4",
     "parcel": "^2.0.1",
     "path-browserify": "^1.0.1",
@@ -70,7 +71,8 @@
   "dependencies": {
     "blessed": "^0.1.81",
     "clipboardy": "^2.3.0",
-    "seedrandom": "2.4.4"
+    "seedrandom": "2.4.4",
+    "indefinite": "2.4.2"
   },
   "license": "BSD-3-Clause"
 }

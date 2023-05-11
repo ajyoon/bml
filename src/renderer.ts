@@ -119,6 +119,9 @@ export class Renderer {
     if (documentSettings.whitespaceCleanup) {
       output = postprocessing.whitespaceCleanup(output);
     }
+    if (documentSettings.indefiniteArticleCleanup) {
+      output = postprocessing.correctIndefiniteArticles(output);
+    }
     return output;
   }
 

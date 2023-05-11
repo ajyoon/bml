@@ -15,6 +15,11 @@ export interface DocumentSettings {
    * following sentence-ending punctuation.
    */
   capitalizationCleanup?: boolean | null;
+
+  /**
+   * Whether to correct English indefinite articles (a / an)
+   */
+  indefiniteArticleCleanup?: boolean | null;
 }
 
 export interface RenderSettings {
@@ -41,6 +46,7 @@ export const defaultBMLSettings: DocumentSettings = {
   whitespaceCleanup: true,
   punctuationCleanup: true,
   capitalizationCleanup: true,
+  indefiniteArticleCleanup: true,
 };
 
 export const defaultRenderSettings: RenderSettings = {

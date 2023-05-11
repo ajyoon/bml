@@ -1,3 +1,5 @@
+const indefinite = require('indefinite');
+
 const BLANK_LINE_RE = /^\s*$/;
 const TRAILING_WHITESPACE_RE = /\s+$/;
 
@@ -86,10 +88,6 @@ export function punctuationCleanup(text: string): string {
 // \p{Ll} matches unicode lowercase letters which have uppercase variants.
 const INCORRECT_CAPS_RE = /([.!?]\s+|^\s*)(\p{Ll})/gu;
 
-// Conforms to `text.replace` replacer function interface
-function correctCaps(_match: string, p1: string, p2: string) {
-  return p1 + p2.toUpperCase();
-}
 
 /**
  * Tries to correct capitalization of the first words of sentences.
@@ -98,6 +96,11 @@ function correctCaps(_match: string, p1: string, p2: string) {
  * following a sentence-ending punctuation mark.
  */
 export function capitalizationCleanup(text: string): string {
+  // Conforms to `text.replace` replacer function interface
+  function correctCaps(_match: string, p1: string, p2: string) {
+    return p1 + p2.toUpperCase();
+  }
+
   return text.replace(INCORRECT_CAPS_RE, correctCaps);
 }
 
@@ -105,4 +108,35 @@ const VISUAL_LINE_BREAK_RE = /\\(\r?\n|\r)[ \t]*/g
 
 export function replaceVisualLineBreaks(text: string): string {
   return text.replace(VISUAL_LINE_BREAK_RE, ' ');
+}
+
+const INDEFINITE_ARTICLE_RE = /(a|an) ([\p{L}0-9]+)\b/igu
+
+/**
+ * Attempt to correct English indefinite articles (a / an)
+ */
+export function correctIndefiniteArticles(text: string) {
+  function upcaseFirstLetter(s: string): string {
+    if (s.length === 0) {
+      return s;
+    } else if (s.length === 1) {
+      return s.toUpperCase();
+    } else {
+      return s[0].toUpperCase() + s.slice(1);
+    }
+  }
+  // Conforms to `text.replace` replacer function interface
+  function correctArticle(_match: string, originalArticle: string, word: string) {
+    let article = indefinite(word, { articleOnly: true });
+    if (originalArticle === 'a' || originalArticle === 'an') {
+      return article + ' ' + word;
+    } else if (originalArticle === 'A' || originalArticle === 'An') {
+      return upcaseFirstLetter(article) + ' ' + word;
+    } else {
+      // All caps
+      return article.toUpperCase() + ' ' + word;
+    }
+  }
+
+  return text.replace(INDEFINITE_ARTICLE_RE, correctArticle);
 }
