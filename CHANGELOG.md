@@ -3,6 +3,8 @@
 ### 0.1.6
 * Add and enable by default correction of English indefinite articles (a / an).
   This can be disabled using the new document setting `indefiniteArticleCleanup: false`.
+* Make static analysis handle unmapped refs more gracefully, since these are expected
+  while includes are not analyzed.
 
 ### 0.1.5
 
