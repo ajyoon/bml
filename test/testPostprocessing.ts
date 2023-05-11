@@ -116,4 +116,8 @@ describe('correctIndefiniteArticles', function() {
     testCase('a apple', 'an apple');
     testCase('AN apple', 'AN apple');
   });
+
+  it('Works on words with diacritics', function() {
+    testCase('an jalapeño', 'a jalapeño');
+  })
 });
