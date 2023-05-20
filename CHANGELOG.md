@@ -1,5 +1,8 @@
 # Changelog
 
+### 0.1.7
+* Fix bug introduced in 0.1.6 article correction
+
 ### 0.1.6
 * Add and enable by default correction of English indefinite articles (a / an).
   This can be disabled using the new document setting `indefiniteArticleCleanup: false`.

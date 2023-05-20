@@ -120,4 +120,9 @@ describe('correctIndefiniteArticles', function() {
   it('Works on words with diacritics', function() {
     testCase('an jalapeño', 'a jalapeño');
   })
+
+  it('Doesnt act on words spelled with article-like endings', function() {
+    // Regression test
+    testCase('can dog', 'can dog');
+  });
 });

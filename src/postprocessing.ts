@@ -110,7 +110,7 @@ export function replaceVisualLineBreaks(text: string): string {
   return text.replace(VISUAL_LINE_BREAK_RE, ' ');
 }
 
-const INDEFINITE_ARTICLE_RE = /(a|an) ([\p{L}0-9]+)\b/igu
+const INDEFINITE_ARTICLE_RE = /\b(a|an) ([\p{L}0-9]+)\b/igu
 
 /**
  * Attempt to correct English indefinite articles (a / an)
