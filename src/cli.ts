@@ -234,9 +234,10 @@ export function stripArgs(argv: string[]): string[] {
 }
 
 
-export function runBmlWithErrorCheck(bmlSource: string, settings: RenderSettings): string {
+export function runBmlWithErrorCheck(bmlSource: string, settings: RenderSettings,
+                                     documentDir: string | null): string {
   try {
-    return bml(bmlSource, settings);
+    return bml(bmlSource, settings, documentDir);
   } catch (e: any) {
     console.error('BML rendering failed with error:\n'
       + e.stack + '\n\n'
@@ -269,8 +270,8 @@ function main() {
     process.stdout.write(`Approx possible branches: ${formattedCount}\n`);
     process.exit(0);
   } else {
-    let { bmlSource, settings } = action.function(...action.args);
-    let renderedContent = runBmlWithErrorCheck(bmlSource, settings);
+    let { bmlSource, settings, documentDir } = action.function(...action.args);
+    let renderedContent = runBmlWithErrorCheck(bmlSource, settings, documentDir);
     process.stdout.write(renderedContent);
   }
 }

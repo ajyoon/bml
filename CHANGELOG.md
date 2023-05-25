@@ -2,6 +2,8 @@
 
 ### 0.1.7
 * Fix bug introduced in 0.1.6 article correction
+* Fix bug in relative path includes on non-interactive execution.
+  (Yet another bug caused by the very confusing way cli.ts is written.)
 
 ### 0.1.6
 * Add and enable by default correction of English indefinite articles (a / an).
