@@ -40,6 +40,13 @@ describe('punctuationCleanup', function() {
     expect(postprocessing.punctuationCleanup('test ; ')).toBe('test;  ');
     expect(postprocessing.punctuationCleanup('test ! ')).toBe('test!  ');
     expect(postprocessing.punctuationCleanup('test ? ')).toBe('test?  ');
+    // Hyphen and multiple hyphens
+    expect(postprocessing.punctuationCleanup('test - ')).toBe('test-  ');
+    expect(postprocessing.punctuationCleanup('test --- ')).toBe('test---  ');
+    // En dash
+    expect(postprocessing.punctuationCleanup('test – ')).toBe('test–  ');
+    // Em dash
+    expect(postprocessing.punctuationCleanup('test — ')).toBe('test—  ');
   });
 
   it('snaps groups of punctuation left together', function() {

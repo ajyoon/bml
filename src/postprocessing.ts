@@ -71,7 +71,8 @@ export function whitespaceCleanup(text: string): string {
   return out;
 }
 
-const MISPLACED_WORD_ENDING_PUNC_RE = /(\w)(\s+)([.,:;!?]+)/g;
+// Note the 3 dashes here are the different kinds, not the same character
+const MISPLACED_WORD_ENDING_PUNC_RE = /(\w)(\s+)([.,:;!?\-\–\—]+)/g;
 
 /**
  * Performs simple English-like correction of whitespace around
