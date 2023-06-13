@@ -52,6 +52,21 @@ describe('render', function() {
     expect(render(testString, null, null)).toEqual('Foo bar buzz\n');
   });
 
+  it('supports re-executing references', function() {
+    let testString = 'foo {id: (bar), (biz)} {@!id} {@!id} {@!id} {@!id} {@!id}';
+    expect(render(testString, null, null)).toEqual('Foo bar bar biz biz biz bar\n');
+  });
+
+  it('updates the executed fork map on re-executing references', function() {
+    let testString = `
+{id: (foo), (bar)} {@id: 0 -> (fff), 1 -> (bbb)}
+{@!id} {@id: 0 -> (fff), 1 -> (bbb)}
+{@!id} {@id: 0 -> (fff), 1 -> (bbb)}
+{@!id} {@id: 0 -> (fff), 1 -> (bbb)}
+`;
+    expect(render(testString, null, null)).toEqual('Foo fff\nfoo fff\nbar bbb\nbar bbb\n');
+  });
+
   it('preserves plaintext parentheses', function() {
     let testString = 'foo (bar)';
     expect(render(testString, null, null)).toEqual('Foo (bar)\n');

@@ -14,8 +14,8 @@ import { EvalContext } from './evalBlock';
 import * as fileUtils from './fileUtils';
 
 
-export type ChoiceResult = { choiceIndex: number, renderedOutput: string };
-export type ChoiceResultMap = Map<string, ChoiceResult>;
+export type ExecutedFork = { choiceFork: ChoiceFork, choiceIndex: number, renderedOutput: string }
+export type ExecutedForkMap = Map<string, ExecutedFork>
 
 /**
  * A helper class for rendering an AST.
@@ -25,34 +25,42 @@ export type ChoiceResultMap = Map<string, ChoiceResult>;
 export class Renderer {
 
   settings: RenderSettings;
-  choiceResultMap: ChoiceResultMap;
+  executedForkMap: ExecutedForkMap;
   evalContext: EvalContext;
   documentDir: string | null;
 
   constructor(settings: RenderSettings, documentDir: string | null) {
     this.settings = settings;
-    this.choiceResultMap = new Map();
+    this.executedForkMap = new Map();
     this.evalContext = { bindings: {}, output: '', renderer: this };
     this.documentDir = documentDir;
   }
 
-  resolveReference(reference: Reference): Choice {
-    let referredChoiceResult = this.choiceResultMap.get(reference.id);
-    if (referredChoiceResult) {
-      if (!reference.referenceMap.size && !reference.fallbackChoiceFork) {
-        // this is a special "copy" backref
-        return [referredChoiceResult.renderedOutput];
+  resolveReference(reference: Reference): string {
+    let referredExecutedFork = this.executedForkMap.get(reference.id);
+    if (referredExecutedFork) {
+      if (reference.reExecute) {
+        // this is a special "re-execute" reference
+        let { replacement, choiceIndex } = referredExecutedFork.choiceFork.call();
+        let renderedOutput = this.renderChoice(replacement);
+        referredExecutedFork.choiceIndex = choiceIndex;
+        referredExecutedFork.renderedOutput = renderedOutput;
+        return renderedOutput;
       }
-      let matchedReferenceResult = reference.referenceMap.get(referredChoiceResult.choiceIndex);
+      if (!reference.referenceMap.size && !reference.fallbackChoiceFork) {
+        // this is a special "copy" reference
+        return this.renderChoice([referredExecutedFork.renderedOutput]);
+      }
+      let matchedReferenceResult = reference.referenceMap.get(referredExecutedFork.choiceIndex);
       if (matchedReferenceResult !== undefined) {
-        return matchedReferenceResult;
+        return this.renderChoice(matchedReferenceResult);
       }
     }
     if (!reference.fallbackChoiceFork) {
       console.warn(`No matching reference or fallback found for ${reference.id}`);
-      return [''];
+      return this.renderChoice(['']);
     }
-    return reference.fallbackChoiceFork.call().replacement;
+    return this.renderChoice(reference.fallbackChoiceFork.call().replacement);
   }
 
   renderChoice(choice: Choice): string {
@@ -95,11 +103,11 @@ export class Renderer {
           output += renderedOutput;
         }
         if (node.identifier) {
-          this.choiceResultMap.set(node.identifier, { choiceIndex, renderedOutput })
+          this.executedForkMap.set(node.identifier,
+            { choiceFork: node, choiceIndex, renderedOutput })
         }
       } else {
-        let backRefResult = this.resolveReference(node);
-        output += this.renderChoice(backRefResult);
+        output += this.resolveReference(node)
       }
     }
     return output;
@@ -162,11 +170,11 @@ export class Renderer {
       }
       this.evalContext.bindings[key] = value;
     }
-    for (let [key, value] of subRenderer.choiceResultMap) {
-      if (this.choiceResultMap.has(key)) {
+    for (let [key, value] of subRenderer.executedForkMap) {
+      if (this.executedForkMap.has(key)) {
         throw new IncludeError(includePath, `Fork id '${key}' is already defined`);
       }
-      this.choiceResultMap.set(key, value);
+      this.executedForkMap.set(key, value);
     }
     rand.restoreRngState(rngState);
     return result;

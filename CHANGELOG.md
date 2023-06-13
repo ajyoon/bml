@@ -5,6 +5,10 @@
 * Fix bug in relative path includes on non-interactive execution.
   (Yet another bug caused by the very confusing way cli.ts is written.)
 * Make punctuation cleanup include dashes (hyphens, en-dash, and em-dash)
+* Support re-executing forks with the syntax `{@!foo}`, which is the
+  equivalent of rewriting the original `{@foo}` fork: re-executing it,
+  inserting its result, and updating the executed fork map
+  accordingly.
 
 ### 0.1.6
 * Add and enable by default correction of English indefinite articles (a / an).
