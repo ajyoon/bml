@@ -188,7 +188,7 @@ describe('parseFork', function() {
     let expectedChoiceMap = new Map();
     expectedChoiceMap.set(0, ['foo']);
     expect(result).toBeInstanceOf(Reference);
-    expect(result).toEqual(new Reference('TestChoice', expectedChoiceMap, []));
+    expect(result).toEqual(new Reference('TestChoice', expectedChoiceMap, [], false));
   });
 
   it('allows grouped mappings in references', function() {
@@ -201,7 +201,7 @@ describe('parseFork', function() {
     expectedChoiceMap.set(3, ['bar']);
     expect(result).toBeInstanceOf(Reference);
     expect(result).toEqual(new Reference(
-      'TestChoice', expectedChoiceMap, [new WeightedChoice(['baz'], 100)]));
+      'TestChoice', expectedChoiceMap, [new WeightedChoice(['baz'], 100)], false));
   });
 
   it('allows multiple fallback branches in references', function() {
@@ -215,7 +215,7 @@ describe('parseFork', function() {
       new WeightedChoice(['baz'], 40),
     ];
     expect(result).toEqual(new Reference(
-      'TestChoice', expectedChoiceMap, expectedWeights));
+      'TestChoice', expectedChoiceMap, expectedWeights, false));
   })
 
   it('allows forks to be used directly as branches', function() {
@@ -352,6 +352,7 @@ describe('parseFork', function() {
     expect(result.referenceMap.size).toBe(1);
     expect(result.referenceMap.get(0)).toBeInstanceOf(EvalBlock);
     expect((result.referenceMap.get(0) as EvalBlock).contents).toBe('some js');
+    expect(result.reExecute).toBeFalsy()
   });
 
   it('allows a single branch with a fallback', function() {
@@ -365,6 +366,7 @@ describe('parseFork', function() {
     expect(result.fallbackChoiceFork!.weights).toHaveLength(1);
     let fallbackChoice = result.fallbackChoiceFork!.weights[0].choice as AstNode[];
     expect(fallbackChoice).toStrictEqual(['fallback']);
+    expect(result.reExecute).toBeFalsy()
   });
 
   it('parses multiple branches of all types with fallback', function() {
@@ -385,6 +387,7 @@ describe('parseFork', function() {
     let fallbackChoice = result.fallbackChoiceFork!.weights[0].choice as EvalBlock;
     expect(fallbackChoice).toBeInstanceOf(EvalBlock);
     expect(fallbackChoice.contents).toBe('some more js');
+    expect(result.reExecute).toBeFalsy()
   });
 
   it('parses copy refs', function() {
@@ -395,6 +398,7 @@ describe('parseFork', function() {
     expect(result.id).toBe('TestRef');
     expect(result.referenceMap.size).toBe(0);
     expect(result.fallbackChoiceFork).toBeNull();
+    expect(result.reExecute).toBeFalsy()
   });
 
   it('throws an error when invalid syntax is used', function() {

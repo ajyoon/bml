@@ -93,6 +93,9 @@ export class Lexer {
     } else if (this.str[this.index] === '@') {
       tokenType = TokenType.AT;
       tokenString = '@';
+    } else if (this.str[this.index] === '!') {
+      tokenType = TokenType.BANG;
+      tokenString = '!';
     } else if (this.str[this.index] === '[') {
       tokenType = TokenType.OPEN_BRACKET;
       tokenString = '[';

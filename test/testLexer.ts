@@ -115,6 +115,12 @@ describe('Lexer', function() {
     expect(lexer.next()).toBeNull();
   });
 
+  it('tokenizes bang', function() {
+    let lexer = new Lexer('!');
+    expect(lexer.next()).toEqual(new Token(TokenType.BANG, 0, 1, '!'));
+    expect(lexer.next()).toBeNull();
+  });
+
   it('tokenizes arrow', function() {
     let lexer = new Lexer('->');
     expect(lexer.next()).toEqual(new Token(TokenType.ARROW, 0, 2, '->'));

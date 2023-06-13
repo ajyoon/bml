@@ -18,6 +18,7 @@ export enum TokenType {
   COMMA = 'COMMA',
   COLON = 'COLON',
   AT = 'AT',
+  BANG = 'BANG',
   ARROW = 'ARROW',
   NUMBER = 'NUMBER',
   TEXT = 'TEXT',

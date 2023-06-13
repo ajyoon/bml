@@ -237,7 +237,8 @@ export function parseFork(lexer: Lexer): ChoiceFork | Reference {
         if (acceptBlockEnd) {
           lexer.next();  // consume close brace
           if (isReference) {
-            return new Reference(id!, mappedChoices, unmappedChoices);
+            // TODO plug in re-execution
+            return new Reference(id!, mappedChoices, unmappedChoices, false);
           } else {
             return new ChoiceFork(unmappedChoices, id, isSilent)
           }
