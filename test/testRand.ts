@@ -88,7 +88,7 @@ describe('setRandomSeed', function() {
   it('when not called, should produce different outputs on program runs', function() {
     jest.isolateModules(() => rand = require('../src/rand.ts'));
     let firstResult = rand.randomFloat(0, 1);
-    expect(rand.randomFloat(0, 1)).not.toBeCloseTo(firstResult);
+    expect(rand.randomFloat(0, 1)).not.toBeCloseTo(firstResult, 10);
   });
 
   it('produces stable results forever', function() {

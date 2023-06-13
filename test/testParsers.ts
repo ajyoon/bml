@@ -401,6 +401,17 @@ describe('parseFork', function() {
     expect(result.reExecute).toBeFalsy()
   });
 
+  it('parses re-executing refs', function() {
+    let testString = '@!TestRef}';
+    let lexer = new Lexer(testString);
+    let result = parseFork(lexer)! as Reference;
+    expect(result).toBeInstanceOf(Reference);
+    expect(result.id).toBe('TestRef');
+    expect(result.referenceMap.size).toBe(0);
+    expect(result.fallbackChoiceFork).toBeNull();
+    expect(result.reExecute).toBeTruthy();
+  });
+
   it('throws an error when invalid syntax is used', function() {
     assertParseForkGivesSyntaxError('@TestRef:}');
     assertParseForkGivesSyntaxError('@TestRef: aaskfj}');
@@ -411,6 +422,8 @@ describe('parseFork', function() {
     assertParseForkGivesSyntaxError('@TestRef: 0, 1}');
     assertParseForkGivesSyntaxError('@TestRef: 0 -> (foo), [some js], @TestRef2: 0 -> (foo)}');
     assertParseForkGivesSyntaxError('@TestRef: (foo) 5, 2}');
+    assertParseForkGivesSyntaxError('@!TestRef:');
+    assertParseForkGivesSyntaxError('!@TestRef');
   });
 
   it('errors on repeated indexes', function() {

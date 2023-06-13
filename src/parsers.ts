@@ -128,11 +128,12 @@ export function parseFork(lexer: Lexer): ChoiceFork | Reference {
 
   // Big blob in 2nd capture is for identifiers inclusive of non-ascii chars
   // It's an approximation of JS identifiers.
-  let idRe = /([@#]?)([_a-zA-Z\xA0-\uFFFF][_a-zA-Z0-9\xA0-\uFFFF]*)(:?)/y;
+  let idRe = /(@|#|@!|)([_a-zA-Z\xA0-\uFFFF][_a-zA-Z0-9\xA0-\uFFFF]*)(:?)/y;
 
   let id = null;
   let isReference = false;
   let isSilent = false;
+  let isReExecuting = false;
 
   let acceptId = true;
   let acceptWeight = false;
@@ -237,8 +238,7 @@ export function parseFork(lexer: Lexer): ChoiceFork | Reference {
         if (acceptBlockEnd) {
           lexer.next();  // consume close brace
           if (isReference) {
-            // TODO plug in re-execution
-            return new Reference(id!, mappedChoices, unmappedChoices, false);
+            return new Reference(id!, mappedChoices, unmappedChoices, isReExecuting);
           } else {
             return new ChoiceFork(unmappedChoices, id, isSilent)
           }
@@ -277,6 +277,17 @@ export function parseFork(lexer: Lexer): ChoiceFork | Reference {
             }
           } else if (typeSlug == '#') {
             isSilent = true;
+          } else if (typeSlug == '@!') {
+            isReference = true;
+            isReExecuting = true;
+            if (includesColon) {
+              // error
+              throw new BMLSyntaxError(`Re-executing reference '${id}' should not have a colon, `
+                + 'since re-executing references cannot have mappings.',
+                lexer.str, token.index, `Did you mean '{@!${id}}'?`)
+            } else {
+              acceptBlockEnd = true;
+            }
           }
           lexer.overrideIndex(lexer.index + idMatch[0].length);
           acceptId = false;
