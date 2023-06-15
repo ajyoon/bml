@@ -12,9 +12,15 @@ import { render } from '../src/renderer';
 
 
 describe('render', function() {
+  let consoleWarnMock: any;
 
   beforeEach(function() {
     rand.setRandomSeed(0); // pin seed for reproducibility
+    consoleWarnMock = jest.spyOn(console, 'warn').mockImplementation();
+  });
+
+  afterEach(function() {
+    consoleWarnMock.mockRestore();
   });
 
   it('executes simple forks', function() {
@@ -89,19 +95,21 @@ describe('render', function() {
     expect(render(testString, null, null)).toEqual(' A B D C\n');
   });
 
-  it('gracefully errors trying to map unexecuted silent set forks', function() {
-    // TODO
+  it('resets weights on exhausted sets', function() {
+    let testString = '{#$id: (A), (B), (C), (D)} {@!id} {@!id} {@!id} {@!id} {@!id}';
+    expect(render(testString, null, null)).toEqual(' A B D C D\n');
+    expect(consoleWarnMock).toBeCalled();
   });
 
-  it('resets weights on exhausted sets', function() {
-    let originalConsoleWarn = console.warn;
-    console.warn = jest.fn(); // Mock console.warn with a Jest mock function
-    try {
-      let testString = '{#$id: (A), (B), (C), (D)} {@!id} {@!id} {@!id} {@!id} {@!id}';
-      expect(render(testString, null, null)).toEqual(' A B D C D\n');
-    } finally {
-      console.warn = originalConsoleWarn;
-    }
+  it('allows mapping on set forks', function() {
+    let testString = '{#$id: (A), (B)} {@!id} {@!id} {@id: 0 -> (a), 1 -> (b)}';
+    expect(render(testString, null, null)).toEqual(' A B b\n');
+  });
+
+  it('gracefully warns when trying to map unexecuted silent set forks', function() {
+    let testString = '{#$id: (A), (B), (C), (D)} {@id: 0 -> (foo)}';
+    expect(render(testString, null, null)).toEqual('');
+    expect(consoleWarnMock).toBeCalled();
   });
 
   it('preserves plaintext parentheses', function() {

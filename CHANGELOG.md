@@ -1,5 +1,9 @@
 # Changelog
 
+### 0.1.8
+* Support set forks with `{$id: (foo), (bar)}` syntax. Silent set
+  forks are also supported.
+
 ### 0.1.7
 * Fix bug introduced in 0.1.6 article correction
 * Fix bug in relative path includes on non-interactive execution.
