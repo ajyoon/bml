@@ -67,6 +67,43 @@ describe('render', function() {
     expect(render(testString, null, null)).toEqual('Foo fff\nfoo fff\nbar bbb\nbar bbb\n');
   });
 
+  it('supports initial set fork declarations', function() {
+    let testString = 'foo {$id: (bar), (biz)}';
+    expect(render(testString, null, null)).toEqual('Foo bar\n');
+  });
+
+  it('supports initial silent set fork declarations', function() {
+    let testString = 'foo {#$id: (bar), (biz)}';
+    expect(render(testString, null, null)).toEqual('Foo\n');
+  });
+
+  it('supports re-executing set forks', function() {
+    let testString = '{$id: (A), (B), (C), (D)} {@!id} {@!id} {@!id}';
+    expect(render(testString, null, null)).toEqual('A B D C\n');
+  });
+
+  it('supports re-executing silent set forks', function() {
+    // Note that silent set forks are *not* immediately executed,
+    // so the initial declaration does not cause a set member to be exhausted
+    let testString = '{#$id: (A), (B), (C), (D)} {@!id} {@!id} {@!id} {@!id}';
+    expect(render(testString, null, null)).toEqual(' A B D C\n');
+  });
+
+  it('gracefully errors trying to map unexecuted silent set forks', function() {
+    // TODO
+  });
+
+  it('resets weights on exhausted sets', function() {
+    let originalConsoleWarn = console.warn;
+    console.warn = jest.fn(); // Mock console.warn with a Jest mock function
+    try {
+      let testString = '{#$id: (A), (B), (C), (D)} {@!id} {@!id} {@!id} {@!id} {@!id}';
+      expect(render(testString, null, null)).toEqual(' A B D C D\n');
+    } finally {
+      console.warn = originalConsoleWarn;
+    }
+  });
+
   it('preserves plaintext parentheses', function() {
     let testString = 'foo (bar)';
     expect(render(testString, null, null)).toEqual('Foo (bar)\n');

@@ -28,6 +28,7 @@ describe('ChoiceFork', function() {
     let choiceFork = new ChoiceFork(weights, 'identifier', true, false);
     expect(choiceFork.toString()).toBe(
       'ChoiceFork{weights: WeightedChoice{choice: foo, weight: 40},'
-      + 'WeightedChoice{choice: bar, weight: 60}, identifier: identifier, isSilent: true}');
+      + 'WeightedChoice{choice: bar, weight: 60}, identifier: identifier, '
+      + 'isSilent: true, isSet: false}');
   });
 });

@@ -25,3 +25,9 @@ export class WeightedChoice {
     return new WeightedChoice(this.choice, this.weight);
   }
 }
+
+export function sumWeights(weights: WeightedChoice[]) {
+  // Note that if weights have been normalized, as they are in `ChoiceFork`s,
+  // `wc.weight` will always be non-null here so the default should never occur.
+  return weights.reduce((acc, val) => acc + (val.weight ?? 0), 0);
+}

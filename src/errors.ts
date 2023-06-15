@@ -53,7 +53,7 @@ export class BMLDuplicatedRefError extends Error {
 
 export class EvalBoundSettingsError extends Error {
   constructor(field: string, value: any) {
-    super(`Eval binding of settings field '${field}' of '${value}' is invalid`)
+    super(`Eval binding of settings field '${field}' of '${value}' is invalid`);
     this.name = 'EvalBoundSettingsError';
     Object.setPrototypeOf(this, EvalBoundSettingsError.prototype);
   }
@@ -61,7 +61,7 @@ export class EvalBoundSettingsError extends Error {
 
 export class EvalBindingError extends Error {
   constructor(key: string) {
-    super(`Eval binding ${key} was bound multiple times.`)
+    super(`Eval binding ${key} was bound multiple times.`);
     this.name = 'EvalBindingError';
     Object.setPrototypeOf(this, EvalBindingError.prototype);
   }
@@ -69,7 +69,7 @@ export class EvalBindingError extends Error {
 
 export class EvalDisabledError extends Error {
   constructor() {
-    super(`This document includes eval blocks and cannot be rendered with allowEval=false.`)
+    super(`This document includes eval blocks and cannot be rendered with allowEval=false.`);
     this.name = 'EvalDisabledError';
     Object.setPrototypeOf(this, EvalDisabledError.prototype);
   }
@@ -82,3 +82,21 @@ export class IncludeError extends Error {
     Object.setPrototypeOf(this, IncludeError.prototype);
   }
 }
+
+export class InvalidForkWeightsError extends Error {
+  constructor() {
+    super('Fork has invalid weights');
+    this.name = 'InvalidForkWeightsError';
+    Object.setPrototypeOf(this, InvalidForkWeightsError.prototype);
+  }
+}
+
+export class NoPossibleChoiceError extends Error {
+  constructor() {
+    super('Cannot perform weighted choice where the given weights have a sum of zero');
+    this.name = 'NoPossibleWeightsError';
+    Object.setPrototypeOf(this, NoPossibleChoiceError.prototype);
+  }
+}
+
+

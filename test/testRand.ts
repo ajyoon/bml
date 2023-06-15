@@ -3,6 +3,7 @@ import sha from 'sha.js';
 import { Buffer } from 'buffer';
 
 import { WeightedChoice } from '../src/weightedChoice';
+import { NoPossibleChoiceError } from '../src/errors';
 let rand = require('../src/rand.ts');
 
 type RandomFunction = (a: number, b: number) => number;
@@ -108,6 +109,7 @@ describe('weightedChoose', function() {
   beforeEach(function() {
     rand.setRandomSeed(0); // pin seed for reproducibility
   });
+
   it('behaves on well-formed weights', function() {
     let weights = [
       new WeightedChoice(['foo'], 40),
@@ -125,4 +127,23 @@ describe('weightedChoose', function() {
     expect(result.choice).toStrictEqual(['bar']);
     expect(result.choiceIndex).toBe(1);
   });
+
+  it('errors when given no weights', function() {
+    expect(() =>
+      rand.weightedChoose([])
+    ).toThrow('Cannot perform weighted choice where the given weights have a sum of zero');
+    // For reasons beyond me, toThrow here fails when I reference the actual error type
+  });
+
+  it('errors when given all-zero weights', function() {
+    expect(() => {
+      let weights = [
+        new WeightedChoice(['foo'], 0),
+        new WeightedChoice(['bar'], 0),
+      ];
+      rand.weightedChoose(weights);
+    }).toThrow('Cannot perform weighted choice where the given weights have a sum of zero');
+    // For reasons beyond me, toThrow here fails when I reference the actual error type
+  });
+
 });

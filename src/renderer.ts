@@ -86,6 +86,12 @@ export class Renderer {
       if (isStr(node)) {
         output += node;
       } else if (node instanceof ChoiceFork) {
+        if (node.isSet && node.isSilent) {
+          // Silent set declarations are *not* immediately executed.
+          this.executedForkMap.set(node.identifier!,
+            { choiceFork: node, choiceIndex: -1, renderedOutput: '' });
+          continue;
+        }
         let { replacement, choiceIndex } = node.call();
         let renderedOutput = this.renderChoice(replacement);
         if (node.isSilent) {

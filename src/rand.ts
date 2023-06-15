@@ -1,5 +1,7 @@
-import { WeightedChoice, Choice } from './weightedChoice';
+import { WeightedChoice, Choice, sumWeights } from './weightedChoice';
+import { NoPossibleChoiceError } from './errors';
 import seedrandom from 'seedrandom';
+
 
 // A module-local seedable random number generator
 // The selected seed will be random unless `setRandomSeed()` is called.
@@ -63,9 +65,9 @@ export function randomInt(min: number, max: number): number {
  * Returns an object of the form {choice, choiceIndex}
  */
 export function weightedChoose(weights: WeightedChoice[]): { choice: Choice, choiceIndex: number } {
-  let sum = 0;
-  for (let wc of weights) {
-    sum += wc.weight ?? 0;
+  let sum = sumWeights(weights);
+  if (sum === 0) {
+    throw new NoPossibleChoiceError();
   }
   let progress = 0;
   let pickedValue = randomFloat(0, sum);
