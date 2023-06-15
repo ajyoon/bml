@@ -180,7 +180,26 @@ describe('parseFork', function() {
     expect(result).toBeInstanceOf(ChoiceFork);
     expect((result as ChoiceFork).identifier).toBe('TestChoice');
     expect((result as ChoiceFork).isSilent).toBe(true);
+    expect((result as ChoiceFork).isSet).toBe(false);
   });
+
+  it('allows non-silent sets', function() {
+    let lexer = new Lexer('$TestChoice: (test)}');
+    let result = parseFork(lexer);
+    expect(result).toBeInstanceOf(ChoiceFork);
+    expect((result as ChoiceFork).identifier).toBe('TestChoice');
+    expect((result as ChoiceFork).isSilent).toBe(false);
+    expect((result as ChoiceFork).isSet).toBe(true);
+  })
+
+  it('allows silent sets', function() {
+    let lexer = new Lexer('#$TestChoice: (test)}');
+    let result = parseFork(lexer);
+    expect(result).toBeInstanceOf(ChoiceFork);
+    expect((result as ChoiceFork).identifier).toBe('TestChoice');
+    expect((result as ChoiceFork).isSilent).toBe(true);
+    expect((result as ChoiceFork).isSet).toBe(true);
+  })
 
   it('allows references', function() {
     let lexer = new Lexer('@TestChoice: 0 -> (foo)}');
@@ -226,11 +245,11 @@ describe('parseFork', function() {
         // Nested fork
         new ChoiceFork([
           new WeightedChoice(['foo'], 100)
-        ], null, false)
+        ], null, false, false)
       ], 60),
       // Alternate branch in outer fork
       new WeightedChoice(['bar'], 40)
-    ], null, false);
+    ], null, false, false);
     expect(result).toEqual(expectedResult);
   });
 });

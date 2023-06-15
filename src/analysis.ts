@@ -95,6 +95,7 @@ function deriveForkNode(choiceFork: ChoiceFork, forkIdMap: ForkIdMap): ForkNode 
 }
 
 function deriveRefNode(ref: Reference, forkIdMap: ForkIdMap): RefNode {
+  // TODO handle re-executing refs
   let forkMapLookupResult = forkIdMap.get(ref.id);
   if (!forkMapLookupResult) {
     // Handle unmapped refs gracefully - this is expected

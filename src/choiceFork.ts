@@ -13,11 +13,13 @@ export class ChoiceFork {
   weights: WeightedChoice[];
   identifier: string | null;
   isSilent: boolean;
+  isSet: boolean;
 
-  constructor(weights: WeightedChoice[], identifier: string | null, isSilent: boolean) {
+  constructor(weights: WeightedChoice[], identifier: string | null, isSilent: boolean, isSet: boolean) {
     this.weights = normalizeWeights(weights);
     this.identifier = identifier;
     this.isSilent = isSilent;
+    this.isSet = isSet;
   }
 
   /**

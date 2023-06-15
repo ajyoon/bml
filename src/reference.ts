@@ -1,6 +1,5 @@
 import { Choice, WeightedChoice } from './weightedChoice';
 import { ChoiceFork } from './choiceFork';
-import { threadId } from 'worker_threads';
 
 export type ReferenceMap = Map<number, Choice>;
 
@@ -15,7 +14,7 @@ export class Reference {
     this.id = id;
     this.referenceMap = choiceMap;
     if (fallbackChocies.length) {
-      this.fallbackChoiceFork = new ChoiceFork(fallbackChocies, null, false);
+      this.fallbackChoiceFork = new ChoiceFork(fallbackChocies, null, false, false);
     } else {
       this.fallbackChoiceFork = null;
     }

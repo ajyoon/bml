@@ -24,7 +24,7 @@
    #+end_src
 ** Ideally leave room for some way to do smart grammar things
    Things like pluralization matching can be pretty tedious and often push me to skipping some chancelation variety. If there was some kind of way to support this in the language with a plugin that would be very helpful. It seems pretty complicated though..
-** TODO Support "re-using" choice blocks
+** DONE Support "re-using" choice blocks
    Sometimes I find myself wanting to reuse a choice block without copying the picked result from the original. Maybe this could be done with syntax like:
 
    #+begin_src bml

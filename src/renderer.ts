@@ -14,6 +14,8 @@ import { EvalContext } from './evalBlock';
 import * as fileUtils from './fileUtils';
 
 
+// If the referred fork is a silent set fork that has not yet been executed,
+// choiceIndex will be -1 and renderedOutput will be ''.
 export type ExecutedFork = { choiceFork: ChoiceFork, choiceIndex: number, renderedOutput: string }
 export type ExecutedForkMap = Map<string, ExecutedFork>
 

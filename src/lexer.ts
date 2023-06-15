@@ -93,9 +93,15 @@ export class Lexer {
     } else if (this.str[this.index] === '@') {
       tokenType = TokenType.AT;
       tokenString = '@';
+    } else if (this.str[this.index] === '#') {
+      tokenType = TokenType.HASH;
+      tokenString = '#';
     } else if (this.str[this.index] === '!') {
       tokenType = TokenType.BANG;
       tokenString = '!';
+    } else if (this.str[this.index] === '$') {
+      tokenType = TokenType.DOLLAR;
+      tokenString = '$';
     } else if (this.str[this.index] === '[') {
       tokenType = TokenType.OPEN_BRACKET;
       tokenString = '[';
@@ -152,6 +158,7 @@ export class Lexer {
         if (token.tokenType === TokenType.CLOSE_BLOCK_COMMENT) {
           // Block comments output a single whitespace positioned at
           // the closing slash of the `*/`
+          // TODO why???? isn't it more intuitive that they should emit nothing???
           let virtualSpaceIdx = token.index + 1;
           return new Token(TokenType.WHITESPACE, virtualSpaceIdx, virtualSpaceIdx + 1, ' ');
         }

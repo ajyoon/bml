@@ -128,12 +128,13 @@ export function parseFork(lexer: Lexer): ChoiceFork | Reference {
 
   // Big blob in 2nd capture is for identifiers inclusive of non-ascii chars
   // It's an approximation of JS identifiers.
-  let idRe = /(@|#|@!|)([_a-zA-Z\xA0-\uFFFF][_a-zA-Z0-9\xA0-\uFFFF]*)(:?)/y;
+  let idRe = /(@|#|@!|\$|#\$|)([_a-zA-Z\xA0-\uFFFF][_a-zA-Z0-9\xA0-\uFFFF]*)(:?)/y;
 
   let id = null;
   let isReference = false;
   let isSilent = false;
   let isReExecuting = false;
+  let isSet = false;
 
   let acceptId = true;
   let acceptWeight = false;
@@ -240,7 +241,7 @@ export function parseFork(lexer: Lexer): ChoiceFork | Reference {
           if (isReference) {
             return new Reference(id!, mappedChoices, unmappedChoices, isReExecuting);
           } else {
-            return new ChoiceFork(unmappedChoices, id, isSilent)
+            return new ChoiceFork(unmappedChoices, id, isSilent, isSet)
           }
         } else {
           if (!mappedChoices.size && !unmappedChoices.length) {
@@ -256,8 +257,10 @@ export function parseFork(lexer: Lexer): ChoiceFork | Reference {
           throw new BMLSyntaxError('Unexpected close brace in fork',
             lexer.str, token.index);
         }
-      case TokenType.TEXT:
       case TokenType.AT:
+      case TokenType.HASH:
+      case TokenType.DOLLAR:
+      case TokenType.TEXT:
         if (acceptId) {
           idRe.lastIndex = lexer.index;
           let idMatch = idRe.exec(lexer.str);
@@ -281,13 +284,17 @@ export function parseFork(lexer: Lexer): ChoiceFork | Reference {
             isReference = true;
             isReExecuting = true;
             if (includesColon) {
-              // error
               throw new BMLSyntaxError(`Re-executing reference '${id}' should not have a colon, `
                 + 'since re-executing references cannot have mappings.',
                 lexer.str, token.index, `Did you mean '{@!${id}}'?`)
             } else {
               acceptBlockEnd = true;
             }
+          } else if (typeSlug == '$') {
+            isSet = true;
+          } else if (typeSlug == '#$') {
+            isSet = true;
+            isSilent = true;
           }
           lexer.overrideIndex(lexer.index + idMatch[0].length);
           acceptId = false;

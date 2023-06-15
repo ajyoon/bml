@@ -14,7 +14,7 @@ describe('ChoiceFork', function() {
       new WeightedChoice(['foo'], 40),
       new WeightedChoice(['bar'], 60),
     ];
-    let choiceFork = new ChoiceFork(weights, null, false);
+    let choiceFork = new ChoiceFork(weights, null, false, false);
     let result = choiceFork.call();
     expect(result.replacement).toStrictEqual(['foo']);
     expect(result.choiceIndex).toBe(0);
@@ -25,7 +25,7 @@ describe('ChoiceFork', function() {
       new WeightedChoice(['foo'], 40),
       new WeightedChoice(['bar'], 60),
     ];
-    let choiceFork = new ChoiceFork(weights, 'identifier', true);
+    let choiceFork = new ChoiceFork(weights, 'identifier', true, false);
     expect(choiceFork.toString()).toBe(
       'ChoiceFork{weights: WeightedChoice{choice: foo, weight: 40},'
       + 'WeightedChoice{choice: bar, weight: 60}, identifier: identifier, isSilent: true}');
