@@ -249,6 +249,29 @@ insert('foo got ' + forkResult);
     expect(render(testString, null, null)).toEqual('Foo\n');
   });
 
+  // This documents a known issue: functions bound inside included evals
+  // don't share the same eval context as the outer BML context, and so
+  // things like calling `insert` inside a bound function or accessing the
+  // ref map don't work as expected. I'm unsure what's the best way to handle this,
+  // so for now I'm leaving the behavior in place and pinning it with this test.
+  it('Does not support inserts in include-bound functions', function() {
+    let tmpScript = createTmpFile(`
+      {[
+        bind({
+          test: () => { insert('foo') }
+        });
+      ]}
+    `);
+    // Note that included bindings are NOT available within the same eval block.
+    // To access the included binding 'test', a new eval block must be opened.
+    // This is an internal limitation which could be fixed if needed.
+    let testString = `
+{[include('${tmpScript}')]}
+{[test()]}
+`;
+    expect(render(testString, null, null)).toEqual('');
+  });
+
   it('Retains choice references in includes', function() {
     let tmpScript = createTmpFile(`
       {#foo: (x), (y)}
