@@ -169,17 +169,43 @@ describe('render', function() {
     expect(render(testString, null, null)).toEqual('Foo\nbar\n');
   });
 
-  // Note this feature is currently unstable. The final structure of `forkMap`
-  // is likely to change before stabilizing.
-  it('Allows accessing the choice result map in eval blocks', function() {
+  // Note that in-eval ref lookups are currently unstable
+  it('Allows performing detailed ref lookups in eval blocks', function() {
     let testString = `
 {foo: (bar), (biz)}
 {[
-let forkResult = bml.forkMap.get('foo');
+let forkResult = bml.refDetail('foo');
 insert('foo got index ' + forkResult.choiceIndex + ': ' + forkResult.renderedOutput);
 ]}
 `;
     expect(render(testString, null, null)).toEqual('Bar\nfoo got index 0: bar\n');
+  });
+
+  it('Allows performing simple ref lookups in eval blocks', function() {
+    let testString = `
+{foo: (bar), (biz)}
+{[
+let forkResult = bml.ref('foo');
+insert('foo got ' + forkResult);
+]}
+`;
+    expect(render(testString, null, null)).toEqual('Bar\nfoo got bar\n');
+  });
+
+  it('Dynamically loads fork map in evals', function() {
+    let testString = `
+{#foo: (x)}
+{[
+  bind({
+    test: (id) => {
+      insert(bml.ref(id));
+    }
+  });
+]}
+{#foo: (a)}
+{[test('foo')]}
+`;
+    expect(render(testString, null, null)).toEqual('A\n');
   });
 
   it('Allows disabling eval execution', function() {
@@ -222,7 +248,6 @@ insert('foo got index ' + forkResult.choiceIndex + ': ' + forkResult.renderedOut
 `;
     expect(render(testString, null, null)).toEqual('Foo\n');
   });
-
 
   it('Retains choice references in includes', function() {
     let tmpScript = createTmpFile(`

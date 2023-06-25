@@ -14,9 +14,21 @@ const evalFuncTemplate = `
     }
   }
 
-  // Note this feature is currently unstable. The final structure of forkMap
-  // is likely to change before stabilizing.
-  bml.forkMap = __context.renderer.executedForkMap;
+  // Note ref lookups are currently unstable
+  bml.ref = function(id) {
+    let lookupResult = __context.renderer.executedForkMap.get(id);
+    if (lookupResult === undefined) {
+      throw new Error('Ref lookup inside eval failed for: ' + id);
+    }
+    return lookupResult.renderedOutput;
+  }
+  bml.refDetail = function(id) {
+    let lookupResult = __context.renderer.executedForkMap.get(id);
+    if (lookupResult === undefined) {
+      throw new Error('Ref lookup inside eval failed for: ' + id);
+    }
+    return lookupResult;
+  }
 
   ***USER DEFS BINDING SLOT***
 
