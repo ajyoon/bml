@@ -99,7 +99,7 @@ export function launchInteractive(scriptPath: string, settings: RenderSettings) 
 
   function formatInfoBoxText() {
     return `Source: ${scriptPath} | Refresh delay: ${state.refreshIntervalSecs}s\n`
-      + `R: Refresh | C: Copy | Ctrl-Up/Dwn: Change refresh delay`
+      + `R/Spc: Refresh | C: Copy | Ctrl-Up/Dwn: Change refresh delay`
 
   }
 
@@ -158,7 +158,7 @@ export function launchInteractive(scriptPath: string, settings: RenderSettings) 
   // - Support pausing the refresher
 
   // Attach key listener for force-refresh
-  screen.key(['r', 'S-r'], interruptingRefresh);
+  screen.key(['r', 'S-r', 'space'], interruptingRefresh);
 
   // Attach key listener for copying render output
   screen.key(['c', 'S-c'], function(ch, key) {

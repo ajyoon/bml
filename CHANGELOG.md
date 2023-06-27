@@ -7,6 +7,7 @@
   object). The new functions should be lazily evaluated so they act on
   the fork map state at the time of function use, not function
   declaration.
+* In interactive mode, make spacebar also force refresh
 
 ### 0.1.8
 * Support set forks with `{$id: (foo), (bar)}` syntax. Silent set
