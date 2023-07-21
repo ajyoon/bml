@@ -8,6 +8,7 @@
   the fork map state at the time of function use, not function
   declaration.
 * In interactive mode, make spacebar also force refresh
+* Update punctuation cleanup to work around more script types (like Chinese)
 
 ### 0.1.8
 * Support set forks with `{$id: (foo), (bar)}` syntax. Silent set

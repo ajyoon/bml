@@ -49,6 +49,10 @@ describe('punctuationCleanup', function() {
     expect(postprocessing.punctuationCleanup('test — ')).toBe('test—  ');
   });
 
+  it('snaps punctuation left with Chinese characters', function() {
+    expect(postprocessing.punctuationCleanup('道 . ')).toBe('道.  ');
+  });
+
   it('snaps groups of punctuation left together', function() {
     expect(postprocessing.punctuationCleanup('test ?! ')).toBe('test?!  ');
   });
