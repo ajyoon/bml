@@ -32,7 +32,8 @@ export function launchInteractive(scriptPath: string, settings: RenderSettings) 
   };
 
   const screen = blessed.screen({
-    smartCSR: true
+    smartCSR: true,
+    fullUnicode: true
   });
 
   const infoBox = blessed.box({
