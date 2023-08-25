@@ -12,6 +12,7 @@
 * Make interactive view support unicode
 * Fix interactive view confusingly suppressing error messages, for
   example when trying to read a non-existent file.
+* Provide better error messages when including non-existent files.
 
 ### 0.1.8
 * Support set forks with `{$id: (foo), (bar)}` syntax. Silent set

@@ -11,9 +11,6 @@ export function readFile(filePath: string, workingDir: string | null): string {
     }
     filePath = path.join(workingDir, filePath);
   }
-  if (!fs.existsSync(filePath)) {
-    throw new Error()
-  }
   return '' + fs.readFileSync(filePath);
 }
 
