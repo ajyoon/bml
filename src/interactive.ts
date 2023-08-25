@@ -8,15 +8,16 @@ const process = require('process');
 const clipboard = require('clipboardy');
 const path = require('path');
 
+type InteractiveState = {
+  refreshTimeoutId: NodeJS.Timeout | null,
+  refreshIntervalSecs: number,
+  scriptLastModTime: Date,
+  currentRender: string,
+  capturedErr: string,
+};
 
 export function launchInteractive(scriptPath: string, settings: RenderSettings) {
-  let state: {
-    refreshTimeoutId: NodeJS.Timeout | null,
-    refreshIntervalSecs: number,
-    scriptLastModTime: Date,
-    currentRender: string,
-    capturedErr: string,
-  } = {
+  let state: InteractiveState = {
     refreshTimeoutId: null,
     refreshIntervalSecs: 10,
     scriptLastModTime: new Date(),
@@ -24,12 +25,20 @@ export function launchInteractive(scriptPath: string, settings: RenderSettings) 
     capturedErr: '',
   };
 
-
-  const documentDir = path.dirname(scriptPath);
-
+  let initialStderrWrite = process.stderr.write;
   process.stderr.write = (data: any) => {
     state.capturedErr += data;
   };
+
+  try {
+    runInternal(scriptPath, settings, state)
+  } finally {
+    process.stderr.write = initialStderrWrite;
+  }
+}
+
+export function runInternal(scriptPath: string, settings: RenderSettings, state: InteractiveState) {
+  const documentDir = path.dirname(scriptPath);
 
   const screen = blessed.screen({
     smartCSR: true,
@@ -191,4 +200,5 @@ export function launchInteractive(scriptPath: string, settings: RenderSettings) 
   updateAnalysis();
   refresh();
 }
+
 
