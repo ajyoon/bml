@@ -53,6 +53,20 @@ describe('render', function() {
     expect(render(testString, null, null)).toEqual('Foo bar\n');
   });
 
+  it('emits nothing for lines containing only silent forks', function() {
+    let testString = `
+{[bind({settings: {whitespaceCleanup: false}})]}
+foo
+{#id: (bar), (biz)}
+{#id2:
+  (baz), (buz)
+}
+biz
+`;
+    expect(render(testString, null, null)).toEqual('\n\nFoo\nbiz\n');
+  });
+
+
   it('supports mapped references', function() {
     let testString = 'foo {id: (bar), (biz)} {@id: 0 -> (buzz), (bazz)}';
     expect(render(testString, null, null)).toEqual('Foo bar buzz\n');
