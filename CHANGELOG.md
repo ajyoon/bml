@@ -13,6 +13,9 @@
 * Fix interactive view confusingly suppressing error messages, for
   example when trying to read a non-existent file.
 * Provide better error messages when including non-existent files.
+* Fix bug where files included from included files were being done so
+  relative to the working directory of the top-level script. Includes
+  should now always be relative to the containing file.
 
 ### 0.1.8
 * Support set forks with `{$id: (foo), (bar)}` syntax. Silent set

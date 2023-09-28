@@ -172,7 +172,8 @@ export class Renderer {
 
     let lexer = new Lexer(bmlDocumentString);
     let ast = parseDocument(lexer, true);
-    let subRenderer = new Renderer(this.settings, path.dirname(includePath));
+    let workingDir = path.dirname(path.join(this.documentDir || '', includePath))
+    let subRenderer = new Renderer(this.settings, workingDir);
     let result = subRenderer.renderWithoutPostProcess(ast);
     // Merge state from subrenderer into this renderer
     for (let [key, value] of Object.entries(subRenderer.evalContext.bindings)) {
