@@ -164,7 +164,7 @@ export class Renderer {
       if (typeof window !== 'undefined') {
         throw new IncludeError(includePath, `Includes can't be used in browsers`);
       }
-      if (e.message && e.message.includes('no such file or directory')) {
+      if (e instanceof Error && e.message && e.message.includes('no such file or directory')) {
         throw new IncludeError(includePath, `File not found`);
       }
       throw e;
