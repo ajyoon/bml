@@ -176,16 +176,12 @@ export class Renderer {
     let subRenderer = new Renderer(this.settings, workingDir);
     let result = subRenderer.renderWithoutPostProcess(ast);
     // Merge state from subrenderer into this renderer
+    // Any redefined references are silently overwritten; this is needed to support
+    // repeated includes (caused by diamond-like include graphs) without using namespacing.
     for (let [key, value] of Object.entries(subRenderer.evalContext.bindings)) {
-      if (this.evalContext.bindings.hasOwnProperty(key)) {
-        throw new IncludeError(includePath, `Eval binding '${key}' is already bound`);
-      }
       this.evalContext.bindings[key] = value;
     }
     for (let [key, value] of subRenderer.executedForkMap) {
-      if (this.executedForkMap.has(key)) {
-        throw new IncludeError(includePath, `Fork id '${key}' is already defined`);
-      }
       this.executedForkMap.set(key, value);
     }
     rand.restoreRngState(rngState);

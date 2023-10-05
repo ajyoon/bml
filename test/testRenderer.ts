@@ -298,6 +298,22 @@ insert('foo got ' + forkResult);
     expect(render(testString, null, null)).toEqual('X\nbar\n');
   });
 
+  it('Allows repeated includes', function() {
+    let tmpScript = createTmpFile(`
+      {#foo: (x), (y)}
+      {[
+        bind({
+          test: () => { return 'bar'; }
+        });
+      ]}
+    `);
+    let testString = `
+{[include('${tmpScript}')]}
+{[include('${tmpScript}')]}
+`;
+    expect(render(testString, null, null)).toEqual('');
+  });
+
   it('Preserves RNG state around includes', function() {
     // I suspect this doesn't actually test RNG state restoration
     // but at least it pins some stability around the RNG behavior
