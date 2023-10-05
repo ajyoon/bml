@@ -1,6 +1,6 @@
 # Changelog
 
-### 0.1.9 (unreleased)
+### 0.1.9
 * Update experimental in-eval ref lookup. Now exposed by two
   functions, `bml.ref(id)` (returns rendered output of ref) and
   `bml.refDetail(id)` (returns ref output, index, and original fork
