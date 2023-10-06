@@ -25,16 +25,16 @@ export function launchInteractive(scriptPath: string, settings: RenderSettings) 
     capturedErr: '',
   };
 
-  let initialStderrWrite = process.stderr.write;
-  process.stderr.write = (data: any) => {
+  const realConsoleError = console.error;
+  const realConsoleWarn = console.warn;
+  console.error = (data: any) => {
     state.capturedErr += data;
   };
-
-  try {
-    runInternal(scriptPath, settings, state)
-  } finally {
-    process.stderr.write = initialStderrWrite;
-  }
+  console.warn = console.error;
+  // Ideally, these console overrides should be cleaned up afterward,
+  // but the interactive view runs async so it'd have to be attached
+  // to a shutdown callback of some kind.
+  runInternal(scriptPath, settings, state)
 }
 
 export function runInternal(scriptPath: string, settings: RenderSettings, state: InteractiveState) {

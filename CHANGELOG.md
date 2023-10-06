@@ -1,5 +1,8 @@
 # Changelog
 
+### 0.1.10 (unreleased)
+* Improve interactive view error/warning capture
+
 ### 0.1.9
 * Update experimental in-eval ref lookup. Now exposed by two
   functions, `bml.ref(id)` (returns rendered output of ref) and
