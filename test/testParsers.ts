@@ -150,7 +150,7 @@ describe('parseFork', function() {
     expect(result).toBeInstanceOf(ChoiceFork);
   });
 
-  it('allows the choice to be prefixed by an identifier for reference in later choices', function() {
+  it('allows identifiers for use in references', function() {
     let lexer = new Lexer('TestChoice: (test) 50, (test 2) 40}');
     let result = parseFork(lexer);
     expect(result).toBeInstanceOf(ChoiceFork);
@@ -167,6 +167,13 @@ describe('parseFork', function() {
     result = parseFork(lexer);
     expect(result).toBeInstanceOf(ChoiceFork);
     expect((result as ChoiceFork).identifier).toBe('微妙玄通');
+  });
+
+  it('allows single-character identifiers', function() {
+    let lexer = new Lexer('t: (test), (test 2)}');
+    let result = parseFork(lexer);
+    expect(result).toBeInstanceOf(ChoiceFork);
+    expect((result as ChoiceFork).identifier).toBe('t');
   });
 
   it('errors on a bare id with no branches', function() {
