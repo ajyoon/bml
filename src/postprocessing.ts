@@ -87,7 +87,7 @@ export function punctuationCleanup(text: string): string {
 
 
 // \p{Ll} matches unicode lowercase letters which have uppercase variants.
-const INCORRECT_CAPS_RE = /([.!?]\s+|^\s*)(\p{Ll})/gu;
+const INCORRECT_CAPS_RE = /([.!?]["'_]?\s+|^\s*)(\p{Ll})/gu;
 
 
 /**

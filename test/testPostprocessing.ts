@@ -91,6 +91,11 @@ describe('capitalizationCleanup', function() {
     let src = 'test. \ntest.';
     expect(postprocessing.capitalizationCleanup(src)).toBe('Test. \nTest.');
   });
+
+  it('Works across quotation marks', function() {
+    let src = '"Test." test.';
+    expect(postprocessing.capitalizationCleanup(src)).toBe('"Test." Test.');
+  });
 });
 
 describe('correctIndefiniteArticles', function() {

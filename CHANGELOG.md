@@ -2,6 +2,9 @@
 
 ### 0.1.10 (unreleased)
 * Improve interactive view error/warning capture
+* Update capitalization cleanup postprocessing to support sentences
+  ending before quotation marks. For instance, `"Test." test` will now
+  correct to `"Test." Test` where previously it would not.
 
 ### 0.1.9
 * Update experimental in-eval ref lookup. Now exposed by two
