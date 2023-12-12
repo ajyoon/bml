@@ -105,7 +105,7 @@ export function capitalizationCleanup(text: string): string {
   return text.replace(INCORRECT_CAPS_RE, correctCaps);
 }
 
-const VISUAL_LINE_BREAK_RE = /\\(\r?\n|\r)[ \t]*/g
+const VISUAL_LINE_BREAK_RE = /\\ *(\r?\n|\r)[ \t]*/g
 
 export function replaceVisualLineBreaks(text: string): string {
   return text.replace(VISUAL_LINE_BREAK_RE, ' ');

@@ -2,13 +2,26 @@ import expect from 'expect';
 import * as postprocessing from '../src/postprocessing';
 
 
-describe('cleanWhitespace', function() {
+describe('replaceVisualLineBreaks', function() {
+  it('works in a basic case', function() {
+    expect(postprocessing.replaceVisualLineBreaks('foo\\\nbar')).toBe('foo bar');
+  });
+
+  it('works backslash is followed by whitespace before line break', function() {
+    expect(postprocessing.replaceVisualLineBreaks('foo\\ \nbar')).toBe('foo bar');
+  });
+});
+
+describe('whitespaceCleanup', function() {
   it('removes blank lines at start and end of string', function() {
     expect(postprocessing.whitespaceCleanup('\n\n\n\nfoo\n   \n')).toBe('foo\n');
   });
 
   it('collapses runs of more than 1 blank line into 1', function() {
-    expect(postprocessing.whitespaceCleanup('foo\n\nbar\n\n\n\n\nbiz')).toBe('foo\n\nbar\n\nbiz\n');
+    let input = 'foo\n\nbar\n\n\n\n\nbiz';
+    let expectedOutput = 'foo\n\nbar\n\nbiz\n';
+    expect(postprocessing.whitespaceCleanup(input)).toBe(expectedOutput);
+
   });
 
   it('removes trailing whitespace on every line', function() {
