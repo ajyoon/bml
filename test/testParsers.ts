@@ -359,6 +359,10 @@ describe('parseFork', function() {
   it('fails when two choices are not separated by a comma', function() {
     assertParseForkGivesSyntaxError('(test) (test 2)}');
   });
+
+  xit('fails when an ID is not followed by a colon', function() {
+    assertParseForkGivesSyntaxError('foo (test), (test 2)}');
+  });
 });
 
 describe('parseFork', function() {
