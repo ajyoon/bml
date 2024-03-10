@@ -6,6 +6,10 @@
   ending before quotation marks. For instance, `"Test." test` will now
   correct to `"Test." Test` where previously it would not.
 * Fix visual line breaks when backslash is followed by whitespace
+* Update punctuation cleanup postprocessing to shift punctuation to the
+  right of quotes (single, double, or underscores). For example `"test" .`
+  will now correct to `"test".`. Note that this does not shift punctuation
+  to the inside of quotes, as this is context and style dependent.
 
 ### 0.1.9
 * Update experimental in-eval ref lookup. Now exposed by two
