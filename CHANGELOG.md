@@ -1,6 +1,6 @@
 # Changelog
 
-### 0.1.10 (unreleased)
+### 0.1.10
 * Improve interactive view error/warning capture
 * Update capitalization cleanup postprocessing to support sentences
   ending before quotation marks and other matching delimiters like brackets.
