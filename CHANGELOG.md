@@ -3,8 +3,9 @@
 ### 0.1.10 (unreleased)
 * Improve interactive view error/warning capture
 * Update capitalization cleanup postprocessing to support sentences
-  ending before quotation marks. For instance, `"Test." test` will now
-  correct to `"Test." Test` where previously it would not.
+  ending before quotation marks and other matching delimiters like brackets.
+  For instance, `"Test." test` will now correct to `"Test." Test` where
+  previously it would not.
 * Fix visual line breaks when backslash is followed by whitespace
 * Update punctuation cleanup postprocessing to shift punctuation to the
   right of quotes (single, double, or underscores). For example `"test" .`
