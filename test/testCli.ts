@@ -30,7 +30,11 @@ describe('cli', function() {
     let path = 'some path';
     let action = cli.determineAction([path]);
     expect(action.function).toBe(cli.executeFromPath);
-    expect(action.args).toEqual([path, defaultRenderSettings]);
+    let expectedSettings = {
+      ...defaultRenderSettings,
+      workingDir: ".",
+    }
+    expect(action.args).toEqual([path, expectedSettings]);
   });
 
   it('reads from stdin when not given any arguments', function() {
@@ -103,10 +107,14 @@ describe('cli', function() {
   it('supports interactive mode from path', function() {
     let action = cli.determineAction(['--interactive', '1.bml']);
     expect(action.function).toBe(cli.executeInteractively);
-    expect(action.args).toEqual(['1.bml', defaultRenderSettings]);
+    let expectedSettings = {
+      ...defaultRenderSettings,
+      workingDir: ".",
+    }
+    expect(action.args).toEqual(['1.bml', expectedSettings]);
     action = cli.determineAction(['-i', '1.bml']);
     expect(action.function).toBe(cli.executeInteractively);
-    expect(action.args).toEqual(['1.bml', defaultRenderSettings]);
+    expect(action.args).toEqual(['1.bml', expectedSettings]);
   });
 
   it('supports all settings', function() {
@@ -116,6 +124,7 @@ describe('cli', function() {
     let expectedSettings = {
       randomSeed: 123,
       allowEval: false,
+      workingDir: ".",
     };
     expect(action.function).toBe(cli.executeFromPath);
     expect(action.args).toEqual([path, expectedSettings]);

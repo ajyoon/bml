@@ -25,32 +25,32 @@ describe('render', function() {
 
   it('executes simple forks', function() {
     let testString = 'foo {(bar), (biz)}';
-    expect(render(testString, null, null)).toEqual('Foo bar\n');
+    expect(render(testString, null)).toEqual('Foo bar\n');
   });
 
   it('executes forks with eval blocks', function() {
     let testString = 'foo {[insert("eval")], (biz)}';
-    expect(render(testString, null, null)).toEqual('Foo eval\n');
+    expect(render(testString, null)).toEqual('Foo eval\n');
   });
 
   it('executes forks with weights', function() {
     let testString = 'foo {[insert("eval")], (biz) 99}';
-    expect(render(testString, null, null)).toEqual('Foo biz\n');
+    expect(render(testString, null)).toEqual('Foo biz\n');
   });
 
   it('executes nested forks', function() {
     let testString = 'foo {(bar {(nested branch), (other nested branch)}), (biz)}';
-    expect(render(testString, null, null)).toEqual('Foo bar nested branch\n');
+    expect(render(testString, null)).toEqual('Foo bar nested branch\n');
   });
 
   it('supports bare references', function() {
     let testString = 'foo {id: (bar), (biz)} {@id}';
-    expect(render(testString, null, null)).toEqual('Foo bar bar\n');
+    expect(render(testString, null)).toEqual('Foo bar bar\n');
   });
 
   it('supports silent fork references', function() {
     let testString = 'foo {#id: (bar), (biz)} {@id}';
-    expect(render(testString, null, null)).toEqual('Foo bar\n');
+    expect(render(testString, null)).toEqual('Foo bar\n');
   });
 
   it('emits nothing for lines containing only silent forks', function() {
@@ -63,18 +63,18 @@ foo
 }
 biz
 `;
-    expect(render(testString, null, null)).toEqual('\n\nFoo\nbiz\n');
+    expect(render(testString, null)).toEqual('\n\nFoo\nbiz\n');
   });
 
 
   it('supports mapped references', function() {
     let testString = 'foo {id: (bar), (biz)} {@id: 0 -> (buzz), (bazz)}';
-    expect(render(testString, null, null)).toEqual('Foo bar buzz\n');
+    expect(render(testString, null)).toEqual('Foo bar buzz\n');
   });
 
   it('supports re-executing references', function() {
     let testString = 'foo {id: (bar), (biz)} {@!id} {@!id} {@!id} {@!id} {@!id}';
-    expect(render(testString, null, null)).toEqual('Foo bar bar biz biz biz bar\n');
+    expect(render(testString, null)).toEqual('Foo bar bar biz biz biz bar\n');
   });
 
   it('updates the executed fork map on re-executing references', function() {
@@ -84,62 +84,62 @@ biz
 {@!id} {@id: 0 -> (fff), 1 -> (bbb)}
 {@!id} {@id: 0 -> (fff), 1 -> (bbb)}
 `;
-    expect(render(testString, null, null)).toEqual('Foo fff\nfoo fff\nbar bbb\nbar bbb\n');
+    expect(render(testString, null)).toEqual('Foo fff\nfoo fff\nbar bbb\nbar bbb\n');
   });
 
   it('supports initial set fork declarations', function() {
     let testString = 'foo {$id: (bar), (biz)}';
-    expect(render(testString, null, null)).toEqual('Foo bar\n');
+    expect(render(testString, null)).toEqual('Foo bar\n');
   });
 
   it('supports initial silent set fork declarations', function() {
     let testString = 'foo {#$id: (bar), (biz)}';
-    expect(render(testString, null, null)).toEqual('Foo\n');
+    expect(render(testString, null)).toEqual('Foo\n');
   });
 
   it('supports re-executing set forks', function() {
     let testString = '{$id: (A), (B), (C), (D)} {@!id} {@!id} {@!id}';
-    expect(render(testString, null, null)).toEqual('A B D C\n');
+    expect(render(testString, null)).toEqual('A B D C\n');
   });
 
   it('supports re-executing silent set forks', function() {
     // Note that silent set forks are *not* immediately executed,
     // so the initial declaration does not cause a set member to be exhausted
     let testString = '{#$id: (A), (B), (C), (D)} {@!id} {@!id} {@!id} {@!id}';
-    expect(render(testString, null, null)).toEqual(' A B D C\n');
+    expect(render(testString, null)).toEqual(' A B D C\n');
   });
 
   it('resets weights on exhausted sets', function() {
     let testString = '{#$id: (A), (B), (C), (D)} {@!id} {@!id} {@!id} {@!id} {@!id}';
-    expect(render(testString, null, null)).toEqual(' A B D C D\n');
+    expect(render(testString, null)).toEqual(' A B D C D\n');
     expect(consoleWarnMock).toBeCalled();
   });
 
   it('allows mapping on set forks', function() {
     let testString = '{#$id: (A), (B)} {@!id} {@!id} {@id: 0 -> (a), 1 -> (b)}';
-    expect(render(testString, null, null)).toEqual(' A B b\n');
+    expect(render(testString, null)).toEqual(' A B b\n');
   });
 
   it('gracefully warns when trying to map unexecuted silent set forks', function() {
     let testString = '{#$id: (A), (B), (C), (D)} {@id: 0 -> (foo)}';
-    expect(render(testString, null, null)).toEqual('');
+    expect(render(testString, null)).toEqual('');
     expect(consoleWarnMock).toBeCalled();
   });
 
   it('preserves plaintext parentheses', function() {
     let testString = 'foo (bar)';
-    expect(render(testString, null, null)).toEqual('Foo (bar)\n');
+    expect(render(testString, null)).toEqual('Foo (bar)\n');
   });
 
   it('preserves plaintext parentheses in fork text', function() {
     let testString = 'foo (bar {((biz))})';
-    expect(render(testString, null, null)).toEqual('Foo (bar (biz))\n');
+    expect(render(testString, null)).toEqual('Foo (bar (biz))\n');
   });
 
 
   it('skips line break after silent fork on its own line', function() {
     let testString = 'foo\n{#id: (bar)}\nbiz';
-    expect(render(testString, null, null)).toEqual('Foo\nbiz\n');
+    expect(render(testString, null)).toEqual('Foo\nbiz\n');
   });
 
   it('errors on duplicate eval bindings', function() {
@@ -147,7 +147,7 @@ biz
 {[bind({foo: 123})]}
 {[bind({foo: 456})]}
 `;
-    expect(() => render(testString, null, null)).toThrow(EvalBindingError);
+    expect(() => render(testString, null)).toThrow(EvalBindingError);
   });
 
   it('Allows a value bound in one eval block to be accessed in others', function() {
@@ -155,7 +155,7 @@ biz
 {[bind({foo: 123})]}
 {[insert(foo)]}
 `;
-    expect(render(testString, null, null)).toEqual('123\n');
+    expect(render(testString, null)).toEqual('123\n');
   });
 
   it('Allows a value bound in one eval block to be mutated in others', function() {
@@ -164,7 +164,7 @@ biz
 {[foo = 456;]}
 {[insert(foo)]}
 `;
-    expect(render(testString, null, null)).toEqual('456\n');
+    expect(render(testString, null)).toEqual('456\n');
   });
 
   it('Allows calling insert within bound functions', function() {
@@ -180,7 +180,7 @@ biz
 {[myFunc('foo')]}
 {[myFunc(someValue)]}
 `;
-    expect(render(testString, null, null)).toEqual('Foo\nbar\n');
+    expect(render(testString, null)).toEqual('Foo\nbar\n');
   });
 
   // Note that in-eval ref lookups are currently unstable
@@ -192,7 +192,7 @@ let forkResult = bml.refDetail('foo');
 insert('foo got index ' + forkResult.choiceIndex + ': ' + forkResult.renderedOutput);
 ]}
 `;
-    expect(render(testString, null, null)).toEqual('Bar\nfoo got index 0: bar\n');
+    expect(render(testString, null)).toEqual('Bar\nfoo got index 0: bar\n');
   });
 
   it('Allows performing simple ref lookups in eval blocks', function() {
@@ -203,7 +203,7 @@ let forkResult = bml.ref('foo');
 insert('foo got ' + forkResult);
 ]}
 `;
-    expect(render(testString, null, null)).toEqual('Bar\nfoo got bar\n');
+    expect(render(testString, null)).toEqual('Bar\nfoo got bar\n');
   });
 
   it('Dynamically loads fork map in evals', function() {
@@ -219,7 +219,7 @@ insert('foo got ' + forkResult);
 {#foo: (a)}
 {[test('foo')]}
 `;
-    expect(render(testString, null, null)).toEqual('A\n');
+    expect(render(testString, null)).toEqual('A\n');
   });
 
   it('Allows disabling eval execution', function() {
@@ -242,7 +242,7 @@ insert('foo got ' + forkResult);
 {[include('${tmpFilename}')]}
 `;
 
-    expect(render(testString, null, tmpDir)).toEqual('Foo\n');
+    expect(render(testString, { workingDir: tmpDir })).toEqual('Foo\n');
   });
 
   it('Retains eval bindings in includes', function() {
@@ -260,7 +260,7 @@ insert('foo got ' + forkResult);
 {[include('${tmpScript}')]}
 {[insert(test)]}
 `;
-    expect(render(testString, null, null)).toEqual('Foo\n');
+    expect(render(testString, null)).toEqual('Foo\n');
   });
 
   // This documents a known issue: functions bound inside included evals
@@ -283,7 +283,7 @@ insert('foo got ' + forkResult);
 {[include('${tmpScript}')]}
 {[test()]}
 `;
-    expect(render(testString, null, null)).toEqual('');
+    expect(render(testString, null)).toEqual('');
   });
 
   it('Retains choice references in includes', function() {
@@ -295,7 +295,7 @@ insert('foo got ' + forkResult);
 {@foo}
 {@foo: 0 -> (bar), 1 -> (biz)}
 `;
-    expect(render(testString, null, null)).toEqual('X\nbar\n');
+    expect(render(testString, null)).toEqual('X\nbar\n');
   });
 
   it('Allows repeated includes', function() {
@@ -311,7 +311,7 @@ insert('foo got ' + forkResult);
 {[include('${tmpScript}')]}
 {[include('${tmpScript}')]}
 `;
-    expect(render(testString, null, null)).toEqual('');
+    expect(render(testString, null)).toEqual('');
   });
 
   it('Preserves RNG state around includes', function() {
@@ -324,7 +324,7 @@ insert('foo got ' + forkResult);
 {[include('${tmpScript}')]}
 {(a), (b), (c), (d), (e), (f), (g), (h), (i), (j), (k), (l), (m), (n), (o), (p)}
 `;
-    expect(render(testString, null, null)).toEqual('A\ny\nj\n');
+    expect(render(testString, null)).toEqual('A\ny\nj\n');
   });
 });
 

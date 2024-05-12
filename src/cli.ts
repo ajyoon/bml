@@ -26,7 +26,6 @@ export const ALL_SWITCHES = ([] as string[]).concat(
 export type BMLArgs = {
   bmlSource: string,
   settings: RenderSettings,
-  documentDir: string | null
 };
 export type Action = { function: Function, args: any[] };
 
@@ -43,15 +42,13 @@ export function executeFromStdin(settings: RenderSettings): BMLArgs {
   return {
     bmlSource: fileUtils.readStdin(),
     settings: settings,
-    documentDir: null
   };
 }
 
 export function executeFromPath(scriptPath: string, settings: RenderSettings): BMLArgs {
   return {
     bmlSource: readFile(scriptPath),
-    settings: settings,
-    documentDir: path.dirname(scriptPath)
+    settings: settings
   }
 }
 
@@ -187,6 +184,7 @@ export function determineAction(args: string[]): Action {
   let settings = {
     randomSeed: seed,
     allowEval: !noEval,
+    workingDir: file ? path.dirname(file) : null,
   };
 
   if (interactive) {
@@ -234,10 +232,9 @@ export function stripArgs(argv: string[]): string[] {
 }
 
 
-export function runBmlWithErrorCheck(bmlSource: string, settings: RenderSettings,
-                                     documentDir: string | null): string {
+export function runBmlWithErrorCheck(bmlSource: string, settings: RenderSettings): string {
   try {
-    return bml(bmlSource, settings, documentDir);
+    return bml(bmlSource, settings);
   } catch (e: any) {
     console.error('BML rendering failed with error:\n'
       + e.stack + '\n\n'
@@ -270,8 +267,8 @@ function main() {
     process.stdout.write(`Approx possible branches: ${formattedCount}\n`);
     process.exit(0);
   } else {
-    let { bmlSource, settings, documentDir } = action.function(...action.args);
-    let renderedContent = runBmlWithErrorCheck(bmlSource, settings, documentDir);
+    let { bmlSource, settings } = action.function(...action.args);
+    let renderedContent = runBmlWithErrorCheck(bmlSource, settings);
     process.stdout.write(renderedContent);
   }
 }

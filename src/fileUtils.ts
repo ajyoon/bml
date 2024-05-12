@@ -9,7 +9,7 @@ export function readFile(filePath: string, workingDir: string | null): string {
     if (!fs.lstatSync(workingDir).isDirectory()) {
       throw new Error()
     }
-    filePath = path.join(workingDir, filePath);
+    filePath = path.resolve(workingDir, filePath);
   }
   return '' + fs.readFileSync(filePath);
 }

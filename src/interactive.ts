@@ -38,7 +38,7 @@ export function launchInteractive(scriptPath: string, settings: RenderSettings) 
 }
 
 export function runInternal(scriptPath: string, settings: RenderSettings, state: InteractiveState) {
-  const documentDir = path.dirname(scriptPath);
+  settings.workingDir = path.dirname(scriptPath);
 
   const screen = blessed.screen({
     smartCSR: true,
@@ -138,7 +138,7 @@ export function runInternal(scriptPath: string, settings: RenderSettings, state:
     let bmlSource = '' + fs.readFileSync(scriptPath);
     let result = '';
     try {
-      result = render(bmlSource, settings, documentDir);
+      result = render(bmlSource, settings);
     } catch (e: any) {
       // Also need to capture warnings somehow and print them out.
       // Currently when a missing ref is found it gets printed weirdly over the TUI

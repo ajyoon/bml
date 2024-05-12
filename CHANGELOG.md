@@ -10,6 +10,7 @@
   right of quotes (single, double, or underscores). For example `"test" .`
   will now correct to `"test".`. Note that this does not shift punctuation
   to the inside of quotes, as this is context and style dependent.
+* Move working directory from top-level call argument to render settings.
 
 ### 0.1.9
 * Update experimental in-eval ref lookup. Now exposed by two

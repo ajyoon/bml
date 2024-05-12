@@ -31,12 +31,21 @@ export interface RenderSettings {
    * the actual seed.
    */
   randomSeed?: number | null;
+
   /**
    * Whether to disable `eval` blocks in the document.
    *
    * This can be useful for security purposes.
    */
   allowEval?: boolean | null;
+
+  /**
+   * The working directory used for imports in this render.
+   *
+   * If the document uses imports, this should generally be set to the
+   * absolute path of the document file's directory.
+   */
+  workingDir?: string | null;
 }
 
 /**
@@ -52,6 +61,7 @@ export const defaultBMLSettings: DocumentSettings = {
 export const defaultRenderSettings: RenderSettings = {
   randomSeed: null,
   allowEval: true,
+  workingDir: null,
 };
 
 /**

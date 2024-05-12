@@ -1,4 +1,5 @@
 import path from 'path';
+import process from 'process';
 import * as rand from './rand';
 import * as postprocessing from './postprocessing';
 import { defaultBMLSettings, defaultRenderSettings, mergeSettings, RenderSettings } from './settings';
@@ -29,13 +30,11 @@ export class Renderer {
   settings: RenderSettings;
   executedForkMap: ExecutedForkMap;
   evalContext: EvalContext;
-  documentDir: string | null;
 
-  constructor(settings: RenderSettings, documentDir: string | null) {
+  constructor(settings: RenderSettings) {
     this.settings = settings;
     this.executedForkMap = new Map();
     this.evalContext = { bindings: {}, output: '', renderer: this };
-    this.documentDir = documentDir;
   }
 
   resolveReference(reference: Reference): string {
@@ -159,7 +158,8 @@ export class Renderer {
     let rngState = rand.saveRngState();
     let bmlDocumentString;
     try {
-      bmlDocumentString = fileUtils.readFile(includePath, this.documentDir);
+      let resolvedWorkingDir = this.settings.workingDir || process.cwd();
+      bmlDocumentString = fileUtils.readFile(includePath, resolvedWorkingDir);
     } catch (e) {
       if (typeof window !== 'undefined') {
         throw new IncludeError(includePath, `Includes can't be used in browsers`);
@@ -172,8 +172,12 @@ export class Renderer {
 
     let lexer = new Lexer(bmlDocumentString);
     let ast = parseDocument(lexer, true);
-    let workingDir = path.dirname(path.join(this.documentDir || '', includePath))
-    let subRenderer = new Renderer(this.settings, workingDir);
+    let subWorkingDir = path.dirname(path.join(this.settings.workingDir || '', includePath))
+    let subSettings = {
+      workingDir: subWorkingDir,
+      ...this.settings
+    }
+    let subRenderer = new Renderer(subSettings);
     let result = subRenderer.renderWithoutPostProcess(ast);
     // Merge state from subrenderer into this renderer
     // Any redefined references are silently overwritten; this is needed to support
@@ -190,10 +194,10 @@ export class Renderer {
 }
 
 export function render(bmlDocumentString: string,
-  renderSettings: RenderSettings | null, documentDir: string | null): string {
+  renderSettings: RenderSettings | null): string {
   renderSettings = mergeSettings(defaultRenderSettings, renderSettings);
   let lexer = new Lexer(bmlDocumentString);
   let ast = parseDocument(lexer, true);
-  return new Renderer(renderSettings, documentDir).renderAndPostProcess(ast);
+  return new Renderer(renderSettings).renderAndPostProcess(ast);
 }
 
