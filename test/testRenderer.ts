@@ -224,7 +224,7 @@ insert('foo got ' + forkResult);
 
   it('Allows disabling eval execution', function() {
     let testString = `{[insert('foo')]}`;
-    expect(() => render(testString, { allowEval: false }, null))
+    expect(() => render(testString, { allowEval: false }))
       .toThrow(EvalDisabledError);
   })
 

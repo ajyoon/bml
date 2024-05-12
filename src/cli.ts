@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import process from 'process';
 import path from 'path';
+import fs from 'fs';
 import { RenderSettings } from './settings';
 import { analyze } from './analysis';
 import { launchInteractive } from './interactive';
@@ -31,7 +32,7 @@ export type Action = { function: Function, args: any[] };
 
 function readFile(path: string): string {
   try {
-    return fileUtils.readFile(path, null);
+    return '' + fs.readFileSync(path);
   } catch {
     handleNonexistingPath(path);
     process.exit(1);

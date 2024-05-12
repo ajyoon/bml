@@ -1,5 +1,6 @@
 import path from 'path';
 import process from 'process';
+import fs from 'fs';
 import * as rand from './rand';
 import * as postprocessing from './postprocessing';
 import { defaultBMLSettings, defaultRenderSettings, mergeSettings, RenderSettings } from './settings';
@@ -12,7 +13,6 @@ import { Choice } from './weightedChoice';
 import { isStr } from './stringUtils';
 import { EvalDisabledError, IncludeError } from './errors';
 import { EvalContext } from './evalBlock';
-import * as fileUtils from './fileUtils';
 
 
 // If the referred fork is a silent set fork that has not yet been executed,
@@ -157,9 +157,10 @@ export class Renderer {
   renderInclude(includePath: string): string {
     let rngState = rand.saveRngState();
     let bmlDocumentString;
+    let resolvedWorkingDir = this.settings.workingDir || process.cwd();
+    let resolvedIncludePath = path.resolve(resolvedWorkingDir, includePath);
     try {
-      let resolvedWorkingDir = this.settings.workingDir || process.cwd();
-      bmlDocumentString = fileUtils.readFile(includePath, resolvedWorkingDir);
+      bmlDocumentString = '' + fs.readFileSync(resolvedIncludePath);
     } catch (e) {
       if (typeof window !== 'undefined') {
         throw new IncludeError(includePath, `Includes can't be used in browsers`);
@@ -172,10 +173,10 @@ export class Renderer {
 
     let lexer = new Lexer(bmlDocumentString);
     let ast = parseDocument(lexer, true);
-    let subWorkingDir = path.dirname(path.join(this.settings.workingDir || '', includePath))
+    let subWorkingDir = path.dirname(resolvedIncludePath)
     let subSettings = {
+      ...this.settings,
       workingDir: subWorkingDir,
-      ...this.settings
     }
     let subRenderer = new Renderer(subSettings);
     let result = subRenderer.renderWithoutPostProcess(ast);
